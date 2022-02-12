@@ -44,7 +44,8 @@ export const options = {
   },
 };
 
-const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+const labels = ['January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'];
 
 export function App() {
   const [data, setData] = useState({
@@ -69,7 +70,7 @@ export function App() {
     let dataQuery = {
       resource_id: 'f1765b54-a209-4718-8d38-a39237f502b3', // the resource id
       fields: "month, resale_price", // other useful parameters: filters, sort
-      limit: 7, // get 7 results
+      limit: 12, // get 12 results
     };
 
     $.ajax({
