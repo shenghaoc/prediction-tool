@@ -16,7 +16,7 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel'
-import Select from '@mui/material/Select';
+import Select, {SelectChangeEvent} from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Box from '@mui/material/Box';
 import { InputAdornment, OutlinedInput } from "@mui/material";
@@ -48,6 +48,16 @@ const labels = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'];
 
 export function App() {
+  const [values, setValues] = React.useState({
+    twn: '',
+    fa: '',
+  });
+
+  const handleChange = (prop: any) => (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement> | SelectChangeEvent) => {
+    setValues({ ...values, [prop]: event.target.value });
+  };
+
+
   const [data, setData] = useState({
     labels,
     datasets: [
@@ -96,9 +106,9 @@ export function App() {
       }
     });
 
-    var price = +(document.getElementById("fa") as HTMLInputElement).value * 4000
+    var price = +values.fa * 4000
 
-    var town = +(document.getElementById("twn") as HTMLInputElement).value
+    var town = +values.twn
     if (town == 0) {
       price = price + 100000;
     }
@@ -127,7 +137,7 @@ export function App() {
             <Typography variant="body1" component="div" gutterBottom>
               <FormControl fullWidth>
                 <InputLabel id="twn-label">Town</InputLabel>
-                <Select id="twn" value={0}
+                <Select id="twn" value={values.twn} onChange={handleChange('twn')}
                   label="twn">
                   <MenuItem value={0}> Town A </MenuItem>
                   <MenuItem value={1}> Town B </MenuItem>
@@ -137,6 +147,7 @@ export function App() {
                 <InputLabel htmlFor="outlined-adornment-amount">Floor area</InputLabel>
                 <OutlinedInput
                   id="fa"
+                  onChange={handleChange('fa')}
                   endAdornment={<InputAdornment position="end">m<sup>2</sup></InputAdornment>}
                   label="Floor area"
                 />
