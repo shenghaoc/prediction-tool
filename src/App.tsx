@@ -58,37 +58,38 @@ export const data = {
 export function App() {
   return (
     <div className='app-main'>
-      My price prediction tool!
+      <body>
+        My price prediction tool!
 
-      <br/><br/>
+        <br /><br />
 
-      <form>
-        <label> Town: </label>
-        <select id="twn">
-          <option value = "0"> Town A </option>
-        <option value = "1"> Town B </option>
-    </select>
-</form>
+        <form>
+          <label> Town: </label>
+          <select id="twn">
+            <option value="0"> Town A </option>
+            <option value="1"> Town B </option>
+          </select>
+        </form>
 
-  <br/>
+        <br />
 
-  Floor area (sqm): <input type="number" id="fa"/>
+        Floor area (sqm): <input type="number" id="fa" />
 
-      <br/><br/>
+        <br /><br />
 
-      Prediction: $<a id="output"></a>
+        Prediction: $<a id="output"></a>
 
-      <br/><br/>
+        <br /><br />
 
-      <button onClick={funPredict}>
-        Get prediction
-      </button>
-
+        <button onClick={funPredict}>
+          Get prediction
+        </button>
+      </body>
       <div className='app'>
-      <Line options={options} data={data} />;
+        <Line options={options} data={data} />;
+      </div>
     </div>
-    </div>
-    )
+  )
 }
 
 function funPredict() {
