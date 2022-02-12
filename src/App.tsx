@@ -56,6 +56,52 @@ export const data = {
 };
 
 export function App() {
-  return <Line options={options} data={data} />;
+  return (
+    <div className='app-main'>
+      My price prediction tool!
+
+      <br/><br/>
+
+      <form>
+        <label> Town: </label>
+        <select id="twn">
+          <option value = "0"> Town A </option>
+        <option value = "1"> Town B </option>
+    </select>
+</form>
+
+  <br/>
+
+  Floor area (sqm): <input type="number" id="fa"/>
+
+      <br/><br/>
+
+      Prediction: $<a id="output"></a>
+
+      <br/><br/>
+
+      <button onClick={funPredict}>
+        Get prediction
+      </button>
+
+      <div className='app'>
+      <Line options={options} data={data} />;
+    </div>
+    </div>
+    )
+}
+
+function funPredict() {
+  var price = +(document.getElementById("fa") as HTMLInputElement).value * 4000
+
+  var town = +(document.getElementById("twn") as HTMLInputElement).value
+  if (town == 0) {
+    price = price + 100000;
+  }
+  else {
+    price = price + 200000;
+  }
+
+  (document.getElementById("output") as HTMLOutputElement).innerHTML = String(price)
 }
 
