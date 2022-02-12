@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -46,25 +46,68 @@ export const options = {
 
 const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
 
-var data = {
-  labels,
-  datasets: [
-    {
-      label: 'Dataset 1',
-      data: labels.map(() => faker.datatype.number({ min: -1000, max: 1000 })),
-      borderColor: 'rgb(255, 99, 132)',
-      backgroundColor: 'rgba(255, 99, 132, 0.5)',
-    },
-    {
-      label: 'Dataset 2',
-      data: labels.map(() => faker.datatype.number({ min: -1000, max: 1000 })),
-      borderColor: 'rgb(53, 162, 235)',
-      backgroundColor: 'rgba(53, 162, 235, 0.5)',
-    },
-  ],
-};
-
 export function App() {
+  const [data, setData] = useState({
+    labels,
+    datasets: [
+      {
+        label: 'Dataset 1',
+        data: labels.map(() => faker.datatype.number({ min: -1000, max: 1000 })),
+        borderColor: 'rgb(255, 99, 132)',
+        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+      },
+      {
+        label: 'Dataset 2',
+        data: labels.map(() => faker.datatype.number({ min: -1000, max: 1000 })),
+        borderColor: 'rgb(53, 162, 235)',
+        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+      },
+    ],
+  });
+
+  function funPredict() {
+    let dataQuery = {
+      resource_id: 'f1765b54-a209-4718-8d38-a39237f502b3', // the resource id
+      fields: "month, resale_price", // other useful parameters: filters, sort
+      limit: 7, // get 7 results
+    };
+
+    $.ajax({
+      url: 'https://data.gov.sg/api/action/datastore_search',
+      data: dataQuery,
+      dataType: 'jsonp',
+      cache: true,
+      async: false,
+      success: function (data) {
+        alert('Total results found: ' + data.result.total)
+        console.log(data.result.records)
+        setData({
+          labels: data.result.records.map((record: { month: any; }) => record.month),
+          datasets: [
+            {
+              label: 'Test',
+              data: data.result.records.map((record: { resale_price: any; }) => record.resale_price),
+              borderColor: 'rgb(0, 0, 0)',
+              backgroundColor: 'rgba(1, 2, 132, 0.5)',
+            },
+          ],
+        })
+      }
+    });
+
+    var price = +(document.getElementById("fa") as HTMLInputElement).value * 4000
+
+    var town = +(document.getElementById("twn") as HTMLInputElement).value
+    if (town == 0) {
+      price = price + 100000;
+    }
+    else {
+      price = price + 200000;
+    }
+
+    (document.getElementById("output") as HTMLOutputElement).innerHTML = String(price)
+  }
+
   return (
     <div className='App'>
       <header className='App-header'>
@@ -83,13 +126,14 @@ export function App() {
             <Typography variant="body1" component="div" gutterBottom>
               <FormControl fullWidth>
                 <InputLabel id="twn-label">Town</InputLabel>
-                <Select id="twn">
+                <Select id="twn" value={0}
+                  label="twn">
                   <MenuItem value={0}> Town A </MenuItem>
                   <MenuItem value={1}> Town B </MenuItem>
                 </Select>
               </FormControl>
               <FormControl fullWidth>
-                <InputLabel htmlFor="outlined-adornment-amount">Amount</InputLabel>
+                <InputLabel htmlFor="outlined-adornment-amount">Floor area</InputLabel>
                 <OutlinedInput
                   id="fa"
                   endAdornment={<InputAdornment position="end">m<sup>2</sup></InputAdornment>}
@@ -109,11 +153,12 @@ export function App() {
                 <Box component="div" sx={{ display: 'inline' }}>
                   <Box sx={{ color: 'text.secondary' }}>Prediction</Box>
                   <Box sx={{ color: 'text.primary', fontSize: 34, fontWeight: 'medium' }}>
-                    $<span id="output">98.3 K</span>
+                    $<span id="output">0</span>
                   </Box>
                 </Box>
               </Box>
-              <Button variant="contained" onClick={funPredict}>
+              <Button variant="contained"
+                onClick={funPredict}>
                 Get prediction
               </Button>
             </Typography>
@@ -125,37 +170,5 @@ export function App() {
       </div>
     </div>
   )
-}
-
-function funPredict() {
-  let dataQuery = {
-    resource_id: 'f1765b54-a209-4718-8d38-a39237f502b3', // the resource id
-    fields: "resale_price", // other useful parameters: filters, sort
-    limit: 7, // get 5 results
-  };
-
-  $.ajax({
-    url: 'https://data.gov.sg/api/action/datastore_search',
-    data: dataQuery,
-    dataType: 'jsonp',
-    cache: true,
-    async: false,
-    success: function (data) {
-      alert('Total results found: ' + data.result.total)
-      console.log(data.result)
-    }
-  });
-
-  var price = +(document.getElementById("fa") as HTMLInputElement).value * 4000
-
-  var town = +(document.getElementById("twn") as HTMLInputElement).value
-  if (town == 0) {
-    price = price + 100000;
-  }
-  else {
-    price = price + 200000;
-  }
-
-  (document.getElementById("output") as HTMLOutputElement).innerHTML = String(price)
 }
 
