@@ -58,8 +58,8 @@ var data = {
 
 export function App() {
   return (
-    <div className='app-main'>
-      <body>
+      <div className='App'>
+    <header className='App-header'>
         My price prediction tool!
 
         <br /><br />
@@ -85,11 +85,11 @@ export function App() {
         <button onClick={funPredict}>
           Get prediction
         </button>
-      </body>
-      <div className='app'>
+    </header>
+      <div className='App-logo'>
         <Line options={options} data={data} />;
       </div>
-    </div>
+</div>
   )
 }
 
