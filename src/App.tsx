@@ -12,6 +12,14 @@ import {
 import { Line } from 'react-chartjs-2';
 import faker from '@faker-js/faker';
 import $ from 'jquery';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel'
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import Box from '@mui/material/Box';
+import { InputAdornment, OutlinedInput } from "@mui/material";
 
 ChartJS.register(
   CategoryScale,
@@ -58,38 +66,64 @@ var data = {
 
 export function App() {
   return (
-      <div className='App'>
-    <header className='App-header'>
-        My price prediction tool!
-
-        <br /><br />
-
-        <form>
-          <label> Town: </label>
-          <select id="twn">
-            <option value="0"> Town A </option>
-            <option value="1"> Town B </option>
-          </select>
-        </form>
-
-        <br />
-
-        Floor area (sqm): <input type="number" id="fa" />
-
-        <br /><br />
-
-        Prediction: $<a id="output"></a>
-
-        <br /><br />
-
-        <button onClick={funPredict}>
-          Get prediction
-        </button>
-    </header>
+    <div className='App'>
+      <header className='App-header'>
+        <Typography variant="h2" component="div" gutterBottom>
+          Price Prediction
+        </Typography>
+        <Box
+          component="form"
+          sx={{
+            '& .MuiTextField-root': { m: 1, width: '25ch' },
+          }}
+          noValidate
+          autoComplete="off"
+        >
+          <div>
+            <Typography variant="body1" component="div" gutterBottom>
+              <FormControl fullWidth>
+                <InputLabel id="twn-label">Town</InputLabel>
+                <Select id="twn">
+                  <MenuItem value={0}> Town A </MenuItem>
+                  <MenuItem value={1}> Town B </MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel htmlFor="outlined-adornment-amount">Amount</InputLabel>
+                <OutlinedInput
+                  id="fa"
+                  endAdornment={<InputAdornment position="end">m<sup>2</sup></InputAdornment>}
+                  label="Floor area"
+                />
+              </FormControl>
+              <Box
+                sx={{
+                  bgcolor: 'background.paper',
+                  boxShadow: 1,
+                  borderRadius: 1,
+                  p: 2,
+                  minWidth: 300,
+                  py: 2
+                }}
+              >
+                <Box component="div" sx={{ display: 'inline' }}>
+                  <Box sx={{ color: 'text.secondary' }}>Prediction</Box>
+                  <Box sx={{ color: 'text.primary', fontSize: 34, fontWeight: 'medium' }}>
+                    $<span id="output">98.3 K</span>
+                  </Box>
+                </Box>
+              </Box>
+              <Button variant="contained" onClick={funPredict}>
+                Get prediction
+              </Button>
+            </Typography>
+          </div>
+        </Box>
+      </header>
       <div className='App-logo'>
         <Line options={options} data={data} />;
       </div>
-</div>
+    </div>
   )
 }
 
@@ -106,7 +140,7 @@ function funPredict() {
     dataType: 'jsonp',
     cache: true,
     async: false,
-    success: function(data) {
+    success: function (data) {
       alert('Total results found: ' + data.result.total)
       console.log(data.result)
     }
