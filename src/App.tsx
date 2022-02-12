@@ -11,6 +11,7 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import faker from '@faker-js/faker';
+import $ from 'jquery';
 
 ChartJS.register(
   CategoryScale,
@@ -37,7 +38,7 @@ export const options = {
 
 const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
 
-export const data = {
+var data = {
   labels,
   datasets: [
     {
@@ -93,6 +94,24 @@ export function App() {
 }
 
 function funPredict() {
+  let dataQuery = {
+    resource_id: 'f1765b54-a209-4718-8d38-a39237f502b3', // the resource id
+    fields: "resale_price", // other useful parameters: filters, sort
+    limit: 7, // get 5 results
+  };
+
+  $.ajax({
+    url: 'https://data.gov.sg/api/action/datastore_search',
+    data: dataQuery,
+    dataType: 'jsonp',
+    cache: true,
+    async: false,
+    success: function(data) {
+      alert('Total results found: ' + data.result.total)
+      console.log(data.result)
+    }
+  });
+
   var price = +(document.getElementById("fa") as HTMLInputElement).value * 4000
 
   var town = +(document.getElementById("twn") as HTMLInputElement).value
