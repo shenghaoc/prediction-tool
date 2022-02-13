@@ -10,16 +10,20 @@ import {
   Legend,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import faker from '@faker-js/faker';
+import { faker } from '@faker-js/faker';
 import $ from 'jquery';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel'
-import Select, {SelectChangeEvent} from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import Box from '@mui/material/Box';
-import { InputAdornment, OutlinedInput } from "@mui/material";
+import {
+  Typography,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  SelectChangeEvent,
+  MenuItem,
+  Box,
+  InputAdornment,
+  OutlinedInput
+} from "@mui/material";
 
 ChartJS.register(
   CategoryScale,
