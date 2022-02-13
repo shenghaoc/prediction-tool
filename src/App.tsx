@@ -24,6 +24,7 @@ import {
   InputAdornment,
   OutlinedInput
 } from "@mui/material";
+import * as tf from '@tensorflow/tfjs';
 
 ChartJS.register(
   CategoryScale,
@@ -50,6 +51,16 @@ export const options = {
 
 const labels = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'];
+
+let model: tf.LayersModel;
+
+async function loadModel() {
+  if (model == null) {
+    model = await tf.loadLayersModel(
+        'https://storage.googleapis.com/tfjs-models/tfjs/iris_v1/model.json');
+    model.summary();
+  }
+}
 
 export function App() {
   const [values, setValues] = React.useState({
@@ -92,8 +103,9 @@ export function App() {
       data: dataQuery,
       dataType: 'jsonp',
       cache: true,
-      async: false,
-      success: function (data) {
+      success: async function (data) {
+        await loadModel();
+        (model.predict(tf.ones([1, 4])) as tf.Tensor).print();
         alert('Total results found: ' + data.result.total)
         console.log(data.result.records)
         setData({
