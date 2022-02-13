@@ -53,6 +53,5 @@
   "devDependencies": {
     "@faker-js/faker": "^6.0.0-alpha.6",
     "@types/jquery": "^3.5.13"
-  },
-  "homepage": "https://shenghaoc.github.io/prediction-tool"
+  }
 }
