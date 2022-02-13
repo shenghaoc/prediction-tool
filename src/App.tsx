@@ -109,7 +109,7 @@ export function App() {
     var price = +values.fa * 4000
 
     var town = +values.twn
-    if (town == 0) {
+    if (town === 0) {
       price = price + 100000;
     }
     else {
