@@ -178,7 +178,7 @@ export function App() {
         </Box>
       </header>
       <div className='App-logo'>
-        <Line options={options} data={data} />;
+        <Line options={options} data={data} />
       </div>
     </div>
   )
