@@ -17,12 +17,16 @@ import {
   FormControl,
   InputLabel,
   Select,
-  SelectChangeEvent,
   MenuItem,
   Box,
   InputAdornment,
-  OutlinedInput
+  OutlinedInput,
+  TextField,
+  Stack
 } from "@mui/material";
+import AdapterLuxon from '@mui/lab/AdapterLuxon';
+import LocalizationProvider from '@mui/lab/LocalizationProvider';
+import DatePicker from '@mui/lab/DatePicker';
 import * as tf from '@tensorflow/tfjs';
 import town_list from './town.json';
 import flat_type_list from './flat_type.json';
@@ -73,11 +77,12 @@ export function App() {
     storey_range: '',
     floor_area_sqm: '',
     flat_model: '',
-    lease_commence_date: '',
     resale_price: '',
   });
 
-  const handleChange = (prop: any) => (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement> | SelectChangeEvent) => {
+  const [leaseCommencementDate, setLeaseCommencementDate] = React.useState<Date | null>(new Date());
+
+  const handleChange = (prop: any) => (event: any) => {
     setValues({ ...values, [prop]: event.target.value });
   };
 
@@ -155,6 +160,7 @@ export function App() {
       autoComplete="off"
     >
       Price Prediction
+      <Stack spacing={3}>
       <FormControl fullWidth>
         <InputLabel>Town</InputLabel>
         <Select value={values.town} onChange={handleChange('town')}>
@@ -214,6 +220,18 @@ export function App() {
           endAdornment={<InputAdornment position="end">m<sup>2</sup></InputAdornment>}
         />
       </FormControl>
+      <LocalizationProvider dateAdapter={AdapterLuxon}>
+        <DatePicker
+            label = "Lease commence date"
+            views={['year']}
+            value={leaseCommencementDate}
+            onChange={(newValue : Date | null) => {
+              setLeaseCommencementDate(newValue);
+            }}
+            renderInput={(params) => <TextField {...params} fullWidth />}
+        />
+      </LocalizationProvider>
+      </Stack>
       <Box
         sx={{
           bgcolor: 'background.paper',
