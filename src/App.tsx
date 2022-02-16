@@ -13,7 +13,6 @@ import { Line } from 'react-chartjs-2';
 import { faker } from '@faker-js/faker';
 import $ from 'jquery';
 import {
-  Typography,
   Button,
   FormControl,
   InputLabel,
@@ -61,7 +60,7 @@ let model: tf.LayersModel;
 async function loadModel() {
   if (model == null) {
     model = await tf.loadLayersModel(
-        'https://storage.googleapis.com/tfjs-models/tfjs/iris_v1/model.json');
+      'https://storage.googleapis.com/tfjs-models/tfjs/iris_v1/model.json');
     model.summary();
   }
 }
@@ -147,109 +146,97 @@ export function App() {
   }
 
   return (
-    <div className='App'>
-      <header className='App-header'>
-        <Typography variant="h2" component="div" gutterBottom>
-          Price Prediction
-        </Typography>
-        <Box
-          component="form"
-          sx={{
-            '& .MuiTextField-root': { m: 1, width: '25ch' },
-          }}
-          noValidate
-          autoComplete="off"
-        >
-          <div>
-            <Typography variant="body1" component="div" gutterBottom>
-              <FormControl fullWidth>
-                <InputLabel>Town</InputLabel>
-                <Select value={values.town} onChange={handleChange('town')}>
-                  {town_list.sort().map((town: string) => (
-                      <MenuItem
-                          key={town}
-                          value={town}
-                      >
-                        {town}
-                      </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl fullWidth>
-                <InputLabel>Flat Type</InputLabel>
-                <Select value={values.flat_type} onChange={handleChange('flat_type')}>
-                  {flat_type_list.sort().map((flat_type: string) => (
-                      <MenuItem
-                          key={flat_type}
-                          value={flat_type}
-                      >
-                        {flat_type}
-                      </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl fullWidth>
-                <InputLabel>Storey Range</InputLabel>
-                <Select value={values.storey_range} onChange={handleChange('storey_range')}>
-                  {storey_range_list.sort().map((storey_range: string) => (
-                      <MenuItem
-                          key={storey_range}
-                          value={storey_range}
-                      >
-                        {storey_range}
-                      </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl fullWidth>
-                <InputLabel>Flat Model</InputLabel>
-                <Select value={values.flat_model} onChange={handleChange('flat_model')}>
-                  {flat_model_list.sort().map((flat_model: string) => (
-                      <MenuItem
-                          key={flat_model}
-                          value={flat_model}
-                      >
-                        {flat_model}
-                      </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl fullWidth>
-                <InputLabel htmlFor="outlined-adornment-amount">Floor area</InputLabel>
-                <OutlinedInput
-                  onChange={handleChange('floor_area_sqm')}
-                  endAdornment={<InputAdornment position="end">m<sup>2</sup></InputAdornment>}
-                />
-              </FormControl>
-              <Box
-                sx={{
-                  bgcolor: 'background.paper',
-                  boxShadow: 1,
-                  borderRadius: 1,
-                  p: 2,
-                  minWidth: 300,
-                  py: 2
-                }}
-              >
-                <Box component="div" sx={{ display: 'inline' }}>
-                  <Box sx={{ color: 'text.secondary' }}>Prediction</Box>
-                  <Box sx={{ color: 'text.primary', fontSize: 34, fontWeight: 'medium' }}>
-                    $<span id="output">0</span>
-                  </Box>
-                </Box>
-              </Box>
-              <Button variant="contained"
-                onClick={funPredict}>
-                Get prediction
-              </Button>
-            </Typography>
-          </div>
+    <Box
+      component="form"
+      sx={{
+        '& .MuiTextField-root': { m: 1, width: '25ch' },
+      }}
+      noValidate
+      autoComplete="off"
+    >
+      Price Prediction
+      <FormControl fullWidth>
+        <InputLabel>Town</InputLabel>
+        <Select value={values.town} onChange={handleChange('town')}>
+          {town_list.sort().map((town: string) => (
+            <MenuItem
+              key={town}
+              value={town}
+            >
+              {town}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <FormControl fullWidth>
+        <InputLabel>Flat Type</InputLabel>
+        <Select value={values.flat_type} onChange={handleChange('flat_type')}>
+          {flat_type_list.sort().map((flat_type: string) => (
+            <MenuItem
+              key={flat_type}
+              value={flat_type}
+            >
+              {flat_type}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <FormControl fullWidth>
+        <InputLabel>Storey Range</InputLabel>
+        <Select value={values.storey_range} onChange={handleChange('storey_range')}>
+          {storey_range_list.sort().map((storey_range: string) => (
+            <MenuItem
+              key={storey_range}
+              value={storey_range}
+            >
+              {storey_range}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <FormControl fullWidth>
+        <InputLabel>Flat Model</InputLabel>
+        <Select value={values.flat_model} onChange={handleChange('flat_model')}>
+          {flat_model_list.sort().map((flat_model: string) => (
+            <MenuItem
+              key={flat_model}
+              value={flat_model}
+            >
+              {flat_model}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <FormControl fullWidth>
+        <InputLabel htmlFor="outlined-adornment-amount">Floor area</InputLabel>
+        <OutlinedInput
+          onChange={handleChange('floor_area_sqm')}
+          endAdornment={<InputAdornment position="end">m<sup>2</sup></InputAdornment>}
+        />
+      </FormControl>
+      <Box
+        sx={{
+          bgcolor: 'background.paper',
+          boxShadow: 1,
+          borderRadius: 1,
+          p: 2,
+          minWidth: 300,
+          py: 2
+        }}
+      >
+        <Box component="div" sx={{ display: 'inline' }}>
+          <Box sx={{ color: 'text.secondary' }}>Prediction</Box>
+          <Box sx={{ color: 'text.primary', fontSize: 34, fontWeight: 'medium' }}>
+            $<span id="output">0</span>
+          </Box>
         </Box>
-      </header>
-      <div className='App-logo'>
-        <Line options={options} data={data} />
-      </div>
-    </div>
+      </Box>
+      <Button variant="contained"
+        onClick={funPredict}>
+        Get prediction
+      </Button>
+      <Line options={options} data={data} />
+    </Box>
   )
 }
 
