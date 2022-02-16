@@ -28,6 +28,7 @@ import * as tf from '@tensorflow/tfjs';
 import town_list from './town.json';
 import flat_type_list from './flat_type.json';
 import storey_range_list from './storey_range.json';
+import flat_model_list from './flat_model.json';
 
 ChartJS.register(
   CategoryScale,
@@ -104,7 +105,7 @@ export function App() {
     let dataQuery = {
       resource_id: 'f1765b54-a209-4718-8d38-a39237f502b3', // the resource id
       fields: "month, town, resale_price", // other useful parameters: filters, sort
-      filters: "{\"town\": \"" + values.town.toUpperCase() + "\"}",
+      filters: "{\"town\": \"" + values.town + "\", \"flat_type\": \"" + values.flat_type + "\", \"storey_range\": \"" + values.storey_range + "\", \"flat_model\": \"" + values.flat_model + "\"}",
       limit: 12, // get 12 results
     };
 
@@ -196,6 +197,19 @@ export function App() {
                           value={storey_range}
                       >
                         {storey_range}
+                      </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel>Flat Model</InputLabel>
+                <Select value={values.flat_model} onChange={handleChange('flat_model')}>
+                  {flat_model_list.sort().map((flat_model: string) => (
+                      <MenuItem
+                          key={flat_model}
+                          value={flat_model}
+                      >
+                        {flat_model}
                       </MenuItem>
                   ))}
                 </Select>
