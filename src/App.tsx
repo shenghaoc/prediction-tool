@@ -25,8 +25,9 @@ import {
   OutlinedInput
 } from "@mui/material";
 import * as tf from '@tensorflow/tfjs';
-import town_list from './town_list.json';
+import town_list from './town.json';
 import flat_type_list from './flat_type.json';
+import storey_range_list from './storey_range.json';
 
 ChartJS.register(
   CategoryScale,
@@ -182,6 +183,19 @@ export function App() {
                           value={flat_type}
                       >
                         {flat_type}
+                      </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel>Storey Range</InputLabel>
+                <Select value={values.storey_range} onChange={handleChange('storey_range')}>
+                  {storey_range_list.sort().map((storey_range: string) => (
+                      <MenuItem
+                          key={storey_range}
+                          value={storey_range}
+                      >
+                        {storey_range}
                       </MenuItem>
                   ))}
                 </Select>
