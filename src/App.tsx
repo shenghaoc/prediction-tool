@@ -101,7 +101,8 @@ export function App() {
   function funPredict() {
     let dataQuery = {
       resource_id: 'f1765b54-a209-4718-8d38-a39237f502b3', // the resource id
-      fields: "month, resale_price", // other useful parameters: filters, sort
+      fields: "month, town, resale_price", // other useful parameters: filters, sort
+      filters: "{\"town\": \"" + values.town.toUpperCase() + "\"}",
       limit: 12, // get 12 results
     };
 
