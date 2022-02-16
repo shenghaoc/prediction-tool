@@ -25,6 +25,7 @@ import {
   OutlinedInput
 } from "@mui/material";
 import * as tf from '@tensorflow/tfjs';
+import town_list from './town_list.json';
 
 ChartJS.register(
   CategoryScale,
@@ -64,8 +65,14 @@ async function loadModel() {
 
 export function App() {
   const [values, setValues] = React.useState({
-    twn: '',
-    fa: '',
+    month: '',
+    town: '',
+    flat_type: '',
+    storey_range: '',
+    floor_area_sqm: '',
+    flat_model: '',
+    lease_commence_date: '',
+    resale_price: '',
   });
 
   const handleChange = (prop: any) => (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement> | SelectChangeEvent) => {
@@ -122,9 +129,9 @@ export function App() {
       }
     });
 
-    var price = +values.fa * 4000
+    let price = +values.floor_area_sqm * 4000;
 
-    var town = +values.twn
+    let town = +values.town;
     if (town === 0) {
       price = price + 100000;
     }
@@ -153,17 +160,23 @@ export function App() {
             <Typography variant="body1" component="div" gutterBottom>
               <FormControl fullWidth>
                 <InputLabel id="twn-label">Town</InputLabel>
-                <Select id="twn" value={values.twn} onChange={handleChange('twn')}
+                <Select id="twn" value={values.town} onChange={handleChange('town')}
                   label="twn">
-                  <MenuItem value={0}> Town A </MenuItem>
-                  <MenuItem value={1}> Town B </MenuItem>
+                  {town_list.sort().map((town: string) => (
+                      <MenuItem
+                          key={town}
+                          value={town}
+                      >
+                        {town}
+                      </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
               <FormControl fullWidth>
                 <InputLabel htmlFor="outlined-adornment-amount">Floor area</InputLabel>
                 <OutlinedInput
                   id="fa"
-                  onChange={handleChange('fa')}
+                  onChange={handleChange('floor_area_sqm')}
                   endAdornment={<InputAdornment position="end">m<sup>2</sup></InputAdornment>}
                   label="Floor area"
                 />
