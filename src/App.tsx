@@ -26,6 +26,7 @@ import {
 } from "@mui/material";
 import * as tf from '@tensorflow/tfjs';
 import town_list from './town_list.json';
+import flat_type_list from './flat_type.json';
 
 ChartJS.register(
   CategoryScale,
@@ -160,9 +161,8 @@ export function App() {
           <div>
             <Typography variant="body1" component="div" gutterBottom>
               <FormControl fullWidth>
-                <InputLabel id="twn-label">Town</InputLabel>
-                <Select id="twn" value={values.town} onChange={handleChange('town')}
-                  label="twn">
+                <InputLabel>Town</InputLabel>
+                <Select value={values.town} onChange={handleChange('town')}>
                   {town_list.sort().map((town: string) => (
                       <MenuItem
                           key={town}
@@ -174,12 +174,23 @@ export function App() {
                 </Select>
               </FormControl>
               <FormControl fullWidth>
+                <InputLabel>Flat Type</InputLabel>
+                <Select value={values.flat_type} onChange={handleChange('flat_type')}>
+                  {flat_type_list.sort().map((flat_type: string) => (
+                      <MenuItem
+                          key={flat_type}
+                          value={flat_type}
+                      >
+                        {flat_type}
+                      </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth>
                 <InputLabel htmlFor="outlined-adornment-amount">Floor area</InputLabel>
                 <OutlinedInput
-                  id="fa"
                   onChange={handleChange('floor_area_sqm')}
                   endAdornment={<InputAdornment position="end">m<sup>2</sup></InputAdornment>}
-                  label="Floor area"
                 />
               </FormControl>
               <Box
