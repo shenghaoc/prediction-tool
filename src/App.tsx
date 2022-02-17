@@ -22,7 +22,8 @@ import {
   InputAdornment,
   OutlinedInput,
   TextField,
-  Stack
+  Stack,
+  Typography
 } from "@mui/material";
 import AdapterLuxon from '@mui/lab/AdapterLuxon';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
@@ -153,15 +154,10 @@ export function App() {
   }
 
   return (
-    <Box
-      component="form"
-      sx={{
-        '& .MuiTextField-root': { m: 1, width: '25ch' },
-      }}
-      noValidate
-      autoComplete="off"
-    >
-      Price Prediction
+    <Box>
+      <Typography variant="h1" component="div" gutterBottom>
+        Price Prediction
+      </Typography>
       <LocalizationProvider dateAdapter={AdapterLuxon}>
         <Stack spacing={3}>
           <DatePicker
@@ -241,28 +237,30 @@ export function App() {
             }}
             renderInput={(params) => <TextField {...params} fullWidth />}
           />
-        </Stack>
-        <Box
-          sx={{
-            bgcolor: 'background.paper',
-            boxShadow: 1,
-            borderRadius: 1,
-            p: 2,
-            minWidth: 300,
-            py: 2
-          }}
-        >
-          <Box component="div" sx={{ display: 'inline' }}>
-            <Box sx={{ color: 'text.secondary' }}>Prediction</Box>
-            <Box sx={{ color: 'text.primary', fontSize: 34, fontWeight: 'medium' }}>
-              $<span id="output">0</span>
+          <Box
+            sx={{
+              bgcolor: 'background.paper',
+              boxShadow: 1,
+              borderRadius: 1,
+              p: 2,
+              minWidth: 300,
+              py: 2
+            }}
+          >
+            <Box component="div" sx={{ display: 'inline' }}>
+              <Typography variant="overline" display="block" gutterBottom>
+                Prediction
+              </Typography>
+              <Typography variant="h2" gutterBottom>
+                $<span id="output">0</span>
+              </Typography>
             </Box>
           </Box>
-        </Box>
-        <Button variant="contained"
-          onClick={funPredict}>
-          Get prediction
-        </Button>
+          <Button variant="contained"
+            onClick={funPredict}>
+            Get prediction
+          </Button>
+        </Stack>
         <Line options={options} data={data} />
       </LocalizationProvider>
     </Box>
