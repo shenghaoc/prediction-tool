@@ -81,6 +81,8 @@ export function App() {
   });
 
   const [leaseCommencementDate, setLeaseCommencementDate] = React.useState<Date | null>(new Date());
+  const [month, setMonth] = React.useState<Date | null>(new Date());
+
 
   const handleChange = (prop: any) => (event: any) => {
     setValues({ ...values, [prop]: event.target.value });
@@ -160,100 +162,109 @@ export function App() {
       autoComplete="off"
     >
       Price Prediction
-      <Stack spacing={3}>
-      <FormControl fullWidth>
-        <InputLabel>Town</InputLabel>
-        <Select value={values.town} onChange={handleChange('town')}>
-          {town_list.sort().map((town: string) => (
-            <MenuItem
-              key={town}
-              value={town}
-            >
-              {town}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <FormControl fullWidth>
-        <InputLabel>Flat Type</InputLabel>
-        <Select value={values.flat_type} onChange={handleChange('flat_type')}>
-          {flat_type_list.sort().map((flat_type: string) => (
-            <MenuItem
-              key={flat_type}
-              value={flat_type}
-            >
-              {flat_type}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <FormControl fullWidth>
-        <InputLabel>Storey Range</InputLabel>
-        <Select value={values.storey_range} onChange={handleChange('storey_range')}>
-          {storey_range_list.sort().map((storey_range: string) => (
-            <MenuItem
-              key={storey_range}
-              value={storey_range}
-            >
-              {storey_range}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <FormControl fullWidth>
-        <InputLabel>Flat Model</InputLabel>
-        <Select value={values.flat_model} onChange={handleChange('flat_model')}>
-          {flat_model_list.sort().map((flat_model: string) => (
-            <MenuItem
-              key={flat_model}
-              value={flat_model}
-            >
-              {flat_model}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <FormControl fullWidth>
-        <InputLabel htmlFor="outlined-adornment-amount">Floor area</InputLabel>
-        <OutlinedInput
-          onChange={handleChange('floor_area_sqm')}
-          endAdornment={<InputAdornment position="end">m<sup>2</sup></InputAdornment>}
-        />
-      </FormControl>
       <LocalizationProvider dateAdapter={AdapterLuxon}>
-        <DatePicker
-            label = "Lease commence date"
+        <Stack spacing={3}>
+          <DatePicker
+            label="Month"
+            views={['year', 'month']}
+            value={month}
+            onChange={(newValue: Date | null) => {
+              setMonth(newValue);
+            }}
+            renderInput={(params) => <TextField {...params} fullWidth />}
+          />
+          <FormControl fullWidth>
+            <InputLabel>Town</InputLabel>
+            <Select value={values.town} onChange={handleChange('town')}>
+              {town_list.sort().map((town: string) => (
+                <MenuItem
+                  key={town}
+                  value={town}
+                >
+                  {town}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth>
+            <InputLabel>Flat Type</InputLabel>
+            <Select value={values.flat_type} onChange={handleChange('flat_type')}>
+              {flat_type_list.sort().map((flat_type: string) => (
+                <MenuItem
+                  key={flat_type}
+                  value={flat_type}
+                >
+                  {flat_type}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth>
+            <InputLabel>Storey Range</InputLabel>
+            <Select value={values.storey_range} onChange={handleChange('storey_range')}>
+              {storey_range_list.sort().map((storey_range: string) => (
+                <MenuItem
+                  key={storey_range}
+                  value={storey_range}
+                >
+                  {storey_range}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth>
+            <InputLabel>Flat Model</InputLabel>
+            <Select value={values.flat_model} onChange={handleChange('flat_model')}>
+              {flat_model_list.sort().map((flat_model: string) => (
+                <MenuItem
+                  key={flat_model}
+                  value={flat_model}
+                >
+                  {flat_model}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth>
+            <InputLabel htmlFor="outlined-adornment-amount">Floor area</InputLabel>
+            <OutlinedInput
+              onChange={handleChange('floor_area_sqm')}
+              endAdornment={<InputAdornment position="end">m<sup>2</sup></InputAdornment>}
+            />
+          </FormControl>
+          <DatePicker
+            label="Lease commence date"
             views={['year']}
             value={leaseCommencementDate}
-            onChange={(newValue : Date | null) => {
+            onChange={(newValue: Date | null) => {
               setLeaseCommencementDate(newValue);
             }}
             renderInput={(params) => <TextField {...params} fullWidth />}
-        />
-      </LocalizationProvider>
-      </Stack>
-      <Box
-        sx={{
-          bgcolor: 'background.paper',
-          boxShadow: 1,
-          borderRadius: 1,
-          p: 2,
-          minWidth: 300,
-          py: 2
-        }}
-      >
-        <Box component="div" sx={{ display: 'inline' }}>
-          <Box sx={{ color: 'text.secondary' }}>Prediction</Box>
-          <Box sx={{ color: 'text.primary', fontSize: 34, fontWeight: 'medium' }}>
-            $<span id="output">0</span>
+          />
+        </Stack>
+        <Box
+          sx={{
+            bgcolor: 'background.paper',
+            boxShadow: 1,
+            borderRadius: 1,
+            p: 2,
+            minWidth: 300,
+            py: 2
+          }}
+        >
+          <Box component="div" sx={{ display: 'inline' }}>
+            <Box sx={{ color: 'text.secondary' }}>Prediction</Box>
+            <Box sx={{ color: 'text.primary', fontSize: 34, fontWeight: 'medium' }}>
+              $<span id="output">0</span>
+            </Box>
           </Box>
         </Box>
-      </Box>
-      <Button variant="contained"
-        onClick={funPredict}>
-        Get prediction
-      </Button>
-      <Line options={options} data={data} />
+        <Button variant="contained"
+          onClick={funPredict}>
+          Get prediction
+        </Button>
+        <Line options={options} data={data} />
+      </LocalizationProvider>
     </Box>
   )
 }
