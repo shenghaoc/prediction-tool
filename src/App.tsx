@@ -102,6 +102,27 @@ export function App() {
   });
 
   function funPredict() {
+    if (!values.town) {
+      alert('Missing Town!');
+      return;
+    }
+    if (!values.flat_type) {
+      alert('Missing Flat Type!');
+      return;
+    }
+    if (!values.storey_range) {
+      alert('Missing Storey Range!');
+      return;
+    }
+    if (!values.flat_model) {
+      alert('Missing Flat Model!');
+      return;
+    }
+    if (!leaseCommenceDate) {
+      alert("Missing Lease Commencement Date!")
+      return;
+    }
+
     let dataQuery = {
       resource_id: 'f1765b54-a209-4718-8d38-a39237f502b3', // the resource id
       fields: "month, resale_price", // other useful parameters: filters, sort
@@ -116,7 +137,7 @@ export function App() {
       success: async function (data) {
         await loadModel();
         (model.predict(tf.ones([1, 4])) as tf.Tensor).print();
-        (document.getElementById("past") as HTMLOutputElement).innerHTML =  data.result.records.length
+        (document.getElementById("past") as HTMLOutputElement).innerHTML = data.result.records.length
         console.log(data.result.records)
         setData({
           labels: data.result.records.map((record: { month: any; }) => record.month),
