@@ -112,7 +112,6 @@ export function App() {
       resource_id: 'f1765b54-a209-4718-8d38-a39237f502b3', // the resource id
       fields: "month, resale_price", // other useful parameters: filters, sort
       filters: "{\"town\": \"" + values.town + "\", \"flat_type\": \"" + values.flat_type + "\", \"storey_range\": \"" + values.storey_range + "\", \"flat_model\": \"" + values.flat_model + "\", \"lease_commence_date\": \"" + leaseCommenceDate?.year + "\"}",
-      limit: 12, // get 12 results
     };
 
     $.ajax({
@@ -123,7 +122,7 @@ export function App() {
       success: async function (data) {
         await loadModel();
         (model.predict(tf.ones([1, 4])) as tf.Tensor).print();
-        alert('Total results found: ' + data.result.total)
+        (document.getElementById("past") as HTMLOutputElement).innerHTML =  data.result.records.length
         console.log(data.result.records)
         setData({
           labels: data.result.records.map((record: { month: any; }) => record.month),
@@ -243,6 +242,11 @@ export function App() {
               </Typography>
               <Typography variant="h2" gutterBottom>
                 $<span id="output">0</span>
+              </Typography>
+            </Box>
+            <Box sx={{ color: 'text.secondary', display: 'inline', fontSize: 12 }}>
+              <Typography variant="body1" gutterBottom>
+                <span id="past">0</span> matching entries on record
               </Typography>
             </Box>
           </Box>
