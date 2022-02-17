@@ -81,7 +81,7 @@ export function App() {
     resale_price: '',
   });
 
-  const [leaseCommencementDate, setLeaseCommencementDate] = React.useState<DateTime | null>(null);
+  const [leaseCommenceDate, setLeaseCommenceDate] = React.useState<DateTime | null>(null);
 
 
   const handleChange = (prop: any) => (event: any) => {
@@ -111,7 +111,7 @@ export function App() {
     let dataQuery = {
       resource_id: 'f1765b54-a209-4718-8d38-a39237f502b3', // the resource id
       fields: "month, resale_price", // other useful parameters: filters, sort
-      filters: "{\"town\": \"" + values.town + "\", \"flat_type\": \"" + values.flat_type + "\", \"storey_range\": \"" + values.storey_range + "\", \"flat_model\": \"" + values.flat_model + "\", \"lease_commence_date\": \"" + leaseCommencementDate?.year + "\"}",
+      filters: "{\"town\": \"" + values.town + "\", \"flat_type\": \"" + values.flat_type + "\", \"storey_range\": \"" + values.storey_range + "\", \"flat_model\": \"" + values.flat_model + "\", \"lease_commence_date\": \"" + leaseCommenceDate?.year + "\"}",
       limit: 12, // get 12 results
     };
 
@@ -221,9 +221,9 @@ export function App() {
           <DatePicker
             label="Lease commence date"
             views={['year']}
-            value={leaseCommencementDate}
+            value={leaseCommenceDate}
             onChange={(newValue) => {
-              setLeaseCommencementDate(newValue);
+              setLeaseCommenceDate(newValue);
             }}
             renderInput={(params) => <TextField {...params} fullWidth />}
           />
