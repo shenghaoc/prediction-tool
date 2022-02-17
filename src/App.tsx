@@ -25,6 +25,7 @@ import {
   Stack,
   Typography
 } from "@mui/material";
+import { DateTime } from "luxon";
 import AdapterLuxon from '@mui/lab/AdapterLuxon';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DatePicker from '@mui/lab/DatePicker';
@@ -72,7 +73,6 @@ async function loadModel() {
 
 export function App() {
   const [values, setValues] = React.useState({
-    month: '',
     town: '',
     flat_type: '',
     storey_range: '',
@@ -81,8 +81,7 @@ export function App() {
     resale_price: '',
   });
 
-  const [leaseCommencementDate, setLeaseCommencementDate] = React.useState<Date | null>(new Date());
-  const [month, setMonth] = React.useState<Date | null>(new Date());
+  const [leaseCommencementDate, setLeaseCommencementDate] = React.useState<DateTime | null>(null);
 
 
   const handleChange = (prop: any) => (event: any) => {
@@ -111,8 +110,8 @@ export function App() {
   function funPredict() {
     let dataQuery = {
       resource_id: 'f1765b54-a209-4718-8d38-a39237f502b3', // the resource id
-      fields: "month, town, resale_price", // other useful parameters: filters, sort
-      filters: "{\"town\": \"" + values.town + "\", \"flat_type\": \"" + values.flat_type + "\", \"storey_range\": \"" + values.storey_range + "\", \"flat_model\": \"" + values.flat_model + "\"}",
+      fields: "month, resale_price", // other useful parameters: filters, sort
+      filters: "{\"town\": \"" + values.town + "\", \"flat_type\": \"" + values.flat_type + "\", \"storey_range\": \"" + values.storey_range + "\", \"flat_model\": \"" + values.flat_model + "\", \"lease_commence_date\": \"" + leaseCommencementDate?.year + "\"}",
       limit: 12, // get 12 results
     };
 
@@ -160,15 +159,6 @@ export function App() {
       </Typography>
       <LocalizationProvider dateAdapter={AdapterLuxon}>
         <Stack spacing={3}>
-          <DatePicker
-            label="Month"
-            views={['year', 'month']}
-            value={month}
-            onChange={(newValue: Date | null) => {
-              setMonth(newValue);
-            }}
-            renderInput={(params) => <TextField {...params} fullWidth />}
-          />
           <FormControl fullWidth>
             <InputLabel>Town</InputLabel>
             <Select value={values.town} onChange={handleChange('town')}>
@@ -232,7 +222,7 @@ export function App() {
             label="Lease commence date"
             views={['year']}
             value={leaseCommencementDate}
-            onChange={(newValue: Date | null) => {
+            onChange={(newValue) => {
               setLeaseCommencementDate(newValue);
             }}
             renderInput={(params) => <TextField {...params} fullWidth />}
