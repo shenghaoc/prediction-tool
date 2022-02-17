@@ -155,7 +155,7 @@ export function App() {
 
   return (
     <Box>
-      <Typography variant="h1" component="div" gutterBottom>
+      <Typography variant="h2" component="div" gutterBottom>
         Price Prediction
       </Typography>
       <LocalizationProvider dateAdapter={AdapterLuxon}>
