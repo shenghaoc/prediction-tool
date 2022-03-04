@@ -29,7 +29,6 @@ import { DateTime } from "luxon";
 import AdapterLuxon from '@mui/lab/AdapterLuxon';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DatePicker from '@mui/lab/DatePicker';
-import * as tf from '@tensorflow/tfjs';
 import town_list from './town.json';
 import flat_type_list from './flat_type.json';
 import storey_range_list from './storey_range.json';
@@ -60,16 +59,6 @@ export const options = {
 
 const labels = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'];
-
-let model: tf.LayersModel;
-
-async function loadModel() {
-  if (model == null) {
-    model = await tf.loadLayersModel(
-      'https://storage.googleapis.com/tfjs-models/tfjs/iris_v1/model.json');
-    model.summary();
-  }
-}
 
 export function App() {
   const [values, setValues] = React.useState({
@@ -135,8 +124,6 @@ export function App() {
       dataType: 'jsonp',
       cache: true,
       success: async function (data) {
-        await loadModel();
-        (model.predict(tf.ones([1, 4])) as tf.Tensor).print();
         (document.getElementById("past") as HTMLOutputElement).innerHTML = data.result.records.length
         console.log(data.result.records)
         setData({
