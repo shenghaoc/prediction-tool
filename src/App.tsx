@@ -28,10 +28,16 @@ import { DateTime } from "luxon";
 import AdapterLuxon from '@mui/lab/AdapterLuxon';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DatePicker from '@mui/lab/DatePicker';
+
 import town_list from './town.json';
 import flat_type_list from './flat_type.json';
 import storey_range_list from './storey_range.json';
 import flat_model_list from './flat_model.json';
+
+town_list.sort()
+flat_type_list.sort()
+storey_range_list.sort()
+flat_model_list.sort()
 
 ChartJS.register(
   CategoryScale,
@@ -65,11 +71,11 @@ const labels = [...Array(12).keys()]
 
 export function App() {
   const [values, setValues] = React.useState({
-    town: '',
-    flat_type: '',
-    storey_range: '',
+    town: town_list[0],
+    flat_type: flat_type_list[0],
+    storey_range: storey_range_list[0],
     floor_area_sqm: '',
-    flat_model: '',
+    flat_model: flat_model_list[0],
     resale_price: '',
   });
 
@@ -181,7 +187,7 @@ export function App() {
           <FormControl fullWidth>
             <InputLabel>Town</InputLabel>
             <NativeSelect value={values.town} onChange={handleChange('town')}>
-              {town_list.sort().map((town: string) => (
+              {town_list.map((town: string) => (
                 <option
                   key={town}
                   value={town}
@@ -194,7 +200,7 @@ export function App() {
           <FormControl fullWidth>
             <InputLabel>Flat Type</InputLabel>
             <NativeSelect value={values.flat_type} onChange={handleChange('flat_type')}>
-              {flat_type_list.sort().map((flat_type: string) => (
+              {flat_type_list.map((flat_type: string) => (
                 <option
                   key={flat_type}
                   value={flat_type}
@@ -207,7 +213,7 @@ export function App() {
           <FormControl fullWidth>
             <InputLabel>Storey Range</InputLabel>
             <NativeSelect value={values.storey_range} onChange={handleChange('storey_range')}>
-              {storey_range_list.sort().map((storey_range: string) => (
+              {storey_range_list.map((storey_range: string) => (
                 <option
                   key={storey_range}
                   value={storey_range}
@@ -220,7 +226,7 @@ export function App() {
           <FormControl fullWidth>
             <InputLabel>Flat Model</InputLabel>
             <NativeSelect value={values.flat_model} onChange={handleChange('flat_model')}>
-              {flat_model_list.sort().map((flat_model: string) => (
+              {flat_model_list.map((flat_model: string) => (
                 <option
                   key={flat_model}
                   value={flat_model}
