@@ -57,8 +57,9 @@ export const options = {
   },
 };
 
-const labels = ['January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'];
+const curr_year = DateTime.now().toFormat('yyyy')
+const labels = [curr_year +'-01', curr_year +'-02', curr_year +'-03', curr_year +'-04', curr_year +'-05', curr_year +'-06',
+  curr_year +'-07', curr_year +'-08', curr_year +'-09', curr_year +'-10', curr_year +'-11', curr_year +'-12'];
 
 export function App() {
   const [values, setValues] = React.useState({
@@ -255,7 +256,7 @@ export function App() {
             </Box>
             <Box sx={{ color: 'text.secondary', display: 'inline', fontSize: 12 }}>
               <Typography variant="body1" gutterBottom>
-                <span id="past">0</span> matching entries on record
+                &gt;= <span id="past">0</span> matching entries on record
               </Typography>
             </Box>
           </Box>
