@@ -116,6 +116,10 @@ export function App() {
       alert('Missing Flat Model!');
       return;
     }
+    if (!values.floor_area_sqm) {
+      alert('Missing Floor Area!');
+      return;
+    }
     if (!leaseCommenceDate) {
       alert("Missing Lease Commencement Date!")
       return;
