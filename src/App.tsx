@@ -151,14 +151,16 @@ export function App() {
         "method": "predict"
       }
 
+      // @ts-ignore
       $.ajax({
         url: 'https://prediction-tool.azure-api.net/prediction-tool-https/api/v1/service/prediction-tool-https/score',
         type: "POST",
         data: JSON.stringify(INPUT_DATA_FILE),
+        indexValue: i,
         success: function (data) {
           console.log("Data Loaded: " + JSON.stringify(data));
           let tmp = data["predict"].toFixed(2);
-          if (i === 12) {
+          if (this.indexValue === 12) {
             (document.getElementById("output") as HTMLOutputElement).innerHTML = tmp.toString()
             setData({
               labels: labels,
@@ -172,7 +174,7 @@ export function App() {
               ],
             })
           } else {
-            predicts[i] = tmp
+            predicts[this.indexValue] = tmp
           }
         },
         contentType: "application/json"
