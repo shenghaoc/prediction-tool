@@ -235,6 +235,8 @@ export function App() {
               setLeaseCommenceDate(newValue);
             }}
             renderInput={(params) => <TextField {...params} fullWidth />}
+            minDate={DateTime.fromFormat('1960', 'yyyy')}
+            disableFuture={true}
           />
           <Box
             sx={{
