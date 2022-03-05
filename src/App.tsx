@@ -58,8 +58,9 @@ export const options = {
 };
 
 const curr_year = DateTime.now().toFormat('yyyy')
-const labels = [curr_year +'-01', curr_year +'-02', curr_year +'-03', curr_year +'-04', curr_year +'-05', curr_year +'-06',
-  curr_year +'-07', curr_year +'-08', curr_year +'-09', curr_year +'-10', curr_year +'-11', curr_year +'-12'];
+const labels = [curr_year +'-01', curr_year +'-02', curr_year +'-03', curr_year +'-04', curr_year +'-05',
+  curr_year +'-06', curr_year +'-07', curr_year +'-08', curr_year +'-09', curr_year +'-10', curr_year +'-11',
+  curr_year +'-12'];
 
 export function App() {
   const [values, setValues] = React.useState({
@@ -143,17 +144,18 @@ export function App() {
 
     // Last month encoded based on sample dataset seems to be 2021-07
     const INPUT_DATA_FILE= {
-      "data":["2021-07", values.town, values.storey_range, Number(values.floor_area_sqm), values.flat_model, leaseCommenceDate?.year],
+      "data":[DateTime.now().toFormat('yyyy-MM'), values.town, values.storey_range, Number(values.floor_area_sqm),
+        values.flat_model, leaseCommenceDate?.year],
       "method":"predict"
     }
-
     $.ajax({
       url: 'https://prediction-tool.azure-api.net/prediction-tool-https/api/v1/service/prediction-tool-https/score',
       type: "POST",
       data: JSON.stringify(INPUT_DATA_FILE),
       success:  function( data ) {
         console.log( "Data Loaded: " + JSON.stringify(data));
-        (document.getElementById("output") as HTMLOutputElement).innerHTML = data["predict"].toFixed(2)
+        (document.getElementById("output") as HTMLOutputElement).innerHTML
+            = data["predict"].toFixed(2)
       },
       contentType: "application/json"
     });
