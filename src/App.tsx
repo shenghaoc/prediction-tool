@@ -52,15 +52,17 @@ export const options = {
     },
     title: {
       display: true,
-      text: 'Predictions for Next 12 Months',
+      text: 'Predicted Trends for Past 12 Months',
     },
   },
 };
 
-const curr_year = DateTime.now().toFormat('yyyy')
-const labels = [curr_year +'-01', curr_year +'-02', curr_year +'-03', curr_year +'-04', curr_year +'-05',
-  curr_year +'-06', curr_year +'-07', curr_year +'-08', curr_year +'-09', curr_year +'-10', curr_year +'-11',
-  curr_year +'-12'];
+let curr = DateTime.now()
+let curr_minus_1_year = curr.minus({ years: 1 })
+// @ts-ignore
+const labels = [...Array(12).keys()]
+  .map(x => curr_minus_1_year.plus({ months: x }).toFormat('yyyy-MM'))
+
 
 export function App() {
   const [values, setValues] = React.useState({
@@ -84,7 +86,7 @@ export function App() {
     labels,
     datasets: [
       {
-        label: 'Sample Predictions',
+        label: 'Sample Trends',
         data: labels.map(() => faker.datatype.number({ min: 0, max: 1000 })),
         borderColor: 'rgb(255, 99, 132)',
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
@@ -128,39 +130,46 @@ export function App() {
       success: async function (data) {
         (document.getElementById("past") as HTMLOutputElement).innerHTML = data.result.records.length
         console.log(data.result.records)
-        setData({
-          labels: data.result.records.map((record: { month: any; }) => record.month),
-          datasets: [
-            {
-              label: 'Predictions',
-              data: data.result.records.map((record: { resale_price: any; }) => record.resale_price),
-              borderColor: 'rgb(53, 162, 235)',
-              backgroundColor: 'rgba(53, 162, 235, 0.5)',
-            },
-          ],
-        })
       }
     });
 
-    // Last month encoded based on sample dataset seems to be 2021-07
-    const INPUT_DATA_FILE= {
-      "data":[DateTime.now().toFormat('yyyy-MM'), values.town, values.storey_range, Number(values.floor_area_sqm),
+    let predicts = new Array<number>(12).fill(0);
+
+    for (let i = 0; i <= 12; i++) {
+      const INPUT_DATA_FILE = {
+        "data": [i === 12 ? curr.toFormat('yyyy-MM') : labels[i], values.town, values.storey_range, Number(values.floor_area_sqm),
         values.flat_model, leaseCommenceDate?.year],
-      "method":"predict"
+        "method": "predict"
+      }
+
+      $.ajax({
+        url: 'https://prediction-tool.azure-api.net/prediction-tool-https/api/v1/service/prediction-tool-https/score',
+        type: "POST",
+        data: JSON.stringify(INPUT_DATA_FILE),
+        success: function (data) {
+          console.log("Data Loaded: " + JSON.stringify(data));
+          let tmp = data["predict"].toFixed(2);
+          if (i === 12) {
+            (document.getElementById("output") as HTMLOutputElement).innerHTML = tmp.toString()
+          } else {
+            predicts[i] = tmp
+          }
+        },
+        contentType: "application/json"
+      });
     }
-    $.ajax({
-      url: 'https://prediction-tool.azure-api.net/prediction-tool-https/api/v1/service/prediction-tool-https/score',
-      type: "POST",
-      data: JSON.stringify(INPUT_DATA_FILE),
-      success:  function( data ) {
-        console.log( "Data Loaded: " + JSON.stringify(data));
-        (document.getElementById("output") as HTMLOutputElement).innerHTML
-            = data["predict"].toFixed(2)
-      },
-      contentType: "application/json"
-    });
 
-
+    setData({
+      labels: labels,
+      datasets: [
+        {
+          label: 'Trends',
+          data: predicts,
+          borderColor: 'rgb(53, 162, 235)',
+          backgroundColor: 'rgba(53, 162, 235, 0.5)',
+        },
+      ],
+    })
   }
 
   return (
