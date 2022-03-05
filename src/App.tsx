@@ -118,6 +118,22 @@ export function App() {
       filters: "{\"town\": \"" + values.town + "\", \"flat_type\": \"" + values.flat_type + "\", \"storey_range\": \"" + values.storey_range + "\", \"flat_model\": \"" + values.flat_model + "\", \"lease_commence_date\": \"" + leaseCommenceDate?.year + "\"}",
     };
 
+    const INPUT_DATA_FILE= {
+      "data":["2017-01", "ANG MO KIO", "10 TO 12", 44.0, "Improved", 1979],
+      "method":"predict"
+    }
+
+    $.ajax({
+      url: 'https://prediction-tool.azure-api.net/prediction-tool-https/api/v1/service/prediction-tool-https/score',
+      type: "POST",
+      data: JSON.stringify(INPUT_DATA_FILE),
+      success:  function( data ) {
+        console.log( "Data Loaded: " + JSON.stringify(data));
+      },
+      contentType: "application/json"
+    });
+
+
     $.ajax({
       url: 'https://data.gov.sg/api/action/datastore_search',
       data: dataQuery,
