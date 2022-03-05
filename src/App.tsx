@@ -136,7 +136,8 @@ export function App() {
       dataType: 'jsonp',
       cache: true,
       success: async function (data) {
-        (document.getElementById("past") as HTMLOutputElement).innerHTML = data.result.records.length
+        let tmp = data.result.records.length;
+        (document.getElementById("past") as HTMLOutputElement).innerHTML = (tmp === 100) ? '≥' + tmp : tmp;
         console.log(data.result.records)
       }
     });
@@ -279,7 +280,7 @@ export function App() {
             </Box>
             <Box sx={{ color: 'text.secondary', display: 'inline', fontSize: 12 }}>
               <Typography variant="body1" gutterBottom>
-                ≥ <span id="past">0</span> matching entries on record
+                <span id="past">0</span> matching entries on record
               </Typography>
             </Box>
           </Box>
