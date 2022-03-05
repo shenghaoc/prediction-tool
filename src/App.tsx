@@ -68,7 +68,6 @@ let curr_minus_1_year = curr.minus({ years: 1 })
 const labels = [...Array(12).keys()]
   .map(x => curr_minus_1_year.plus({ months: x }).toFormat('yyyy-MM'))
 
-
 export function App() {
   const [values, setValues] = React.useState({
     town: town_list[0],
@@ -141,45 +140,46 @@ export function App() {
         console.log(data.result.records)
       }
     });
-
-    let predicts = new Array<number>(12).fill(0);
+    const INPUT_DATA_FILE = {
+      "data": [],
+      "method": "predict"
+    }
 
     for (let i = 0; i <= 12; i++) {
-      const INPUT_DATA_FILE = {
-        "data": [i === 12 ? curr.toFormat('yyyy-MM') : labels[i], values.town, values.storey_range, Number(values.floor_area_sqm),
-        values.flat_model, leaseCommenceDate?.year],
-        "method": "predict"
-      }
+      let tmp = [i === 12 ? curr.toFormat('yyyy-MM') : labels[i], values.town, values.storey_range, Number(values.floor_area_sqm),
+          values.flat_model, leaseCommenceDate?.year]
+      if (i === 0) {
+        // @ts-ignore
+        INPUT_DATA_FILE["data"] = [tmp]
+      } else
+        { // @ts-ignore
+          INPUT_DATA_FILE["data"].push(tmp)
+        }
+    }
 
       // @ts-ignore
       $.ajax({
         url: 'https://prediction-tool.azure-api.net/prediction-tool-https/api/v1/service/prediction-tool-https/score',
         type: "POST",
         data: JSON.stringify(INPUT_DATA_FILE),
-        indexValue: i,
         success: function (data) {
           console.log("Data Loaded: " + JSON.stringify(data));
-          let tmp = data["predict"].toFixed(2);
-          if (this.indexValue === 12) {
-            (document.getElementById("output") as HTMLOutputElement).innerHTML = tmp.toString()
-            setData({
-              labels: labels,
-              datasets: [
+          (document.getElementById("output") as HTMLOutputElement).innerHTML = data["predict"].pop()
+              .toFixed(2).toString()
+          setData({
+            labels: labels,
+            datasets: [
                 {
                   label: 'Trends',
-                  data: predicts,
+                  data: data["predict"],
                   borderColor: 'rgb(53, 162, 235)',
                   backgroundColor: 'rgba(53, 162, 235, 0.5)',
                 },
-              ],
-            })
-          } else {
-            predicts[this.indexValue] = tmp
-          }
+            ],
+          })
         },
         contentType: "application/json"
       });
-    }
   }
 
   return (
