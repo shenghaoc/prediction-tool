@@ -16,8 +16,7 @@ import {
   Button,
   FormControl,
   InputLabel,
-  Select,
-  MenuItem,
+  NativeSelect,
   Box,
   InputAdornment,
   OutlinedInput,
@@ -181,55 +180,55 @@ export function App() {
         <Stack spacing={3}>
           <FormControl fullWidth>
             <InputLabel>Town</InputLabel>
-            <Select value={values.town} onChange={handleChange('town')}>
+            <NativeSelect value={values.town} onChange={handleChange('town')}>
               {town_list.sort().map((town: string) => (
-                <MenuItem
+                <option
                   key={town}
                   value={town}
                 >
                   {town}
-                </MenuItem>
+                </option>
               ))}
-            </Select>
+            </NativeSelect>
           </FormControl>
           <FormControl fullWidth>
             <InputLabel>Flat Type</InputLabel>
-            <Select value={values.flat_type} onChange={handleChange('flat_type')}>
+            <NativeSelect value={values.flat_type} onChange={handleChange('flat_type')}>
               {flat_type_list.sort().map((flat_type: string) => (
-                <MenuItem
+                <option
                   key={flat_type}
                   value={flat_type}
                 >
                   {flat_type}
-                </MenuItem>
+                </option>
               ))}
-            </Select>
+            </NativeSelect>
           </FormControl>
           <FormControl fullWidth>
             <InputLabel>Storey Range</InputLabel>
-            <Select value={values.storey_range} onChange={handleChange('storey_range')}>
+            <NativeSelect value={values.storey_range} onChange={handleChange('storey_range')}>
               {storey_range_list.sort().map((storey_range: string) => (
-                <MenuItem
+                <option
                   key={storey_range}
                   value={storey_range}
                 >
                   {storey_range}
-                </MenuItem>
+                </option>
               ))}
-            </Select>
+            </NativeSelect>
           </FormControl>
           <FormControl fullWidth>
             <InputLabel>Flat Model</InputLabel>
-            <Select value={values.flat_model} onChange={handleChange('flat_model')}>
+            <NativeSelect value={values.flat_model} onChange={handleChange('flat_model')}>
               {flat_model_list.sort().map((flat_model: string) => (
-                <MenuItem
+                <option
                   key={flat_model}
                   value={flat_model}
                 >
                   {flat_model}
-                </MenuItem>
+                </option>
               ))}
-            </Select>
+            </NativeSelect>
           </FormControl>
           <FormControl fullWidth>
             <InputLabel htmlFor="outlined-adornment-amount">Floor area</InputLabel>
