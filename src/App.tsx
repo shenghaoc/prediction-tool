@@ -160,6 +160,17 @@ export function App() {
           let tmp = data["predict"].toFixed(2);
           if (i === 12) {
             (document.getElementById("output") as HTMLOutputElement).innerHTML = tmp.toString()
+            setData({
+              labels: labels,
+              datasets: [
+                {
+                  label: 'Trends',
+                  data: predicts,
+                  borderColor: 'rgb(53, 162, 235)',
+                  backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                },
+              ],
+            })
           } else {
             predicts[i] = tmp
           }
@@ -167,18 +178,6 @@ export function App() {
         contentType: "application/json"
       });
     }
-
-    setData({
-      labels: labels,
-      datasets: [
-        {
-          label: 'Trends',
-          data: predicts,
-          borderColor: 'rgb(53, 162, 235)',
-          backgroundColor: 'rgba(53, 162, 235, 0.5)',
-        },
-      ],
-    })
   }
 
   return (
