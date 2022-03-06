@@ -267,6 +267,8 @@ export function App() {
           <FormControl fullWidth>
             <InputLabel htmlFor="outlined-adornment-amount">Floor area</InputLabel>
             <OutlinedInput
+              type = "number"
+              inputProps={{ min: "0" }}
               onChange={handleChange('floor_area_sqm')}
               endAdornment={<InputAdornment position="end">m<sup>2</sup></InputAdornment>}
             />
