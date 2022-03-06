@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
+import './App.css';
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
-  Title,
+  Title as chartTitle,
   Tooltip,
   Legend,
 } from 'chart.js';
@@ -13,21 +14,17 @@ import { Line } from 'react-chartjs-2';
 import { faker } from '@faker-js/faker';
 import $ from 'jquery';
 import {
+  Form,
+  Select,
+  InputNumber,
   Button,
-  FormControl,
-  InputLabel,
-  NativeSelect,
-  Box,
-  InputAdornment,
-  OutlinedInput,
-  TextField,
-  Stack,
-  Typography
-} from "@mui/material";
+  Typography,
+  Statistic,
+  Col,
+  Row
+} from 'antd';
+import { DatePicker } from './components';
 import dayjs, { Dayjs } from 'dayjs';
-import AdapterDayjs from '@mui/lab/AdapterDayjs';
-import LocalizationProvider from '@mui/lab/LocalizationProvider';
-import DatePicker from '@mui/lab/DatePicker';
 
 import url_map from'./url.json'
 import town_list from './town.json';
@@ -37,6 +34,9 @@ import flat_model_list from './flat_model.json';
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat)
+
+const { Option } = Select;
+const { Title } = Typography;
 
 const ml_model_list = Object.keys(url_map).sort()
 town_list.sort()
@@ -49,7 +49,7 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
-  Title,
+  chartTitle,
   Tooltip,
   Legend
 );
@@ -88,10 +88,11 @@ export function App() {
   const [leaseCommenceDate, setLeaseCommenceDate] = useState< Dayjs | null>(null);
 
 
-  const handleChange = (prop: any) => (event: any) => {
-    setValues({ ...values, [prop]: event.target.value });
+  const handleChange = (prop: any) => (value: any) => {
+    setValues({ ...values, [prop]: value });
   };
 
+  const [output, setOutput] = useState(0)
 
   const [data, setData] = useState({
     labels,
@@ -131,27 +132,10 @@ export function App() {
       return;
     }
     if (!leaseCommenceDate) {
-      alert("Missing Lease Commencement Date!")
+      alert("Missing Lease Commence Date!")
       return;
     }
 
-    let dataQuery = {
-      resource_id: 'f1765b54-a209-4718-8d38-a39237f502b3', // the resource id
-      fields: "month, resale_price", // other useful parameters: filters, sort
-      filters: "{\"town\": \"" + values.town + "\", \"flat_type\": \"" + values.flat_type + "\", \"storey_range\": \"" + values.storey_range + "\", \"flat_model\": \"" + values.flat_model + "\", \"lease_commence_date\": \"" + leaseCommenceDate?.year + "\"}",
-    };
-
-    $.ajax({
-      url: 'https://data.gov.sg/api/action/datastore_search',
-      data: dataQuery,
-      dataType: 'jsonp',
-      cache: true,
-      success: async function (data) {
-        let tmp = data.result.records.length;
-        (document.getElementById("past") as HTMLOutputElement).innerHTML = (tmp === 100) ? '≥' + tmp : tmp;
-        console.log(data.result.records)
-      }
-    });
     const INPUT_DATA_FILE = {
       "data": [],
       "method": "predict"
@@ -159,7 +143,7 @@ export function App() {
 
     for (let i = 0; i <= 12; i++) {
       let tmp = [i === 12 ? curr.format('YYYY-MM') : labels[i], values.town, values.storey_range, Number(values.floor_area_sqm),
-          values.flat_model, leaseCommenceDate?.year]
+          values.flat_model, leaseCommenceDate.year()]
       if (i === 0) {
         // @ts-ignore
         INPUT_DATA_FILE["data"] = [tmp]
@@ -177,8 +161,7 @@ export function App() {
         data: JSON.stringify(INPUT_DATA_FILE),
         success: function (data) {
           console.log("Data Loaded: " + JSON.stringify(data));
-          (document.getElementById("output") as HTMLOutputElement).innerHTML = data["predict"].pop()
-              .toFixed(2).toString()
+          setOutput(data["predict"].pop())
           setData({
             labels: labels,
             datasets: [
@@ -196,129 +179,114 @@ export function App() {
   }
 
   return (
-    <Box>
-      <Typography variant="h2" component="div" gutterBottom>
+      <>
+    <Form>
+      <Title level={2}>
         Price Prediction
-      </Typography>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <Stack spacing={3}>
-          <FormControl fullWidth>
-            <InputLabel>ML Model</InputLabel>
-            <NativeSelect value={values.ml_model} onChange={handleChange('ml_model')}>
+      </Title>
+          <Form.Item
+              label="ML Model"
+          >
+            <Select defaultValue={values.ml_model} onChange={handleChange('ml_model')}>
               {ml_model_list.map((ml_model: string) => (
-                  <option
+                  <Option
                       key={ml_model}
                       value={ml_model}
                   >
                     {ml_model}
-                  </option>
+                  </Option>
               ))}
-            </NativeSelect>
-          </FormControl>
-          <FormControl fullWidth>
-            <InputLabel>Town</InputLabel>
-            <NativeSelect value={values.town} onChange={handleChange('town')}>
+            </Select>
+          </Form.Item>
+          <Form.Item
+              label="Town"
+          >
+            <Select value={values.town} onChange={handleChange('town')}>
               {town_list.map((town: string) => (
-                <option
+                <Option
                   key={town}
                   value={town}
                 >
                   {town}
-                </option>
+                </Option>
               ))}
-            </NativeSelect>
-          </FormControl>
-          <FormControl fullWidth>
-            <InputLabel>Flat Type</InputLabel>
-            <NativeSelect value={values.flat_type} onChange={handleChange('flat_type')}>
+            </Select>
+          </Form.Item>
+          <Form.Item
+              label="Flat Type"
+          >
+            <Select value={values.flat_type} onChange={handleChange('flat_type')}>
               {flat_type_list.map((flat_type: string) => (
-                <option
+                <Option
                   key={flat_type}
                   value={flat_type}
                 >
                   {flat_type}
-                </option>
+                </Option>
               ))}
-            </NativeSelect>
-          </FormControl>
-          <FormControl fullWidth>
-            <InputLabel>Storey Range</InputLabel>
-            <NativeSelect value={values.storey_range} onChange={handleChange('storey_range')}>
+            </Select>
+          </Form.Item>
+          <Form.Item
+          label = "Storey Range"
+          >
+            <Select value={values.storey_range} onChange={handleChange('storey_range')}>
               {storey_range_list.map((storey_range: string) => (
-                <option
+                <Option
                   key={storey_range}
                   value={storey_range}
                 >
                   {storey_range}
-                </option>
+                </Option>
               ))}
-            </NativeSelect>
-          </FormControl>
-          <FormControl fullWidth>
-            <InputLabel>Flat Model</InputLabel>
-            <NativeSelect value={values.flat_model} onChange={handleChange('flat_model')}>
+            </Select>
+          </Form.Item>
+          <Form.Item
+          label= "Flat Model"
+          >
+            <Select value={values.flat_model} onChange={handleChange('flat_model')}>
               {flat_model_list.map((flat_model: string) => (
-                <option
+                <Option
                   key={flat_model}
                   value={flat_model}
                 >
                   {flat_model}
-                </option>
+                </Option>
               ))}
-            </NativeSelect>
-          </FormControl>
-          <FormControl fullWidth>
-            <InputLabel htmlFor="outlined-adornment-amount">Floor area</InputLabel>
-            <OutlinedInput
+            </Select>
+          </Form.Item>
+          <Form.Item
+             label = "Floor Area"
+          >
+            <InputNumber
               type = "number"
-              inputProps={{ min: "0" }}
+              min = "0"
               onChange={handleChange('floor_area_sqm')}
-              endAdornment={<InputAdornment position="end">m<sup>2</sup></InputAdornment>}
+              addonAfter = "m²"
             />
-          </FormControl>
+          </Form.Item>
+          <Form.Item
+              label = "Lease Commence Date"
+          >
           <DatePicker
-            label="Lease commence date"
-            views={['year']}
+            picker="year"
             value={leaseCommenceDate}
             onChange={(newValue) => {
               setLeaseCommenceDate(newValue);
             }}
-            renderInput={(params) => <TextField {...params} fullWidth />}
-            minDate={dayjs('1960', 'YYYY')}
-            disableFuture={true}
           />
-          <Box
-            sx={{
-              bgcolor: 'background.paper',
-              boxShadow: 1,
-              borderRadius: 1,
-              p: 2,
-              minWidth: 300,
-              py: 2
-            }}
-          >
-            <Box component="div" sx={{ display: 'inline' }}>
-              <Typography variant="overline" display="block" gutterBottom>
-                Prediction
-              </Typography>
-              <Typography variant="h2" gutterBottom>
-                $<span id="output">0</span>
-              </Typography>
-            </Box>
-            <Box sx={{ color: 'text.secondary', display: 'inline', fontSize: 12 }}>
-              <Typography variant="body1" gutterBottom>
-                <span id="past">0</span> matching entries on record
-              </Typography>
-            </Box>
-          </Box>
-          <Button variant="contained"
-            onClick={funPredict}>
+          </Form.Item>
+      <Row gutter={16}>
+        <Col span={12}>
+          <Statistic title="Prediction" value={output} prefix="$" precision={2} />
+          <Button style={{ marginTop: 16 }} type="primary"
+                  onClick={funPredict}>
             Get prediction
           </Button>
-        </Stack>
+        </Col>
+      </Row>,
+    </Form>
         <Line options={options} data={data} />
-      </LocalizationProvider>
-    </Box>
+      </>
   )
 }
 
