@@ -29,11 +29,13 @@ import AdapterLuxon from '@mui/lab/AdapterLuxon';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DatePicker from '@mui/lab/DatePicker';
 
+import url_map from'./url.json'
 import town_list from './town.json';
 import flat_type_list from './flat_type.json';
 import storey_range_list from './storey_range.json';
 import flat_model_list from './flat_model.json';
 
+const ml_model_list = Object.keys(url_map).sort()
 town_list.sort()
 flat_type_list.sort()
 storey_range_list.sort()
@@ -69,7 +71,9 @@ const labels = [...Array(12).keys()]
   .map(x => curr_minus_1_year.plus({ months: x }).toFormat('yyyy-MM'))
 
 export function App() {
+  // @ts-ignore
   const [values, setValues] = React.useState({
+    ml_model: ml_model_list[0],
     town: town_list[0],
     flat_type: flat_type_list[0],
     storey_range: storey_range_list[0],
@@ -99,6 +103,10 @@ export function App() {
   });
 
   function funPredict() {
+    if (!values.ml_model) {
+      alert('Please choose an ML Model!');
+      return;
+    }
     if (!values.town) {
       alert('Missing Town!');
       return;
@@ -160,7 +168,8 @@ export function App() {
 
       // @ts-ignore
       $.ajax({
-        url: 'https://prediction-tool.azure-api.net/prediction-tool-https/api/v1/service/prediction-tool-https/score',
+        // @ts-ignore
+        url: url_map[values.ml_model],
         type: "POST",
         data: JSON.stringify(INPUT_DATA_FILE),
         success: function (data) {
@@ -190,6 +199,19 @@ export function App() {
       </Typography>
       <LocalizationProvider dateAdapter={AdapterLuxon}>
         <Stack spacing={3}>
+          <FormControl fullWidth>
+            <InputLabel>ML Model</InputLabel>
+            <NativeSelect value={values.ml_model} onChange={handleChange('ml_model')}>
+              {ml_model_list.map((ml_model: string) => (
+                  <option
+                      key={ml_model}
+                      value={ml_model}
+                  >
+                    {ml_model}
+                  </option>
+              ))}
+            </NativeSelect>
+          </FormControl>
           <FormControl fullWidth>
             <InputLabel>Town</InputLabel>
             <NativeSelect value={values.town} onChange={handleChange('town')}>

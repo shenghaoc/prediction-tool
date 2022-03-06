@@ -1,0 +1,4 @@
+{
+  "MLP": "https://prediction-tool.azure-api.net/prediction-tool-https/api/v1/service/prediction-tool-https/score",
+  "SVR": "https://prediction-tool.azure-api.net/prediction-tool-https/api/v1/service/prediction-tool-https/score"
+}
