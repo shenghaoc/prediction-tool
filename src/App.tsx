@@ -24,8 +24,8 @@ import {
   Stack,
   Typography
 } from "@mui/material";
-import { DateTime } from "luxon";
-import AdapterLuxon from '@mui/lab/AdapterLuxon';
+import dayjs, { Dayjs } from 'dayjs';
+import AdapterDayjs from '@mui/lab/AdapterDayjs';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DatePicker from '@mui/lab/DatePicker';
 
@@ -34,6 +34,9 @@ import town_list from './town.json';
 import flat_type_list from './flat_type.json';
 import storey_range_list from './storey_range.json';
 import flat_model_list from './flat_model.json';
+
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(customParseFormat)
 
 const ml_model_list = Object.keys(url_map).sort()
 town_list.sort()
@@ -64,11 +67,11 @@ export const options = {
   },
 };
 
-let curr = DateTime.now()
-let curr_minus_1_year = curr.minus({ years: 1 })
+let curr = dayjs()
+let curr_minus_1_year = curr.add(1, 'year')
 // @ts-ignore
 const labels = [...Array(12).keys()]
-  .map(x => curr_minus_1_year.plus({ months: x }).toFormat('yyyy-MM'))
+  .map(x => curr_minus_1_year.add(x, 'month').format('YYYY-MM'))
 
 export function App() {
   // @ts-ignore
@@ -82,7 +85,7 @@ export function App() {
     resale_price: '',
   });
 
-  const [leaseCommenceDate, setLeaseCommenceDate] = React.useState<DateTime | null>(null);
+  const [leaseCommenceDate, setLeaseCommenceDate] = useState< Dayjs | null>(null);
 
 
   const handleChange = (prop: any) => (event: any) => {
@@ -155,7 +158,7 @@ export function App() {
     }
 
     for (let i = 0; i <= 12; i++) {
-      let tmp = [i === 12 ? curr.toFormat('yyyy-MM') : labels[i], values.town, values.storey_range, Number(values.floor_area_sqm),
+      let tmp = [i === 12 ? curr.format('YYYY-MM') : labels[i], values.town, values.storey_range, Number(values.floor_area_sqm),
           values.flat_model, leaseCommenceDate?.year]
       if (i === 0) {
         // @ts-ignore
@@ -197,7 +200,7 @@ export function App() {
       <Typography variant="h2" component="div" gutterBottom>
         Price Prediction
       </Typography>
-      <LocalizationProvider dateAdapter={AdapterLuxon}>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
         <Stack spacing={3}>
           <FormControl fullWidth>
             <InputLabel>ML Model</InputLabel>
@@ -281,7 +284,7 @@ export function App() {
               setLeaseCommenceDate(newValue);
             }}
             renderInput={(params) => <TextField {...params} fullWidth />}
-            minDate={DateTime.fromFormat('1960', 'yyyy')}
+            minDate={dayjs('1960', 'YYYY')}
             disableFuture={true}
           />
           <Box
