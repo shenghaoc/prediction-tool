@@ -68,7 +68,7 @@ export const options = {
 };
 
 let curr = dayjs()
-let curr_minus_1_year = curr.add(1, 'year')
+let curr_minus_1_year = curr.subtract(1, 'year')
 // @ts-ignore
 const labels = [...Array(12).keys()]
   .map(x => curr_minus_1_year.add(x, 'month').format('YYYY-MM'))
