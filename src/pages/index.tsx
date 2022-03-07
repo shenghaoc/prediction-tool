@@ -288,7 +288,7 @@ const IndexPage = () => {
               Get prediction
             </Button>
           </Col>
-        </Row>,
+        </Row>
       </Form>
       <Title level={3}>
         Predicted Trends for Past 12 Months
