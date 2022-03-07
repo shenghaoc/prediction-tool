@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import './App.css';
 import {Line} from '@ant-design/charts';
-import $ from 'jquery';
 import {
   Form,
   Select,
@@ -143,13 +142,21 @@ export function App() {
     }
 
     // @ts-ignore
-    $.ajax({
-      // @ts-ignore
-      url: url_map[values.ml_model],
-      type: "POST",
-      data: JSON.stringify(INPUT_DATA_FILE),
-      success: function (data) {
-        console.log("Data Loaded: " + JSON.stringify(data));
+    fetch(url_map[values.ml_model], {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(INPUT_DATA_FILE),
+    })
+      .then(response => {
+        if (!response.ok) {
+          alert('Server Down')
+          throw new Error('Network response was not OK');
+        }
+        return response.json();
+      })
+      .then(data => {
         setOutput(data["predict"].pop())
         // @ts-ignore
         const obj = [{'month': labels[0], 'value': data["predict"][0]}];
@@ -167,9 +174,10 @@ export function App() {
             shape: 'diamond',
           },
         })
-      },
-      contentType: "application/json"
-    });
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
   }
 
   return (
