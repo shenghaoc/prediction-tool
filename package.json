@@ -51,6 +51,5 @@
   },
   "devDependencies": {
     "@types/jquery": "^3.5.14"
-  },
-  "homepage": "https://shenghaoc.github.io/prediction-tool"
+  }
 }
