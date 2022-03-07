@@ -182,7 +182,7 @@ const IndexPage = () => {
   }
 
   return (
-    <main style={{ margin: `0 auto`, maxWidth: 650, padding: `0 1rem` }}>
+    <main style={{ padding: `24px` }}>
       <Form>
         <Title level={2}>
           Price Prediction
