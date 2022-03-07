@@ -64,7 +64,7 @@ const IndexPage = () => {
     town: town_list[0],
     flat_type: flat_type_list[0],
     storey_range: storey_range_list[0],
-    floor_area_sqm: '',
+    floor_area_sqm: 0,
     flat_model: flat_model_list[0],
     resale_price: '',
   });
@@ -262,7 +262,7 @@ const IndexPage = () => {
         >
           <InputNumber
             value={values.floor_area_sqm}
-            min="0"
+            min={0}
             onChange={handleChange('floor_area_sqm')}
             addonAfter="m²"
           />
