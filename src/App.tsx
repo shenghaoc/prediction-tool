@@ -53,6 +53,10 @@ let curr_minus_1_year = curr.subtract(1, 'year')
 const labels = [...Array(12).keys()]
   .map(x => curr_minus_1_year.add(x, 'month').format('YYYY-MM'))
 
+function disabledDate(current: Dayjs) {
+  return current.isAfter(dayjs()) || current.isBefore('1960-01-01', 'year')
+}
+
 export function App() {
   // @ts-ignore
   const [values, setValues] = React.useState({
@@ -260,6 +264,8 @@ export function App() {
           <DatePicker
             picker="year"
             value={leaseCommenceDate}
+            inputReadOnly={true}
+            disabledDate={disabledDate}
             onChange={(newValue) => {
               setLeaseCommenceDate(newValue);
             }}
