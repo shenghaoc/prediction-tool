@@ -66,7 +66,6 @@ const IndexPage = () => {
     storey_range: storey_range_list[0],
     floor_area_sqm: 0,
     flat_model: flat_model_list[0],
-    resale_price: '',
   });
 
   const [leaseCommenceDate, setLeaseCommenceDate] = useState<Dayjs | null>(null);
