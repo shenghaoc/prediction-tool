@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import './App.css';
+import 'antd/dist/antd.css';
 import {Line} from '@ant-design/charts';
 import {
   Form,
@@ -11,7 +11,7 @@ import {
   Col,
   Row
 } from 'antd';
-import {DatePicker} from './components';
+import {DatePicker} from '../components';
 import dayjs, {Dayjs} from 'dayjs';
 
 import url_map from './url.json'
@@ -56,7 +56,8 @@ function disabledDate(current: Dayjs) {
   return current.isAfter(dayjs()) || current.isBefore('1960-01-01', 'year')
 }
 
-export function App() {
+// markup
+const IndexPage = () => {
   // @ts-ignore
   const [values, setValues] = React.useState({
     ml_model: ml_model_list[0],
@@ -181,7 +182,7 @@ export function App() {
   }
 
   return (
-    <>
+    <main style={{ margin: `0 auto`, maxWidth: 650, padding: `0 1rem` }}>
       <Form>
         <Title level={2}>
           Price Prediction
@@ -293,7 +294,8 @@ export function App() {
         Predicted Trends for Past 12 Months
       </Title>
       <Line {...config} />
-    </>
+    </main>
   )
 }
 
+export default IndexPage
