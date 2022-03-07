@@ -261,7 +261,6 @@ const IndexPage = () => {
           label="Floor Area"
         >
           <InputNumber
-            type="number"
             min="0"
             onChange={handleChange('floor_area_sqm')}
             addonAfter="m²"
