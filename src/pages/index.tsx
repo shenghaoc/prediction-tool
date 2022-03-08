@@ -180,9 +180,23 @@ const IndexPage = () => {
       });
   }
 
+  type SizeType = Parameters<typeof Form>[0]['size'];
+
+  const [componentSize, setComponentSize] = useState<SizeType | 'default'>('default');
+  const onFormLayoutChange = ({ size }: { size: SizeType }) => {
+    setComponentSize(size);
+  };
+
   return (
     <main style={{ padding: `24px` }}>
-      <Form>
+      <Form
+        labelCol={{ span: 4 }}
+        wrapperCol={{ span: 14 }}
+        layout="horizontal"
+        initialValues={{ size: componentSize }}
+        onValuesChange={onFormLayoutChange}
+        size={componentSize as SizeType}
+      >
         <Title level={2}>
           Price Prediction
         </Title>
