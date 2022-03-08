@@ -71,8 +71,12 @@ const IndexPage = () => {
   const [leaseCommenceDate, setLeaseCommenceDate] = useState<Dayjs | null>(null);
 
 
-  const handleChange = (prop: any) => (value: any) => {
-    setValues({...values, [prop]: value});
+  const handleChange = (prop: any) => (event: any) => {
+    if (prop === "floor_area_sqm") {
+      setValues({...values, [prop]: event.target.value});
+    } else {
+      setValues({...values, [prop]: event});
+    }
   };
 
   const [output, setOutput] = useState(0)
@@ -183,17 +187,17 @@ const IndexPage = () => {
   type SizeType = Parameters<typeof Form>[0]['size'];
 
   const [componentSize, setComponentSize] = useState<SizeType | 'default'>('default');
-  const onFormLayoutChange = ({ size }: { size: SizeType }) => {
+  const onFormLayoutChange = ({size}: { size: SizeType }) => {
     setComponentSize(size);
   };
 
   return (
-    <main style={{ padding: `24px` }}>
+    <main style={{padding: `24px`}}>
       <Form
-        labelCol={{ span: 4 }}
-        wrapperCol={{ span: 14 }}
+        labelCol={{span: 4}}
+        wrapperCol={{span: 14}}
         layout="horizontal"
-        initialValues={{ size: componentSize }}
+        initialValues={{size: componentSize}}
         onValuesChange={onFormLayoutChange}
         size={componentSize as SizeType}
       >
@@ -275,10 +279,10 @@ const IndexPage = () => {
         >
           <Input
             type="number"
-            // value={values.floor_area_sqm}
-            // min={0}
-            // onChange={handleChange('floor_area_sqm')}
-            // addonAfter="m²"
+            value={values.floor_area_sqm}
+            min={0}
+            onChange={handleChange('floor_area_sqm')}
+            addonAfter="m²"
           />
         </Form.Item>
         <Form.Item
