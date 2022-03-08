@@ -4,7 +4,7 @@ import {Line} from '@ant-design/charts';
 import {
   Form,
   Select,
-  InputNumber,
+  Input,
   Button,
   Typography,
   Statistic,
@@ -273,7 +273,7 @@ const IndexPage = () => {
         <Form.Item
           label="Floor Area"
         >
-          <InputNumber
+          <Input
             // value={values.floor_area_sqm}
             // min={0}
             // onChange={handleChange('floor_area_sqm')}
