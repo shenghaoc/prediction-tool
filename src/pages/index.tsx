@@ -274,6 +274,7 @@ const IndexPage = () => {
           label="Floor Area"
         >
           <Input
+            type="number"
             // value={values.floor_area_sqm}
             // min={0}
             // onChange={handleChange('floor_area_sqm')}
