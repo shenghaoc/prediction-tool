@@ -8620,6 +8620,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"gatsby-plugin-manifest@npm:^4.9.0":
+  version: 4.9.0
+  resolution: "gatsby-plugin-manifest@npm:4.9.0"
+  dependencies:
+    "@babel/runtime": ^7.15.4
+    gatsby-core-utils: ^3.9.0
+    gatsby-plugin-utils: ^3.3.0
+    semver: ^7.3.5
+    sharp: ^0.30.1
+  peerDependencies:
+    gatsby: ^4.0.0-next
+  checksum: a9551474a9922608c6c94a83f9e51f05e0207c11bef03dbfb52086d35bd0b2e501c00576b37374318ebf33894eb7648dfd0212cef76fad398831983d1c9b7167
+  languageName: node
+  linkType: hard
+
 "gatsby-plugin-page-creator@npm:^4.9.0":
   version: 4.9.0
   resolution: "gatsby-plugin-page-creator@npm:4.9.0"
@@ -13253,6 +13268,7 @@ __metadata:
     dayjs: ^1.10.8
     gatsby: ^4.9.1
     gatsby-plugin-less: ^6.9.0
+    gatsby-plugin-manifest: ^4.9.0
     gh-pages: ^3.2.3
     react: ^17.0.1
     react-dom: ^17.0.1
