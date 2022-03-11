@@ -57,17 +57,15 @@ function disabledDate(current: Dayjs) {
 // markup
 const IndexPage = () => {
   // @ts-ignore
-  const [values, setValues] = React.useState({
+  const [values, setValues] = useState({
     ml_model: ml_model_list[0],
     month: null,
     town: town_list[0],
     storey_range: storey_range_list[0],
-    floor_area_sqm: 0,
     flat_model: flat_model_list[0],
+    floor_area_sqm: 0,
+    lease_commence_date: null
   });
-
-  const [leaseCommenceDate, setLeaseCommenceDate] = useState<Dayjs | null>(null);
-
 
   const handleChange = (prop: any) => (event: any) => {
     if (prop === "floor_area_sqm") {
@@ -122,7 +120,7 @@ const IndexPage = () => {
       alert('Missing Floor Area!');
       return;
     }
-    if (!leaseCommenceDate) {
+    if (!values.lease_commence_date) {
       alert("Missing Lease Commence Date!")
       return;
     }
@@ -134,7 +132,7 @@ const IndexPage = () => {
 
     for (let i = 0; i <= 12; i++) {
       let tmp = [i === 12 ? values.month.format('YYYY-MM') : labels[i], values.town, values.storey_range, Number(values.floor_area_sqm),
-        values.flat_model, leaseCommenceDate.year()]
+        values.flat_model, values.lease_commence_date.year()]
       if (i === 0) {
         // @ts-ignore
         INPUT_DATA_FILE["data"] = [tmp]
@@ -285,12 +283,10 @@ const IndexPage = () => {
         >
           <DatePicker
             picker="year"
-            value={leaseCommenceDate}
+            value={values.lease_commence_date}
             inputReadOnly={true}
             disabledDate={disabledDate}
-            onChange={(newValue) => {
-              setLeaseCommenceDate(newValue);
-            }}
+            onChange={handleChange('lease_commence_date')}
           />
         </Form.Item>
         <Row gutter={16}>
