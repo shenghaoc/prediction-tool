@@ -50,8 +50,14 @@ let curr_minus_1_year = curr.subtract(1, 'year')
 const labels = [...Array(12).keys()]
   .map(x => curr_minus_1_year.add(x, 'month').format('YYYY-MM'))
 
-function disabledDate(current: Dayjs) {
-  return current.isAfter(dayjs()) || current.isBefore('1960-01-01', 'year')
+// 2017 (start of data) to 2022-02 (current month)
+function disabledMonth(current: Dayjs) {
+  return current.isBefore('2017-01-01', 'year') || current.isAfter('2022-02-01', 'month')
+}
+
+// 1960 (first HDB flats) to 2022 (current year)
+function disabledYear(current: Dayjs) {
+  return current.isBefore('1960-01-01', 'year') || current.isAfter('2022-01-01', 'year')
 }
 
 // markup
@@ -221,7 +227,7 @@ const IndexPage = () => {
             picker="month"
             value={values.month}
             inputReadOnly={true}
-            disabledDate={disabledDate}
+            disabledDate={disabledMonth}
             onChange={handleChange('month')}
           />
         </Form.Item>
@@ -285,7 +291,7 @@ const IndexPage = () => {
             picker="year"
             value={values.lease_commence_date}
             inputReadOnly={true}
-            disabledDate={disabledDate}
+            disabledDate={disabledYear}
             onChange={handleChange('lease_commence_date')}
           />
         </Form.Item>
