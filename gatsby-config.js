@@ -24,6 +24,5 @@ module.exports = {
                 }
             }
         }
-    ],
-    pathPrefix: "/prediction-tool"
+    ]
 }
