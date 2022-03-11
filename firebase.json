@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "ee4802-g20-tool",
     "public": "public",
     "ignore": [
       "firebase.json",
