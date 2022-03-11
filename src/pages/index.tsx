@@ -16,7 +16,6 @@ import dayjs, {Dayjs} from 'dayjs';
 
 import url_map from './url.json'
 import town_list from './town.json';
-import flat_type_list from './flat_type.json';
 import storey_range_list from './storey_range.json';
 import flat_model_list from './flat_model.json';
 
@@ -29,7 +28,6 @@ const {Title} = Typography;
 
 const ml_model_list = Object.keys(url_map).sort()
 town_list.sort()
-flat_type_list.sort()
 storey_range_list.sort()
 flat_model_list.sort()
 
@@ -62,7 +60,6 @@ const IndexPage = () => {
   const [values, setValues] = React.useState({
     ml_model: ml_model_list[0],
     town: town_list[0],
-    flat_type: flat_type_list[0],
     storey_range: storey_range_list[0],
     floor_area_sqm: 0,
     flat_model: flat_model_list[0],
@@ -106,10 +103,6 @@ const IndexPage = () => {
     }
     if (!values.town) {
       alert('Missing Town!');
-      return;
-    }
-    if (!values.flat_type) {
-      alert('Missing Flat Type!');
       return;
     }
     if (!values.storey_range) {
@@ -228,20 +221,6 @@ const IndexPage = () => {
                 value={town}
               >
                 {town}
-              </Option>
-            ))}
-          </Select>
-        </Form.Item>
-        <Form.Item
-          label="Flat Type"
-        >
-          <Select value={values.flat_type} onChange={handleChange('flat_type')}>
-            {flat_type_list.map((flat_type: string) => (
-              <Option
-                key={flat_type}
-                value={flat_type}
-              >
-                {flat_type}
               </Option>
             ))}
           </Select>
