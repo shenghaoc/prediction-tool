@@ -59,6 +59,7 @@ const IndexPage = () => {
   // @ts-ignore
   const [values, setValues] = React.useState({
     ml_model: ml_model_list[0],
+    month: null,
     town: town_list[0],
     storey_range: storey_range_list[0],
     floor_area_sqm: 0,
@@ -105,6 +106,10 @@ const IndexPage = () => {
       alert('Missing Town!');
       return;
     }
+    if (!values.month) {
+      alert('Missing Month!');
+      return;
+    }
     if (!values.storey_range) {
       alert('Missing Storey Range!');
       return;
@@ -128,7 +133,7 @@ const IndexPage = () => {
     }
 
     for (let i = 0; i <= 12; i++) {
-      let tmp = [i === 12 ? curr.format('YYYY-MM') : labels[i], values.town, values.storey_range, Number(values.floor_area_sqm),
+      let tmp = [i === 12 ? values.month.format('YYYY-MM') : labels[i], values.town, values.storey_range, Number(values.floor_area_sqm),
         values.flat_model, leaseCommenceDate.year()]
       if (i === 0) {
         // @ts-ignore
@@ -210,6 +215,17 @@ const IndexPage = () => {
               </Option>
             ))}
           </Select>
+        </Form.Item>
+        <Form.Item
+          label="Month"
+        >
+          <DatePicker
+            picker="month"
+            value={values.month}
+            inputReadOnly={true}
+            disabledDate={disabledDate}
+            onChange={handleChange('month')}
+          />
         </Form.Item>
         <Form.Item
           label="Town"
