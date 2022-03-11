@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import { Helmet } from "react-helmet"
-import 'antd/dist/antd.css';
+import 'antd/dist/antd.less';
 import {Line} from '@ant-design/charts';
 import {
   Form,

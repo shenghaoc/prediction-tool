@@ -1,4 +1,5 @@
 /** @type {import('gatsby').GatsbyConfig} */
+const { getThemeVariables } = require('antd/dist/theme');
 module.exports = {
     siteMetadata: {
         title: "Prediction Tool",
@@ -25,6 +26,9 @@ module.exports = {
             resolve: `gatsby-plugin-less`,
             options: {
                 lessOptions: {
+                    modifyVars: getThemeVariables({
+                            dark: true, // Enable dark mode
+                    }),
                     javascriptEnabled: true,
                 }
             }
