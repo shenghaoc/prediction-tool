@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import { Helmet } from "react-helmet"
 import 'antd/dist/antd.css';
 import {Line} from '@ant-design/charts';
 import {
@@ -9,7 +10,8 @@ import {
   Typography,
   Statistic,
   Col,
-  Row
+  Row,
+  Divider
 } from 'antd';
 import {DatePicker} from '../components';
 import dayjs, {Dayjs} from 'dayjs';
@@ -195,6 +197,14 @@ const IndexPage = () => {
 
   return (
     <main style={{padding: `24px`}}>
+      <Helmet>
+        <meta charSet="utf-8" />
+        <title>Prediction Tool</title>
+        <link rel="canonical" href="https://ee4802-g20-tool.web.app" />
+      </Helmet>
+      <Title level={2}>
+        Price Prediction
+      </Title>
       <Form
         labelCol={{span: 4}}
         wrapperCol={{span: 14}}
@@ -203,9 +213,7 @@ const IndexPage = () => {
         onValuesChange={onFormLayoutChange}
         size={componentSize as SizeType}
       >
-        <Title level={2}>
-          Price Prediction
-        </Title>
+
         <Form.Item
           label="ML Model"
         >
@@ -305,9 +313,7 @@ const IndexPage = () => {
           </Col>
         </Row>
       </Form>
-      <Title level={3}>
-        Predicted Trends for Past 12 Months
-      </Title>
+      <Divider>Predicted Trends for Past 12 Months</Divider>
       <Line {...config} />
     </main>
   )

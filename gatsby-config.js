@@ -1,9 +1,14 @@
 /** @type {import('gatsby').GatsbyConfig} */
 module.exports = {
-  siteMetadata: {
-      siteUrl: `https://www.yourdomain.tld`,
-  },
+    siteMetadata: {
+        title: "Prediction Tool",
+        titleTemplate: "%s · Group 20",
+        description:
+            "Group 20 Prediction for EE4802.",
+        url: "https://ee4802-g20-tool.web.app", // No trailing slash allowed!
+    },
     plugins: [
+        `gatsby-plugin-react-helmet`,
         {
             resolve: `gatsby-plugin-manifest`,
             options: {
