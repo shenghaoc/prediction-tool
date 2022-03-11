@@ -16,10 +16,10 @@ import {
 import {DatePicker} from '../components';
 import dayjs, {Dayjs} from 'dayjs';
 
-import url_map from './url.json'
-import town_list from './town.json';
-import storey_range_list from './storey_range.json';
-import flat_model_list from './flat_model.json';
+import url_map from '../../content/url.json'
+import town_list from '../../content/town.json';
+import storey_range_list from '../../content/storey_range.json';
+import flat_model_list from '../../content/flat_model.json';
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 
