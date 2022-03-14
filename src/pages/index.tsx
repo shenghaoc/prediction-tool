@@ -22,6 +22,8 @@ import town_list from '../../content/town.json';
 import storey_range_map from '../../content/storey_range.json';
 import flat_model_list from '../../content/flat_model.json';
 
+import mapping_rr_map from '../../content/mapping_rr.json'
+
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 
 dayjs.extend(customParseFormat)
@@ -147,6 +149,17 @@ const IndexPage = () => {
         INPUT_DATA_FILE["data"].push(tmp)
       }
     }
+
+    for (let i = 0; i <= 12; i++) {
+      let val = mapping_rr_map[0]["intercept"]
+      val += month_map[INPUT_DATA_FILE["data"][i][0]] * mapping_rr_map[0]["month"]
+      val += mapping_rr_map[0][INPUT_DATA_FILE["data"][i][1]]
+      val += storey_range_map[INPUT_DATA_FILE["data"][i][2]] * mapping_rr_map[0]["storey_range"]
+      val += INPUT_DATA_FILE["data"][i][3] * mapping_rr_map[0]["floor_area_sqm"]
+      val += mapping_rr_map[0][INPUT_DATA_FILE["data"][i][4]]
+      val += INPUT_DATA_FILE["data"][i][5] * mapping_rr_map[0]["lease_commence_date"]
+    }
+
 
     // @ts-ignore
     fetch(url_map[values.ml_model], {
