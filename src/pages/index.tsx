@@ -17,8 +17,9 @@ import {DatePicker} from '../components';
 import dayjs, {Dayjs} from 'dayjs';
 
 import url_map from '../../content/url.json'
+import month_map from '../../content/month.json'
 import town_list from '../../content/town.json';
-import storey_range_list from '../../content/storey_range.json';
+import storey_range_map from '../../content/storey_range.json';
 import flat_model_list from '../../content/flat_model.json';
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -28,10 +29,8 @@ dayjs.extend(customParseFormat)
 const {Option} = Select;
 const {Title} = Typography;
 
-const ml_model_list = Object.keys(url_map).sort()
-town_list.sort()
-storey_range_list.sort()
-flat_model_list.sort()
+const ml_model_list = Object.keys(url_map)
+const storey_range_list = Object.keys(storey_range_map)
 
 export const options = {
   responsive: true,
