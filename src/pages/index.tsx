@@ -241,7 +241,7 @@ const IndexPage = () => {
         <Form.Item
           label="Town"
         >
-          <Select value={town_list[0]} onChange={handleChange('town')}>
+          <Select defaultValue={town_list[0]} onChange={handleChange('town')}>
             {town_list.map((town: string) => (
               <Option
                 key={town}
@@ -255,7 +255,7 @@ const IndexPage = () => {
         <Form.Item
           label="Storey Range"
         >
-          <Select value={storey_range_list[0]} onChange={handleChange('storey_range')}>
+          <Select defaultValue={storey_range_list[0]} onChange={handleChange('storey_range')}>
             {storey_range_list.map((storey_range: string) => (
               <Option
                 key={storey_range}
@@ -269,7 +269,7 @@ const IndexPage = () => {
         <Form.Item
           label="Flat Model"
         >
-          <Select value={flat_model_list[0]} onChange={handleChange('flat_model')}>
+          <Select defaultValue={flat_model_list[0]} onChange={handleChange('flat_model')}>
             {flat_model_list.map((flat_model: string) => (
               <Option
                 key={flat_model}
