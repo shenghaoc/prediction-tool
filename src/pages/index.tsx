@@ -217,7 +217,7 @@ const IndexPage = () => {
         <Form.Item
           label="ML Model"
         >
-          <Select defaultValue={values.ml_model} onChange={handleChange('ml_model')}>
+          <Select defaultValue={ml_model_list[0]} onChange={handleChange('ml_model')}>
             {ml_model_list.map((ml_model: string) => (
               <Option
                 key={ml_model}
@@ -233,7 +233,6 @@ const IndexPage = () => {
         >
           <DatePicker
             picker="month"
-            value={values.month}
             inputReadOnly={true}
             disabledDate={disabledMonth}
             onChange={handleChange('month')}
@@ -242,7 +241,7 @@ const IndexPage = () => {
         <Form.Item
           label="Town"
         >
-          <Select value={values.town} onChange={handleChange('town')}>
+          <Select value={town_list[0]} onChange={handleChange('town')}>
             {town_list.map((town: string) => (
               <Option
                 key={town}
@@ -256,7 +255,7 @@ const IndexPage = () => {
         <Form.Item
           label="Storey Range"
         >
-          <Select value={values.storey_range} onChange={handleChange('storey_range')}>
+          <Select value={storey_range_list[0]} onChange={handleChange('storey_range')}>
             {storey_range_list.map((storey_range: string) => (
               <Option
                 key={storey_range}
@@ -270,7 +269,7 @@ const IndexPage = () => {
         <Form.Item
           label="Flat Model"
         >
-          <Select value={values.flat_model} onChange={handleChange('flat_model')}>
+          <Select value={flat_model_list[0]} onChange={handleChange('flat_model')}>
             {flat_model_list.map((flat_model: string) => (
               <Option
                 key={flat_model}
@@ -286,7 +285,6 @@ const IndexPage = () => {
         >
           <Input
             type="number"
-            value={values.floor_area_sqm}
             min={0}
             onChange={handleChange('floor_area_sqm')}
             addonAfter="m²"
@@ -297,7 +295,6 @@ const IndexPage = () => {
         >
           <DatePicker
             picker="year"
-            value={values.lease_commence_date}
             inputReadOnly={true}
             disabledDate={disabledYear}
             onChange={handleChange('lease_commence_date')}
