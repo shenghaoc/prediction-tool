@@ -48,16 +48,11 @@ export const options = {
   },
 };
 
-let curr = dayjs()
+let curr = dayjs("2022-02", "YYYY-MM")
 let curr_minus_1_year = curr.subtract(1, 'year')
 // @ts-ignore
 const labels = [...Array(12).keys()]
   .map(x => curr_minus_1_year.add(x, 'month').format('YYYY-MM'))
-
-// 2017 (start of data) to 2022-02 (current month)
-function disabledMonth(current: Dayjs) {
-  return current.isBefore('2017-01-01', 'year') || current.isAfter('2022-02-01', 'month')
-}
 
 // 1960 (first HDB flats) to 2022 (current year)
 function disabledYear(current: Dayjs) {
@@ -114,10 +109,6 @@ const IndexPage = () => {
       alert('Missing Town!');
       return;
     }
-    if (!values.month) {
-      alert('Missing Month!');
-      return;
-    }
     if (!values.storey_range) {
       alert('Missing Storey Range!');
       return;
@@ -144,7 +135,7 @@ const IndexPage = () => {
 
     for (let i = 0; i <= labels.length; i++) {
       let val = mapping_map[0]["intercept"]
-      val += month_map[i === 12 ? values.month.format('YYYY-MM') : labels[i]] * mapping_map[0]["month"]
+      val += month_map[i === 12 ? curr.format('YYYY-MM') : labels[i]] * mapping_map[0]["month"]
       val += mapping_map[0][values.town]
       val += storey_range_map[values.storey_range] * mapping_map[0]["storey_range"]
       val += values.floor_area_sqm * mapping_map[0]["floor_area_sqm"]
@@ -213,16 +204,6 @@ const IndexPage = () => {
               </Option>
             ))}
           </Select>
-        </Form.Item>
-        <Form.Item
-          label="Month"
-        >
-          <DatePicker
-            picker="month"
-            inputReadOnly={true}
-            disabledDate={disabledMonth}
-            onChange={handleChange('month')}
-          />
         </Form.Item>
         <Form.Item
           label="Town"
