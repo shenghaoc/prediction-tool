@@ -135,22 +135,6 @@ const IndexPage = () => {
       return;
     }
 
-    const INPUT_DATA_FILE = {
-      "data": [],
-      "method": "predict"
-    }
-
-    for (let i = 0; i <= 12; i++) {
-      let tmp = [i === 12 ? values.month.format('YYYY-MM') : labels[i], values.town, values.storey_range, Number(values.floor_area_sqm),
-        values.flat_model, values.lease_commence_date.year()]
-      if (i === 0) {
-        // @ts-ignore
-        INPUT_DATA_FILE["data"] = [tmp]
-      } else { // @ts-ignore
-        INPUT_DATA_FILE["data"].push(tmp)
-      }
-    }
-
     let mapping_map;
     if (values.ml_model === "Support Vector Regression") {
       mapping_map = mapping_svr_map
@@ -161,12 +145,12 @@ const IndexPage = () => {
     let obj;
     for (let i = 0; i <= labels.length; i++) {
       let val = mapping_map[0]["intercept"]
-      val += month_map[INPUT_DATA_FILE["data"][i][0]] * mapping_map[0]["month"]
-      val += mapping_map[0][INPUT_DATA_FILE["data"][i][1]]
-      val += storey_range_map[INPUT_DATA_FILE["data"][i][2]] * mapping_map[0]["storey_range"]
-      val += INPUT_DATA_FILE["data"][i][3] * mapping_map[0]["floor_area_sqm"]
-      val += mapping_map[0][INPUT_DATA_FILE["data"][i][4]]
-      val += INPUT_DATA_FILE["data"][i][5] * mapping_map[0]["lease_commence_date"]
+      val += month_map[i === 12 ? values.month.format('YYYY-MM') : labels[i]] * mapping_map[0]["month"]
+      val += mapping_map[0][values.town]
+      val += storey_range_map[values.storey_range] * mapping_map[0]["storey_range"]
+      val += values.floor_area_sqm * mapping_map[0]["floor_area_sqm"]
+      val += mapping_map[0][values.flat_model]
+      val += values.lease_commence_date.year() * mapping_map[0]["lease_commence_date"]
 
       if (i == 0) {
         // @ts-ignore
