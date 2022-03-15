@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import { Helmet } from "react-helmet"
+import {Helmet} from "react-helmet"
 import 'antd/dist/antd.less';
 import {Line} from '@ant-design/charts';
 import {
@@ -158,7 +158,8 @@ const IndexPage = () => {
       mapping_map = mapping_rr_map
     }
 
-    for (let i = 0; i <= 12; i++) {
+    let obj;
+    for (let i = 0; i <= labels.length; i++) {
       let val = mapping_map[0]["intercept"]
       val += month_map[INPUT_DATA_FILE["data"][i][0]] * mapping_map[0]["month"]
       val += mapping_map[0][INPUT_DATA_FILE["data"][i][1]]
@@ -166,46 +167,28 @@ const IndexPage = () => {
       val += INPUT_DATA_FILE["data"][i][3] * mapping_map[0]["floor_area_sqm"]
       val += mapping_map[0][INPUT_DATA_FILE["data"][i][4]]
       val += INPUT_DATA_FILE["data"][i][5] * mapping_map[0]["lease_commence_date"]
+
+      if (i == 0) {
+        // @ts-ignore
+        obj = [{'month': labels[i], 'value': val}];
+      } else if (i == 12) {
+        setOutput(val)
+      } else {
+        // @ts-ignore
+        obj.push({'month': labels[i], 'value': val})
+      }
     }
 
-
-    // @ts-ignore
-    fetch(url_map[values.ml_model], {
-      method: 'POST', // or 'PUT'
-      headers: {
-        'Content-Type': 'application/json',
+    setConfig({
+      data: obj,
+      height: 400,
+      xField: 'month',
+      yField: 'value',
+      point: {
+        size: 5,
+        shape: 'diamond',
       },
-      body: JSON.stringify(INPUT_DATA_FILE),
     })
-      .then(response => {
-        if (!response.ok) {
-          alert('Server Down')
-          throw new Error('Network response was not OK');
-        }
-        return response.json();
-      })
-      .then(data => {
-        setOutput(data["predict"].pop())
-        // @ts-ignore
-        const obj = [{'month': labels[0], 'value': data["predict"][0]}];
-        for (let i = 1; i < labels.length; i++) {
-          // @ts-ignore
-          obj.push({'month': labels[i], 'value': data["predict"][i]})
-        }
-        setConfig({
-          data: obj,
-          height: 400,
-          xField: 'month',
-          yField: 'value',
-          point: {
-            size: 5,
-            shape: 'diamond',
-          },
-        })
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
   }
 
   type SizeType = Parameters<typeof Form>[0]['size'];
@@ -218,9 +201,9 @@ const IndexPage = () => {
   return (
     <main style={{padding: `24px`}}>
       <Helmet>
-        <meta charSet="utf-8" />
+        <meta charSet="utf-8"/>
         <title>Prediction Tool</title>
-        <link rel="canonical" href="https://ee4802-g20-tool.web.app" />
+        <link rel="canonical" href="https://ee4802-g20-tool.web.app"/>
       </Helmet>
       <Title level={2}>
         Price Prediction
