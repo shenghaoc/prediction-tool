@@ -23,6 +23,7 @@ import storey_range_map from '../../content/storey_range.json';
 import flat_model_list from '../../content/flat_model.json';
 
 import mapping_rr_map from '../../content/mapping_rr.json'
+import mapping_svr_map from '../../content/mapping_svr.json'
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 
@@ -150,14 +151,21 @@ const IndexPage = () => {
       }
     }
 
+    let mapping_map;
+    if (values.ml_model === "Support Vector Regression") {
+      mapping_map = mapping_svr_map
+    } else if (values.ml_model === "Ridge Regression") {
+      mapping_map = mapping_rr_map
+    }
+
     for (let i = 0; i <= 12; i++) {
-      let val = mapping_rr_map[0]["intercept"]
-      val += month_map[INPUT_DATA_FILE["data"][i][0]] * mapping_rr_map[0]["month"]
-      val += mapping_rr_map[0][INPUT_DATA_FILE["data"][i][1]]
-      val += storey_range_map[INPUT_DATA_FILE["data"][i][2]] * mapping_rr_map[0]["storey_range"]
-      val += INPUT_DATA_FILE["data"][i][3] * mapping_rr_map[0]["floor_area_sqm"]
-      val += mapping_rr_map[0][INPUT_DATA_FILE["data"][i][4]]
-      val += INPUT_DATA_FILE["data"][i][5] * mapping_rr_map[0]["lease_commence_date"]
+      let val = mapping_map[0]["intercept"]
+      val += month_map[INPUT_DATA_FILE["data"][i][0]] * mapping_map[0]["month"]
+      val += mapping_map[0][INPUT_DATA_FILE["data"][i][1]]
+      val += storey_range_map[INPUT_DATA_FILE["data"][i][2]] * mapping_map[0]["storey_range"]
+      val += INPUT_DATA_FILE["data"][i][3] * mapping_map[0]["floor_area_sqm"]
+      val += mapping_map[0][INPUT_DATA_FILE["data"][i][4]]
+      val += INPUT_DATA_FILE["data"][i][5] * mapping_map[0]["lease_commence_date"]
     }
 
 
