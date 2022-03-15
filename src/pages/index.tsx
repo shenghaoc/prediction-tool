@@ -88,7 +88,7 @@ const IndexPage = () => {
   const [output, setOutput] = useState(0)
 
   // @ts-ignore
-  const obj = [{'month': labels[0], 'value': Math.random() * 100000}];
+  let obj = [{'month': labels[0], 'value': Math.random() * 100000}];
   for (let i = 1; i < labels.length; i++) {
     // @ts-ignore
     obj.push({'month': labels[i], 'value': Math.random() * 100000})
@@ -142,7 +142,6 @@ const IndexPage = () => {
       mapping_map = mapping_rr_map
     }
 
-    let obj;
     for (let i = 0; i <= labels.length; i++) {
       let val = mapping_map[0]["intercept"]
       val += month_map[i === 12 ? values.month.format('YYYY-MM') : labels[i]] * mapping_map[0]["month"]
