@@ -1,4 +1,0 @@
-{
-  "Support Vector Regression": "https://prediction-tool.azure-api.net/prediction-tool-svr/api/v1/service/prediction-tool-svr/score",
-  "Ridge Regression": "https://prediction-tool.azure-api.net/prediction-tool-rr/api/v1/service/prediction-tool-rr/score"
-}
