@@ -4,6 +4,8 @@ import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 
 import React, {useState} from 'react';
+import dynamic from 'next/dynamic'
+const Line = dynamic((): any  => import("@ant-design/plots").then((mod) => mod.Line), {   ssr: false, });
 import {
   Form,
   Select,
@@ -287,7 +289,7 @@ const Home: NextPage = () => {
         </Row>
       </Form>
       <Divider>Predicted Trends for Past 12 Months</Divider>
-      {/* <Line {...config} /> */}
+      <Line {...config} />
     </main>
   )
 }
