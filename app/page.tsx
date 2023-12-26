@@ -46,19 +46,6 @@ const {Title} = Typography;
 const ml_model_list = Object.keys(url_map)
 const storey_range_list = Object.keys(storey_range_map)
 
-export const options = {
-  responsive: true,
-  plugins: {
-    legend: {
-      position: 'top' as const,
-    },
-    title: {
-      display: true,
-      text: 'Predicted Trends for Past 12 Months',
-    },
-  },
-};
-
 let curr = dayjs("2022-02", "YYYY-MM")
 let curr_minus_1_year = curr.subtract(1, 'year')
 // @ts-ignore
@@ -71,7 +58,7 @@ function disabledYear(current: Dayjs) {
 }
 
 // markup
-const Home: NextPage = () => {
+export default function Home() {
   // @ts-ignore
   const [values, setValues] = useState({
     ml_model: ml_model_list[0],
@@ -302,4 +289,4 @@ const Home: NextPage = () => {
     </main>
   )
 }
-export default Home
+
