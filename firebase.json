@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "target": "ee4802-g20-tool",
+    "target": "app",
     "source": ".",
     "ignore": [
       "firebase.json",
