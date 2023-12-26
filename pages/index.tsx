@@ -1,7 +1,16 @@
+import type { NextPage } from 'next'
+import Head from 'next/head'
+import Image from 'next/image'
+import styles from '../styles/Home.module.css'
+
 import React, {useState} from 'react';
-import {Helmet} from "react-helmet"
-import 'antd/dist/antd.less';
-import {Line} from '@ant-design/charts';
+import dynamic from 'next/dynamic'
+const Line = dynamic(() => import("@ant-design/plots").then((mod) => ({
+  default: mod.Line,
+})), {
+  ssr: false,
+});
+import { Suspense } from 'react'
 import {
   Form,
   Select,
@@ -13,17 +22,17 @@ import {
   Row,
   Divider
 } from 'antd';
-import {DatePicker} from '../components';
+import {DatePicker} from 'antd';
 import dayjs, {Dayjs} from 'dayjs';
 
-import url_map from '../../content/url.json'
-import month_map from '../../content/month.json'
-import town_list from '../../content/town.json';
-import storey_range_map from '../../content/storey_range.json';
-import flat_model_list from '../../content/flat_model.json';
+import url_map from '../public/url.json'
+import month_map from '../public/month.json'
+import town_list from '../public/town.json';
+import storey_range_map from '../public/storey_range.json';
+import flat_model_list from '../public/flat_model.json';
 
-import mapping_rr_map from '../../content/mapping_rr.json'
-import mapping_svr_map from '../../content/mapping_svr.json'
+import mapping_rr_map from '../public/mapping_rr.json'
+import mapping_svr_map from '../public/mapping_svr.json'
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 
@@ -60,7 +69,7 @@ function disabledYear(current: Dayjs) {
 }
 
 // markup
-const IndexPage = () => {
+const Home: NextPage = () => {
   // @ts-ignore
   const [values, setValues] = useState({
     ml_model: ml_model_list[0],
@@ -134,12 +143,19 @@ const IndexPage = () => {
     }
 
     for (let i = 0; i <= labels.length; i++) {
+      // @ts-ignore
       let val = mapping_map[0]["intercept"]
+      // @ts-ignore
       val += month_map[i === 12 ? curr.format('YYYY-MM') : labels[i]] * mapping_map[0]["month"]
+      // @ts-ignore
       val += mapping_map[0][values.town]
+      // @ts-ignore
       val += storey_range_map[values.storey_range] * mapping_map[0]["storey_range"]
+      // @ts-ignore
       val += values.floor_area_sqm * mapping_map[0]["floor_area_sqm"]
+      // @ts-ignore
       val += mapping_map[0][values.flat_model]
+      // @ts-ignore
       val += values.lease_commence_date.year() * mapping_map[0]["lease_commence_date"]
 
       if (i == 0) {
@@ -174,11 +190,11 @@ const IndexPage = () => {
 
   return (
     <main style={{padding: `24px`}}>
-      <Helmet>
+      <Head>
         <meta charSet="utf-8"/>
         <title>Prediction Tool</title>
         <link rel="canonical" href="https://ee4802-g20-tool.web.app"/>
-      </Helmet>
+      </Head>
       <Title level={2}>
         Price Prediction
       </Title>
@@ -278,9 +294,10 @@ const IndexPage = () => {
         </Row>
       </Form>
       <Divider>Predicted Trends for Past 12 Months</Divider>
-      <Line {...config} />
+      <Suspense fallback={<div>Loading...</div>}>
+        <Line {...config} />
+      </Suspense>
     </main>
   )
 }
-
-export default IndexPage
+export default Home
