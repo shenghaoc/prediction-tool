@@ -289,7 +289,9 @@ const Home: NextPage = () => {
         </Row>
       </Form>
       <Divider>Predicted Trends for Past 12 Months</Divider>
-      <Line {...config} />
+      <Suspense fallback={<div>Loading...</div>}>
+        <Line {...config} />
+      </Suspense>
     </main>
   )
 }
