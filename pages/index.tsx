@@ -6,6 +6,7 @@ import styles from '../styles/Home.module.css'
 import React, {useState} from 'react';
 import dynamic from 'next/dynamic'
 const Line = dynamic((): any  => import("@ant-design/plots").then((mod) => mod.Line), {   ssr: false, });
+import { Suspense } from 'react'
 import {
   Form,
   Select,
