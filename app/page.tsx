@@ -15,7 +15,7 @@ import { Suspense } from 'react'
 import {
   Form,
   Select,
-  Input,
+  InputNumber,
   Button,
   Typography,
   Statistic,
@@ -26,14 +26,11 @@ import {
 import {DatePicker} from 'antd';
 import dayjs, {Dayjs} from 'dayjs';
 
-import url_map from '../public/url.json'
+import ml_model_map from '../public/ml_model.json'
 import month_map from '../public/month.json'
 import town_list from '../public/town.json';
 import storey_range_map from '../public/storey_range.json';
 import flat_model_list from '../public/flat_model.json';
-
-import mapping_rr_map from '../public/mapping_rr.json'
-import mapping_svr_map from '../public/mapping_svr.json'
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 
@@ -42,13 +39,12 @@ dayjs.extend(customParseFormat)
 const {Option} = Select;
 const {Title} = Typography;
 
-const ml_model_list = Object.keys(url_map)
+const ml_model_list = Object.keys(ml_model_map)
 const storey_range_list = Object.keys(storey_range_map)
 
 let curr = dayjs("2022-02", "YYYY-MM")
-let curr_minus_1_year = curr.subtract(1, 'year')
-const labels = [...Array(12).keys()]
-  .map(x => curr_minus_1_year.add(x, 'month').format('YYYY-MM'))
+const labels = [...Array(13).keys()].reverse()
+  .map(x => curr.subtract(x, 'month').format('YYYY-MM'))
 
 // 1960 (first HDB flats) to 2022 (current year)
 function disabledYear(current: Dayjs) {
@@ -57,15 +53,10 @@ function disabledYear(current: Dayjs) {
 
 // markup
 export default function Home() {
-  const [output, setOutput] = useState(0)
 
-  let obj = [{'month': labels[0], 'value': Math.random() * 100000}];
-  for (let i = 1; i < labels.length; i++) {
-    obj.push({'month': labels[i], 'value': Math.random() * 100000})
-  }
 
   const [config, setConfig] = useState({
-    data: obj,
+    data: labels.map(x => ({'month': x, 'value': 0.00})),
     height: 400,
     xField: 'month',
     yField: 'value',
@@ -74,8 +65,6 @@ export default function Home() {
       shape: 'diamond',
     },
   });
-
-  let mapping_map = mapping_svr_map;
 
   type FieldType = {
     ml_model: string;
@@ -88,32 +77,19 @@ export default function Home() {
 
   const funPredict = (values: FieldType) => {
 
-    if (values.ml_model === "Support Vector Regression") {
-      mapping_map = mapping_svr_map
-    } else if (values.ml_model === "Ridge Regression") {
-      mapping_map = mapping_rr_map
-    }
+    let mapping_map = ml_model_map[values.ml_model as keyof typeof ml_model_map]["mapping"];
 
-    for (let i = 0; i <= labels.length; i++) {
-      let val = mapping_map["intercept"]
-      val += month_map[(i === 12 ? curr.format('YYYY-MM') : labels[i]) as keyof typeof month_map] * mapping_map["month"]
-      val += mapping_map["town"][values.town as keyof typeof mapping_map["town"]]
-      val += storey_range_map[values.storey_range as keyof typeof storey_range_map] * mapping_map["storey_range"]
-      val += values.floor_area_sqm * mapping_map["floor_area_sqm"]
-      val += mapping_map["flat_model"][values.flat_model as keyof typeof mapping_map["flat_model"]]
-      val += values.lease_commence_date.year() * mapping_map["lease_commence_date"]
-
-      if (i == 0) {
-        obj = [{'month': labels[i], 'value': val}];
-      } else if (i == 12) {
-        setOutput(val)
-      } else {
-        obj.push({'month': labels[i], 'value': val})
-      }
-    }
 
     setConfig({
-      data: obj,
+      data: labels.map(x => ({
+        'month': x, 'value': Math.round((mapping_map["intercept"]
+          + month_map[x as keyof typeof month_map] * mapping_map["month"]
+          + mapping_map["town"][values.town as keyof typeof mapping_map["town"]]
+          + storey_range_map[values.storey_range as keyof typeof storey_range_map] * mapping_map["storey_range"]
+          + values.floor_area_sqm * mapping_map["floor_area_sqm"]
+          + mapping_map["flat_model"][values.flat_model as keyof typeof mapping_map["flat_model"]]
+          + values.lease_commence_date.year() * mapping_map["lease_commence_date"]) * 100) / 100
+      })),
       height: 400,
       xField: 'month',
       yField: 'value',
@@ -144,7 +120,7 @@ export default function Home() {
           town: town_list[0],
           storey_range: storey_range_list[0],
           flat_model: flat_model_list[0],
-          floor_area_sqm: 0,
+          floor_area_sqm: 1,
           lease_commence_date: null
         }}
         onFinish={funPredict}
@@ -219,9 +195,9 @@ export default function Home() {
           label="Floor Area"
           rules={[{ required: true, message: 'Missing Floor Area!' }]}
         >
-          <Input
+          <InputNumber
             type="number"
-            min={0}
+            min={1}
             addonAfter="m²"
           />
         </Form.Item>
@@ -238,7 +214,7 @@ export default function Home() {
         </Form.Item>
         <Row gutter={16}>
           <Col span={12}>
-            <Statistic title="Prediction" value={output} prefix="$" precision={2}/>
+            <Statistic title="Prediction" value={config.data[12]["value"]} prefix="$" precision={2}/>
             <Button style={{marginTop: 16}} type="primary"
                     htmlType="submit">
               Get prediction
