@@ -58,25 +58,6 @@ function disabledYear(current: Dayjs) {
 
 // markup
 export default function Home() {
-  // @ts-ignore
-  const [values, setValues] = useState({
-    ml_model: ml_model_list[0],
-    month: null,
-    town: town_list[0],
-    storey_range: storey_range_list[0],
-    flat_model: flat_model_list[0],
-    floor_area_sqm: 0,
-    lease_commence_date: null
-  });
-
-  const handleChange = (prop: any) => (event: any) => {
-    if (prop === "floor_area_sqm") {
-      setValues({...values, [prop]: event.target.value});
-    } else {
-      setValues({...values, [prop]: event});
-    }
-  };
-
   const [output, setOutput] = useState(0)
 
   // @ts-ignore
@@ -97,31 +78,7 @@ export default function Home() {
     },
   });
 
-  function funPredict() {
-    if (!values.ml_model) {
-      alert('Please choose an ML Model!');
-      return;
-    }
-    if (!values.town) {
-      alert('Missing Town!');
-      return;
-    }
-    if (!values.storey_range) {
-      alert('Missing Storey Range!');
-      return;
-    }
-    if (!values.flat_model) {
-      alert('Missing Flat Model!');
-      return;
-    }
-    if (!values.floor_area_sqm) {
-      alert('Missing Floor Area!');
-      return;
-    }
-    if (!values.lease_commence_date) {
-      alert("Missing Lease Commence Date!")
-      return;
-    }
+  const funPredict = (values: any) => {
 
     let mapping_map;
     if (values.ml_model === "Support Vector Regression") {
@@ -169,13 +126,6 @@ export default function Home() {
     })
   }
 
-  type SizeType = Parameters<typeof Form>[0]['size'];
-
-  const [componentSize, setComponentSize] = useState<SizeType | 'default'>('default');
-  const onFormLayoutChange = ({size}: { size: SizeType }) => {
-    setComponentSize(size);
-  };
-
   return (
     <main style={{padding: `24px`}}>
       <Head>
@@ -190,15 +140,24 @@ export default function Home() {
         labelCol={{span: 4}}
         wrapperCol={{span: 14}}
         layout="horizontal"
-        initialValues={{size: componentSize}}
-        onValuesChange={onFormLayoutChange}
-        size={componentSize as SizeType}
+        initialValues={{
+          ml_model: ml_model_list[0],
+          month: null,
+          town: town_list[0],
+          storey_range: storey_range_list[0],
+          flat_model: flat_model_list[0],
+          floor_area_sqm: 0,
+          lease_commence_date: null
+        }}
+        onFinish={funPredict}
       >
 
         <Form.Item
+          name="ml_model"
           label="ML Model"
+          rules={[{ required: true, message: 'Please choose an ML Model!' }]}
         >
-          <Select defaultValue={ml_model_list[0]} onChange={handleChange('ml_model')}>
+          <Select>
             {ml_model_list.map((ml_model: string) => (
               <Option
                 key={ml_model}
@@ -210,9 +169,11 @@ export default function Home() {
           </Select>
         </Form.Item>
         <Form.Item
+          name="town"
           label="Town"
+          rules={[{ required: true, message: 'Missing Town!' }]}
         >
-          <Select defaultValue={town_list[0]} onChange={handleChange('town')}>
+          <Select>
             {town_list.map((town: string) => (
               <Option
                 key={town}
@@ -224,9 +185,11 @@ export default function Home() {
           </Select>
         </Form.Item>
         <Form.Item
+          name="storey_range"
           label="Storey Range"
+          rules={[{ required: true, message: 'Missing Storey Range!' }]}
         >
-          <Select defaultValue={storey_range_list[0]} onChange={handleChange('storey_range')}>
+          <Select>
             {storey_range_list.map((storey_range: string) => (
               <Option
                 key={storey_range}
@@ -238,9 +201,11 @@ export default function Home() {
           </Select>
         </Form.Item>
         <Form.Item
+          name="flat_model"
           label="Flat Model"
+          rules={[{ required: true, message: 'Missing Flat Model!' }]}
         >
-          <Select defaultValue={flat_model_list[0]} onChange={handleChange('flat_model')}>
+          <Select>
             {flat_model_list.map((flat_model: string) => (
               <Option
                 key={flat_model}
@@ -252,30 +217,32 @@ export default function Home() {
           </Select>
         </Form.Item>
         <Form.Item
+          name="floor_area_sqm"
           label="Floor Area"
+          rules={[{ required: true, message: 'Missing Floor Area!' }]}
         >
           <Input
             type="number"
             min={0}
-            onChange={handleChange('floor_area_sqm')}
             addonAfter="m²"
           />
         </Form.Item>
         <Form.Item
+          name="lease_commence_date"
           label="Lease Commence Date"
+          rules={[{ required: true, message: 'Missing Lease Commence Date!' }]}
         >
           <DatePicker
             picker="year"
             inputReadOnly={true}
             disabledDate={disabledYear}
-            onChange={handleChange('lease_commence_date')}
           />
         </Form.Item>
         <Row gutter={16}>
           <Col span={12}>
             <Statistic title="Prediction" value={output} prefix="$" precision={2}/>
             <Button style={{marginTop: 16}} type="primary"
-                    onClick={funPredict}>
+                    htmlType="submit">
               Get prediction
             </Button>
           </Col>
