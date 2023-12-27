@@ -47,7 +47,6 @@ const storey_range_list = Object.keys(storey_range_map)
 
 let curr = dayjs("2022-02", "YYYY-MM")
 let curr_minus_1_year = curr.subtract(1, 'year')
-// @ts-ignore
 const labels = [...Array(12).keys()]
   .map(x => curr_minus_1_year.add(x, 'month').format('YYYY-MM'))
 
@@ -60,10 +59,8 @@ function disabledYear(current: Dayjs) {
 export default function Home() {
   const [output, setOutput] = useState(0)
 
-  // @ts-ignore
   let obj = [{'month': labels[0], 'value': Math.random() * 100000}];
   for (let i = 1; i < labels.length; i++) {
-    // @ts-ignore
     obj.push({'month': labels[i], 'value': Math.random() * 100000})
   }
 
@@ -78,9 +75,19 @@ export default function Home() {
     },
   });
 
-  const funPredict = (values: any) => {
+  let mapping_map = mapping_svr_map;
 
-    let mapping_map;
+  type FieldType = {
+    ml_model: string;
+    town: string;
+    storey_range: string;
+    flat_model: string;
+    floor_area_sqm: number;
+    lease_commence_date: Dayjs;
+  };
+
+  const funPredict = (values: FieldType) => {
+
     if (values.ml_model === "Support Vector Regression") {
       mapping_map = mapping_svr_map
     } else if (values.ml_model === "Ridge Regression") {
@@ -88,28 +95,19 @@ export default function Home() {
     }
 
     for (let i = 0; i <= labels.length; i++) {
-      // @ts-ignore
       let val = mapping_map["intercept"]
-      // @ts-ignore
-      val += month_map[i === 12 ? curr.format('YYYY-MM') : labels[i]] * mapping_map["month"]
-      // @ts-ignore
-      val += mapping_map["town"][values.town]
-      // @ts-ignore
-      val += storey_range_map[values.storey_range] * mapping_map["storey_range"]
-      // @ts-ignore
+      val += month_map[(i === 12 ? curr.format('YYYY-MM') : labels[i]) as keyof typeof month_map] * mapping_map["month"]
+      val += mapping_map["town"][values.town as keyof typeof mapping_map["town"]]
+      val += storey_range_map[values.storey_range as keyof typeof storey_range_map] * mapping_map["storey_range"]
       val += values.floor_area_sqm * mapping_map["floor_area_sqm"]
-      // @ts-ignore
-      val += mapping_map["flat_model"][values.flat_model]
-      // @ts-ignore
+      val += mapping_map["flat_model"][values.flat_model as keyof typeof mapping_map["flat_model"]]
       val += values.lease_commence_date.year() * mapping_map["lease_commence_date"]
 
       if (i == 0) {
-        // @ts-ignore
         obj = [{'month': labels[i], 'value': val}];
       } else if (i == 12) {
         setOutput(val)
       } else {
-        // @ts-ignore
         obj.push({'month': labels[i], 'value': val})
       }
     }
