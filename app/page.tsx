@@ -89,19 +89,19 @@ export default function Home() {
 
     for (let i = 0; i <= labels.length; i++) {
       // @ts-ignore
-      let val = mapping_map[0]["intercept"]
+      let val = mapping_map["intercept"]
       // @ts-ignore
-      val += month_map[i === 12 ? curr.format('YYYY-MM') : labels[i]] * mapping_map[0]["month"]
+      val += month_map[i === 12 ? curr.format('YYYY-MM') : labels[i]] * mapping_map["month"]
       // @ts-ignore
-      val += mapping_map[0][values.town]
+      val += mapping_map["town"][values.town]
       // @ts-ignore
-      val += storey_range_map[values.storey_range] * mapping_map[0]["storey_range"]
+      val += storey_range_map[values.storey_range] * mapping_map["storey_range"]
       // @ts-ignore
-      val += values.floor_area_sqm * mapping_map[0]["floor_area_sqm"]
+      val += values.floor_area_sqm * mapping_map["floor_area_sqm"]
       // @ts-ignore
-      val += mapping_map[0][values.flat_model]
+      val += mapping_map["flat_model"][values.flat_model]
       // @ts-ignore
-      val += values.lease_commence_date.year() * mapping_map[0]["lease_commence_date"]
+      val += values.lease_commence_date.year() * mapping_map["lease_commence_date"]
 
       if (i == 0) {
         // @ts-ignore
