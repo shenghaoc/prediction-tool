@@ -1,4 +1,14 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Prediction Tool
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/f95e6bac-be11-4252-94ac-22c6b3714dc8/deploy-status)](https://app.netlify.com/sites/ee4802-g20-tool/deploys)
+
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app). The purpose is to create a website on which the user can obtain a predicted HDB resale flat price by filling in a form.
+
+As part of a minor project in EE4802, only regression models are available to avoid having to maintain a Python backend runnning scikit-learn for the neural network model.
+
+Due to limitations of one-hot encoding in EE4802, prediction of future prices is not possible and the output is hardcoded to show a year before the last month in the data set.
+
+This repository was updated about one and a half years later for me to expriment with web development, code was refactored but the UI has not changed.
 
 ## Getting Started
 
@@ -8,15 +18,17 @@ First, run the development server:
 npm run dev
 # or
 yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
 ## Learn More
 
