@@ -27,20 +27,11 @@ import {DatePicker} from 'antd';
 import dayjs, {Dayjs} from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat)
-import { GET } from './api/route';
-let lists = GET();
 
-let ml_model_list: string[];
-let town_list: string[];
-let storey_range_list: string[];
-let flat_model_list: string[];
-lists.then(response => response.json())
-  .then(data => {
-    ml_model_list = data["ml_model_list"];
-    town_list = data["town_list"];
-    storey_range_list = data["storey_range_list"];
-    flat_model_list = data["flat_model_list"]
-  });
+import ml_model_map from '../public/ml_model.json'
+import town_list from '../public/town.json'
+import storey_range_map from '../public/storey_range.json'
+import flat_model_list from '../public/flat_model.json'
 
 const {Option} = Select;
 const {Title} = Typography;
@@ -112,7 +103,7 @@ export default function Home() {
           rules={[{ required: true, message: 'Please choose an ML Model!' }]}
         >
           <Select>
-            {ml_model_list.map((ml_model: string) => (
+            {Object.keys(ml_model_map).map((ml_model: string) => (
               <Option
                 key={ml_model}
                 value={ml_model}
@@ -144,7 +135,7 @@ export default function Home() {
           rules={[{ required: true, message: 'Missing Storey Range!' }]}
         >
           <Select>
-            {storey_range_list.map((storey_range: string) => (
+            {Object.keys(storey_range_map).map((storey_range: string) => (
               <Option
                 key={storey_range}
                 value={storey_range}
