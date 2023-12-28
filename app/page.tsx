@@ -75,7 +75,7 @@ export default function Home() {
       <Head>
         <meta charSet="utf-8"/>
         <title>Prediction Tool</title>
-        <link rel="canonical" href="https://ee4802-g20-tool.web.app"/>
+        <link rel="canonical" href="https://ee4802-g20-tool.netlify.app/"/>
       </Head>
       <Title level={2}>
         Price Prediction
