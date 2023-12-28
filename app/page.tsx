@@ -25,35 +25,43 @@ import {
 } from 'antd';
 import {DatePicker} from 'antd';
 import dayjs, {Dayjs} from 'dayjs';
-
-import ml_model_map from '../public/ml_model.json'
-import month_map from '../public/month.json'
-import town_list from '../public/town.json';
-import storey_range_map from '../public/storey_range.json';
-import flat_model_list from '../public/flat_model.json';
-
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-
 dayjs.extend(customParseFormat)
+import { GET } from './api/route';
+let lists = GET();
+
+let ml_model_list: string[];
+let town_list: string[];
+let storey_range_list: string[];
+let flat_model_list: string[];
+lists.then(response => response.json())
+  .then(data => {
+    ml_model_list = data["ml_model_list"];
+    town_list = data["town_list"];
+    storey_range_list = data["storey_range_list"];
+    flat_model_list = data["flat_model_list"]
+  });
 
 const {Option} = Select;
 const {Title} = Typography;
 
-const ml_model_list = Object.keys(ml_model_map)
-const storey_range_list = Object.keys(storey_range_map)
+import { funPredict } from './actions';
 
-let curr = dayjs("2022-02", "YYYY-MM")
-const labels = [...Array(13).keys()].reverse()
-  .map(x => curr.subtract(x, 'month').format('YYYY-MM'))
-
-// 1960 (first HDB flats) to 2022 (current year)
-function disabledYear(current: Dayjs) {
-  return current.isBefore('1960-01-01', 'year') || current.isAfter('2022-01-01', 'year')
-}
+export type FieldType = {
+  ml_model: string;
+  town: string;
+  storey_range: string;
+  flat_model: string;
+  floor_area_sqm: number;
+  lease_commence_date: Dayjs;
+};
 
 // markup
 export default function Home() {
 
+  let curr = dayjs("2022-02", "YYYY-MM")
+  let labels = [...Array(13).keys()].reverse()
+    .map(x => curr.subtract(x, 'month').format('YYYY-MM'))
 
   const [config, setConfig] = useState({
     data: labels.map(x => ({'month': x, 'value': 0.00})),
@@ -66,38 +74,9 @@ export default function Home() {
     },
   });
 
-  type FieldType = {
-    ml_model: string;
-    town: string;
-    storey_range: string;
-    flat_model: string;
-    floor_area_sqm: number;
-    lease_commence_date: Dayjs;
-  };
-
-  const funPredict = (values: FieldType) => {
-
-    let mapping_map = ml_model_map[values.ml_model as keyof typeof ml_model_map]["mapping"];
-
-
-    setConfig({
-      data: labels.map(x => ({
-        'month': x, 'value': Math.round((mapping_map["intercept"]
-          + month_map[x as keyof typeof month_map] * mapping_map["month"]
-          + mapping_map["town"][values.town as keyof typeof mapping_map["town"]]
-          + storey_range_map[values.storey_range as keyof typeof storey_range_map] * mapping_map["storey_range"]
-          + values.floor_area_sqm * mapping_map["floor_area_sqm"]
-          + mapping_map["flat_model"][values.flat_model as keyof typeof mapping_map["flat_model"]]
-          + values.lease_commence_date.year() * mapping_map["lease_commence_date"]) * 100) / 100
-      })),
-      height: 400,
-      xField: 'month',
-      yField: 'value',
-      point: {
-        size: 5,
-        shape: 'diamond',
-      },
-    })
+  // 1960 (first HDB flats) to 2022 (current year)
+  function disabledYear(current: Dayjs) {
+    return current.isBefore('1960-01-01', 'year') || current.isAfter('2022-01-01', 'year')
   }
 
   return (
@@ -115,18 +94,19 @@ export default function Home() {
         wrapperCol={{span: 14}}
         layout="horizontal"
         initialValues={{
-          ml_model: ml_model_list[0],
-          month: null,
-          town: town_list[0],
-          storey_range: storey_range_list[0],
-          flat_model: flat_model_list[0],
+          ml_model: "Support Vector Regression",
+          town: "ANG MO KIO",
+          storey_range: "01 TO 03",
+          flat_model: "2-room",
           floor_area_sqm: 1,
-          lease_commence_date: null
+          lease_commence_date: curr
         }}
-        onFinish={funPredict}
+        onFinish={(values: FieldType) => {
+          funPredict(JSON.parse(JSON.stringify(values))).then(response => setConfig(response));
+        }}
       >
 
-        <Form.Item
+        <Form.Item<FieldType>
           name="ml_model"
           label="ML Model"
           rules={[{ required: true, message: 'Please choose an ML Model!' }]}
@@ -142,7 +122,7 @@ export default function Home() {
             ))}
           </Select>
         </Form.Item>
-        <Form.Item
+        <Form.Item<FieldType>
           name="town"
           label="Town"
           rules={[{ required: true, message: 'Missing Town!' }]}
@@ -158,7 +138,7 @@ export default function Home() {
             ))}
           </Select>
         </Form.Item>
-        <Form.Item
+        <Form.Item<FieldType>
           name="storey_range"
           label="Storey Range"
           rules={[{ required: true, message: 'Missing Storey Range!' }]}
@@ -174,7 +154,7 @@ export default function Home() {
             ))}
           </Select>
         </Form.Item>
-        <Form.Item
+        <Form.Item<FieldType>
           name="flat_model"
           label="Flat Model"
           rules={[{ required: true, message: 'Missing Flat Model!' }]}
@@ -190,7 +170,7 @@ export default function Home() {
             ))}
           </Select>
         </Form.Item>
-        <Form.Item
+        <Form.Item<FieldType>
           name="floor_area_sqm"
           label="Floor Area"
           rules={[{ required: true, message: 'Missing Floor Area!' }]}
@@ -201,7 +181,7 @@ export default function Home() {
             addonAfter="m²"
           />
         </Form.Item>
-        <Form.Item
+        <Form.Item<FieldType>
           name="lease_commence_date"
           label="Lease Commence Date"
           rules={[{ required: true, message: 'Missing Lease Commence Date!' }]}
