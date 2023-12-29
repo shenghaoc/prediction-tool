@@ -19,21 +19,21 @@ export async function funPredict(values: FieldType) {
 
     let mapping_map = ml_model_map[values.ml_model as keyof typeof ml_model_map]["mapping"];
     return {
-        data: labels.map(x => ({
-            'month': x, 'value': Math.round((mapping_map["intercept"]
-                + month_map[x as keyof typeof month_map] * mapping_map["month"]
-                + mapping_map["town"][values.town as keyof typeof mapping_map["town"]]
-                + storey_range_map[values.storey_range as keyof typeof storey_range_map] * mapping_map["storey_range"]
-                + values.floor_area_sqm * mapping_map["floor_area_sqm"]
-                + mapping_map["flat_model"][values.flat_model as keyof typeof mapping_map["flat_model"]]
-                + dayjs(values.lease_commence_date).year() * mapping_map["lease_commence_date"]) * 100) / 100
-        })),
-        height: 400,
-        xField: 'month',
-        yField: 'value',
-        point: {
-            size: 5,
-            shape: 'diamond',
-        },
+        labels: labels,
+        datasets: [
+            {
+                label: 'Trends',
+                data: labels.map(x => (Math.round((mapping_map["intercept"]
+                    + month_map[x as keyof typeof month_map] * mapping_map["month"]
+                    + mapping_map["town"][values.town as keyof typeof mapping_map["town"]]
+                    + storey_range_map[values.storey_range as keyof typeof storey_range_map] * mapping_map["storey_range"]
+                    + values.floor_area_sqm * mapping_map["floor_area_sqm"]
+                    + mapping_map["flat_model"][values.flat_model as keyof typeof mapping_map["flat_model"]]
+                    + dayjs(values.lease_commence_date).year() * mapping_map["lease_commence_date"]) * 100) / 100
+                )),
+                borderColor: 'rgb(53, 162, 235)',
+                backgroundColor: 'rgba(53, 162, 235, 0.5)',
+            },
+        ],
     }
 }

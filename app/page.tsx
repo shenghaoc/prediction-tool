@@ -4,13 +4,18 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 
-import React, {useState} from 'react';
-import dynamic from 'next/dynamic'
-const Line = dynamic(() => import("@ant-design/plots").then((mod) => ({
-  default: mod.Line,
-})), {
-  ssr: false,
-});
+import React, { useState, useRef } from 'react';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title as chartTitle,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
 import { Suspense } from 'react'
 import {
   Form,
@@ -27,6 +32,28 @@ import {DatePicker} from 'antd';
 import dayjs, {Dayjs} from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat)
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  chartTitle,
+  Tooltip,
+  Legend
+);
+
+const options = {
+  responsive: true,
+  plugins: {
+    legend: {
+      position: 'top' as const,
+    },
+    title: {
+      display: false,
+      text: 'Predicted Trends for Past 12 Months',
+    },
+  },
+};
 
 import ml_model_map from '../public/ml_model.json'
 import town_list from '../public/town.json'
@@ -54,22 +81,25 @@ export default function Home() {
   let labels = [...Array(13).keys()].reverse()
     .map(x => curr.subtract(x, 'month').format('YYYY-MM'))
 
-  const [config, setConfig] = useState({
-    data: labels.map(x => ({'month': x, 'value': 0.00})),
-    height: 400,
-    xField: 'month',
-    yField: 'value',
-    point: {
-      size: 5,
-      shape: 'diamond',
-    },
-  });
+    const [output, setOutput] = useState(0.00);
+    const [config, setConfig] = useState({
+      labels,
+      datasets: [
+        {
+          label: 'Sample Trends',
+          data: labels.map(() => 0.00),
+          borderColor: 'rgb(255, 99, 132)',
+          backgroundColor: 'rgba(255, 99, 132, 0.5)',
+        }
+      ],
+        });
 
   // 1960 (first HDB flats) to 2022 (current year)
   function disabledYear(current: Dayjs) {
     return current.isBefore('1960-01-01', 'year') || current.isAfter('2022-01-01', 'year')
   }
 
+  const chartRef = useRef(null);
   return (
     <main style={{padding: `24px`}}>
       <Head>
@@ -93,7 +123,13 @@ export default function Home() {
           lease_commence_date: curr
         }}
         onFinish={(values: FieldType) => {
-          funPredict(JSON.parse(JSON.stringify(values))).then(response => setConfig(response));
+          funPredict(JSON.parse(JSON.stringify(values))).then(response => {
+            setConfig(response as typeof config);
+            let tmp = response.datasets.find((data) => data.label == 'Trends')?.data[12];
+            if (tmp != undefined) {
+              setOutput(tmp);
+            }
+          });
         }}
       >
 
@@ -185,7 +221,7 @@ export default function Home() {
         </Form.Item>
         <Row gutter={16}>
           <Col span={12}>
-            <Statistic title="Prediction" value={config.data[12]["value"]} prefix="$" precision={2}/>
+            <Statistic title="Prediction" value={output} prefix="$" precision={2}/>
             <Button style={{marginTop: 16}} type="primary"
                     htmlType="submit">
               Get prediction
@@ -195,7 +231,7 @@ export default function Home() {
       </Form>
       <Divider>Predicted Trends for Past 12 Months</Divider>
       <Suspense fallback={<div>Loading...</div>}>
-        <Line {...config} />
+        <Line ref={chartRef} options={options} data={config} />
       </Suspense>
     </main>
   )
