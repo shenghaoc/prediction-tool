@@ -31,7 +31,9 @@ import {
 import {DatePicker} from 'antd';
 import dayjs, {Dayjs} from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import utc from 'dayjs/plugin/utc';
 dayjs.extend(customParseFormat)
+dayjs.extend(utc)
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -77,7 +79,7 @@ export type FieldType = {
 // markup
 export default function Home() {
 
-  let curr = dayjs("2022-02", "YYYY-MM")
+  let curr = dayjs.utc("2022-02", "YYYY-MM")
   let labels = [...Array(13).keys()].reverse()
     .map(x => curr.subtract(x, 'month').format('YYYY-MM'))
 
@@ -120,7 +122,7 @@ export default function Home() {
           storey_range: "01 TO 03",
           flat_model: "2-room",
           floor_area_sqm: 1,
-          lease_commence_date: curr
+          lease_commence_date: dayjs.utc("1960-01", "YYYY-MM")
         }}
         onFinish={(values: FieldType) => {
           funPredict(JSON.parse(JSON.stringify(values))).then(response => {
