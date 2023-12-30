@@ -122,7 +122,7 @@ export default function Home() {
           storey_range: "01 TO 03",
           flat_model: "2-room",
           floor_area_sqm: 1,
-          lease_commence_date: dayjs.utc("1960-01", "YYYY-MM")
+          lease_commence_date: curr
         }}
         onFinish={(values: FieldType) => {
           funPredict(JSON.parse(JSON.stringify(values))).then(response => {
