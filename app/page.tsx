@@ -1,9 +1,5 @@
 'use client'
 
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
-
 import React, { useState, useRef } from 'react';
 import {
   Chart as ChartJS,
@@ -104,11 +100,6 @@ export default function Home() {
   const chartRef = useRef(null);
   return (
     <main style={{padding: `24px`}}>
-      <Head>
-        <meta charSet="utf-8"/>
-        <title>Prediction Tool</title>
-        <link rel="canonical" href="https://ee4802-g20-tool.netlify.app/"/>
-      </Head>
       <Title level={2}>
         Price Prediction
       </Title>
