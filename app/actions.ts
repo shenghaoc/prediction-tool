@@ -1,7 +1,6 @@
 'use server'
 
 import { PrismaClient } from '@prisma/client';
-import { cache } from 'react'
 const prisma = new PrismaClient();
 
 import dayjs, { Dayjs } from 'dayjs';
@@ -43,7 +42,7 @@ const schema = z.object({
 })
 
 type Schema = z.output<typeof schema>
-export const funPredict = cache(async (values: Schema) => {
+export const funPredict = async (values: Schema) => {
     const parsed = schema.parse(values)
 
     const full_map = (await ml_model_map_promise)
@@ -74,4 +73,4 @@ export const funPredict = cache(async (values: Schema) => {
             },
         ],
     }
-})
+}
