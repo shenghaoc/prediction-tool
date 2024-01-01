@@ -53,6 +53,8 @@ const options = {
   },
 };
 
+export const revalidate = 3600 // revalidate the data at most every hour
+
 import ml_model_map from '../public/ml_model.json'
 import town_list from '../public/town.json'
 import storey_range_map from '../public/storey_range.json'

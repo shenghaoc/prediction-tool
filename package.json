@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@prisma/client": "^5.7.1",
     "antd": "^5.12.5",
     "chart.js": "^4.4.1",
     "dayjs": "^1.11.10",
@@ -24,6 +25,7 @@
     "@types/react-dom": "^17.0.25",
     "eslint": "8.14.0",
     "eslint-config-next": "^14.0.4",
+    "prisma": "^5.7.1",
     "typescript": "^5.3.3"
   },
   "type": "module"

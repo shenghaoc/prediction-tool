@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model flat_models_onehot {
+  name     String @db.VarChar(100)
+  value    Float
+  ml_model String @db.VarChar(100)
+
+  @@id([name, ml_model])
+}
+
+model ml_models {
+  name                    String @id @db.VarChar(100)
+  url                     String @db.VarChar(100)
+  intercept_map           Float
+  month_map               Float
+  storey_range_map        Float
+  floor_area_sqm_map      Float
+  lease_commence_date_map Float
+}
+
+model months_ordinal {
+  name  String @id @db.VarChar(100)
+  value Int
+}
+
+model storey_ranges_ordinal {
+  name  String @id @db.VarChar(100)
+  value Int
+}
+
+model towns_onehot {
+  name     String @db.VarChar(100)
+  value    Float
+  ml_model String @db.VarChar(100)
+
+  @@id([name, ml_model])
+}
