@@ -31,11 +31,17 @@ const month_map_promise: Promise<any[]> = prisma.$queryRaw`SELECT name, value
 FROM months_ordinal;`
 const storey_range_map_promise: Promise<any[]> = prisma.$queryRaw`SELECT name, value
 FROM storey_ranges_ordinal;`
+
+import { ml_model_list } from '../lib/lists';
+import { town_list } from '../lib/lists';
+import { storey_range_list } from '../lib/lists';
+import { flat_model_list } from '../lib/lists';
+
 const schema = z.object({
-    ml_model: z.string(),
-    town: z.string(),
-    storey_range: z.string(),
-    flat_model: z.string(),
+    ml_model: z.enum(ml_model_list),
+    town: z.enum(town_list),
+    storey_range: z.enum(storey_range_list),
+    flat_model: z.enum(flat_model_list),
     floor_area_sqm: z.number().positive('Must be greater than 0'),
     lease_commence_date: z.coerce.date().min(new Date("1960-01-01"), { message: "Must not be before 1960" })
         .max(curr.toDate(), { message: "Must not be in future" })

@@ -53,10 +53,10 @@ const options = {
   },
 };
 
-import ml_model_map from '../public/ml_model.json'
-import town_list from '../public/town.json'
-import storey_range_map from '../public/storey_range.json'
-import flat_model_list from '../public/flat_model.json'
+import { ml_model_list } from '../lib/lists';
+import { town_list } from '../lib/lists';
+import { storey_range_list } from '../lib/lists';
+import { flat_model_list } from '../lib/lists';
 
 const {Option} = Select;
 const {Title} = Typography;
@@ -132,7 +132,7 @@ export default function Home() {
           rules={[{ required: true, message: 'Please choose an ML Model!' }]}
         >
           <Select>
-            {Object.keys(ml_model_map).map((ml_model: string) => (
+            {ml_model_list.map((ml_model: string) => (
               <Option
                 key={ml_model}
                 value={ml_model}
@@ -164,7 +164,7 @@ export default function Home() {
           rules={[{ required: true, message: 'Missing Storey Range!' }]}
         >
           <Select>
-            {Object.keys(storey_range_map).map((storey_range: string) => (
+            {storey_range_list.map((storey_range: string) => (
               <Option
                 key={storey_range}
                 value={storey_range}
