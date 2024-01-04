@@ -51,8 +51,6 @@ import { flat_model_list } from '../lib/lists';
 const { Option } = Select;
 const { Title } = Typography;
 
-import { funPredict } from './actions';
-
 export type FieldType = {
 	ml_model: string;
 	town: string;
@@ -104,13 +102,38 @@ export default function Home() {
 					lease_commence_date: curr
 				}}
 				onFinish={(values: FieldType) => {
-					funPredict(JSON.parse(JSON.stringify(values))).then((response) => {
-						setConfig(response as typeof config);
-						let tmp = response.datasets.find((data) => data.label == 'Trends')?.data[12];
-						if (tmp != undefined) {
-							setOutput(tmp);
+					const res = fetch(
+						'https://ee4802-g20-tool.schoenherrchen.workers.dev/api/prices?' +
+							new URLSearchParams({
+								ml_model: values.ml_model,
+								month_start: curr.subtract(12, 'month').format('YYYY-MM'),
+								month_end: curr.format('YYYY-MM'),
+								town: values.town,
+								storey_range: values.storey_range,
+								flat_model: values.flat_model,
+								floor_area_sqm: values.floor_area_sqm.toString(),
+								lease_commence_date: dayjs(values.lease_commence_date).year().toString()
+							}),
+						{
+							method: 'GET' // *GET, POST, PUT, DELETE, etc.
 						}
-					});
+					);
+					res.then((response) =>
+						response.json().then((server_data: [{ labels: string; data: number }]) => {
+							setConfig({
+								labels: server_data.map((x: { labels: string; data: number }) => x['labels']),
+								datasets: [
+									{
+										label: 'Trends',
+										data: server_data.map((x: { labels: string; data: number }) => x['data']),
+										borderColor: 'rgb(53, 162, 235)',
+										backgroundColor: 'rgba(53, 162, 235, 0.5)'
+									}
+								]
+							});
+							setOutput(server_data[server_data.length - 1]['data']);
+						})
+					);
 				}}
 			>
 				<Form.Item<FieldType>

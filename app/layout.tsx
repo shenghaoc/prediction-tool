@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
 	title: 'Prediction Tool',
 	description: 'An app for HDB resale price prediction',
-	metadataBase: new URL('https://ee4802-g20-tool.vercel.app/'),
+	metadataBase: new URL('https://ee4802-g20-tool.pages.dev/'),
 	alternates: {
 		canonical: '/'
 	}
