@@ -82,7 +82,7 @@ export default function Home() {
 
 	// 1960 (first HDB flats) to 2022 (current year)
 	function disabledYear(current: Dayjs) {
-		return current.isBefore('1960-01-01', 'year') || current.isAfter('2022-01-01', 'year');
+		return current.isBefore('1960-01-01') || current.isAfter('2022-01-01', 'year');
 	}
 
 	const chartRef = useRef(null);
