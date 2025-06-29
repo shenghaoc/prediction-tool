@@ -94,50 +94,6 @@ type ChartConfig = {
 	}>;
 };
 
-const MLModelSelect = React.memo(({ value }: { value?: MLModel }) => (
-	<Select placeholder="Select ML Model" autoFocus defaultValue={value} aria-label="ML Model">
-		{ML_MODELS.map((ml_model) => (
-			<Option key={ml_model} value={ml_model}>
-				{ml_model}
-			</Option>
-		))}
-	</Select>
-));
-MLModelSelect.displayName = 'MLModelSelect';
-
-const TownSelect = React.memo(({ value }: { value?: Town }) => (
-	<Select placeholder="Select Town" defaultValue={value} aria-label="Town">
-		{TOWNS.map((town) => (
-			<Option key={town} value={town}>
-				{town}
-			</Option>
-		))}
-	</Select>
-));
-TownSelect.displayName = 'TownSelect';
-
-const StoreyRangeSelect = React.memo(({ value }: { value?: StoreyRange }) => (
-	<Select placeholder="Select Storey Range" defaultValue={value} aria-label="Storey Range">
-		{STOREY_RANGES.map((storey_range) => (
-			<Option key={storey_range} value={storey_range}>
-				{storey_range}
-			</Option>
-		))}
-	</Select>
-));
-StoreyRangeSelect.displayName = 'StoreyRangeSelect';
-
-const FlatModelSelect = React.memo(({ value }: { value?: FlatModel }) => (
-	<Select placeholder="Select Flat Model" defaultValue={value} aria-label="Flat Model">
-		{FLAT_MODELS.map((flat_model) => (
-			<Option key={flat_model} value={flat_model}>
-				{flat_model}
-			</Option>
-		))}
-	</Select>
-));
-FlatModelSelect.displayName = 'FlatModelSelect';
-
 export default function Home() {
 	const curr = useMemo(() => initialFormValues.lease_commence_date, []);
 	const labels = useMemo(
@@ -195,14 +151,7 @@ export default function Home() {
 				]
 			});
 			setOutput(server_data[server_data.length - 1]?.data ?? 0.0);
-			// Only reset fields except lease_commence_date
-			form.setFieldsValue({
-				ml_model: initialFormValues.ml_model,
-				town: initialFormValues.town,
-				storey_range: initialFormValues.storey_range,
-				flat_model: initialFormValues.flat_model,
-				floor_area_sqm: initialFormValues.floor_area_sqm
-			});
+
 		} catch (err: any) {
 			message.error(err?.message || 'Failed to fetch prediction. Please try again.');
 		} finally {
@@ -226,28 +175,52 @@ export default function Home() {
 					label="ML Model"
 					rules={[{ required: true, message: 'Please choose an ML Model!' }]}
 				>
-					<MLModelSelect value={initialFormValues.ml_model} />
+					<Select placeholder="Select ML Model" autoFocus aria-label="ML Model">
+						{ML_MODELS.map((ml_model) => (
+							<Option key={ml_model} value={ml_model}>
+								{ml_model}
+							</Option>
+						))}
+					</Select>
 				</Form.Item>
 				<Form.Item<FieldType>
 					name="town"
 					label="Town"
 					rules={[{ required: true, message: 'Missing Town!' }]}
 				>
-					<TownSelect value={initialFormValues.town} />
+					<Select placeholder="Select Town" aria-label="Town">
+						{TOWNS.map((town) => (
+							<Option key={town} value={town}>
+								{town}
+							</Option>
+						))}
+					</Select>
 				</Form.Item>
 				<Form.Item<FieldType>
 					name="storey_range"
 					label="Storey Range"
 					rules={[{ required: true, message: 'Missing Storey Range!' }]}
 				>
-					<StoreyRangeSelect value={initialFormValues.storey_range} />
+					<Select placeholder="Select Storey Range" aria-label="Storey Range">
+						{STOREY_RANGES.map((storey_range) => (
+							<Option key={storey_range} value={storey_range}>
+								{storey_range}
+							</Option>
+						))}
+					</Select>
 				</Form.Item>
 				<Form.Item<FieldType>
 					name="flat_model"
 					label="Flat Model"
 					rules={[{ required: true, message: 'Missing Flat Model!' }]}
 				>
-					<FlatModelSelect value={initialFormValues.flat_model} />
+					<Select placeholder="Select Flat Model" aria-label="Flat Model">
+						{FLAT_MODELS.map((flat_model) => (
+							<Option key={flat_model} value={flat_model}>
+								{flat_model}
+							</Option>
+						))}
+					</Select>
 				</Form.Item>
 				<Form.Item<FieldType>
 					name="floor_area_sqm"
