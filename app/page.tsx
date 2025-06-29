@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useCallback } from 'react';
 import {
 	Chart as ChartJS,
 	CategoryScale,
@@ -29,7 +29,7 @@ ChartJS.register(
 	Legend
 );
 
-const options = {
+const chartOptions = {
 	responsive: true,
 	plugins: {
 		legend: {
@@ -39,7 +39,34 @@ const options = {
 			display: false,
 			text: 'Predicted Trends for Past 12 Months'
 		}
+	},
+	animation: {
+		duration: 800,
+		easing: 'easeInOutQuart' as const // Chart.js expects a specific literal type
 	}
+};
+
+const initialFormValues = {
+	ml_model: 'Support Vector Regression',
+	town: 'ANG MO KIO',
+	storey_range: '01 TO 03',
+	flat_model: '2-room',
+	floor_area_sqm: 1,
+	lease_commence_date: dayjs.utc('2022-02', 'YYYY-MM')
+};
+
+const defaultLabels = [...Array(13).keys()].reverse().map((x) => initialFormValues.lease_commence_date.subtract(x, 'month').format('YYYY-MM'));
+
+const defaultChartConfig = {
+	labels: defaultLabels,
+	datasets: [
+		{
+			label: 'Sample Trends',
+			data: defaultLabels.map(() => 0.0),
+			borderColor: 'rgb(255, 99, 132)',
+			backgroundColor: 'rgba(255, 99, 132, 0.5)'
+		}
+	]
 };
 
 import { ml_model_list, town_list, storey_range_list, flat_model_list } from '../lib/lists';
@@ -68,33 +95,23 @@ type ChartConfig = {
 };
 
 export default function Home() {
-	const curr = useMemo(() => dayjs.utc('2022-02', 'YYYY-MM'), []);
+	const curr = useMemo(() => initialFormValues.lease_commence_date, []);
 	const labels = useMemo(
 		() => [...Array(13).keys()].reverse().map((x) => curr.subtract(x, 'month').format('YYYY-MM')),
 		[curr]
 	);
 
 	const [output, setOutput] = useState(0.0);
-	const [config, setConfig] = useState<ChartConfig>({
-		labels,
-		datasets: [
-			{
-				label: 'Sample Trends',
-				data: labels.map(() => 0.0),
-				borderColor: 'rgb(255, 99, 132)',
-				backgroundColor: 'rgba(255, 99, 132, 0.5)'
-			}
-		]
-	});
+	const [config, setConfig] = useState<ChartConfig>(defaultChartConfig);
 	const [loading, setLoading] = useState(false);
 	const [form] = Form.useForm<FieldType>();
 	const chartRef = useRef(null);
 
-	function disabledYear(current: Dayjs) {
+	const disabledYear = useCallback((current: Dayjs) => {
 		return current.isBefore('1960-01-01') || current.isAfter('2022-01-01', 'year');
-	}
+	}, []);
 
-	const handleFinish = async (values: FieldType) => {
+	const handleFinish = useCallback(async (values: FieldType) => {
 		setLoading(true);
 		const formData = new FormData();
 		formData.append('ml_model', values.ml_model);
@@ -113,7 +130,10 @@ export default function Home() {
 					body: formData
 				}
 			);
-			if (!response.ok) throw new Error('API request failed');
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(`API request failed: ${errorText}`);
+			}
 			const server_data: ApiResponse = await response.json();
 			setConfig({
 				labels: server_data.map((x) => x.labels),
@@ -129,11 +149,11 @@ export default function Home() {
 			setOutput(server_data[server_data.length - 1]?.data ?? 0.0);
 			form.resetFields();
 		} catch (err: any) {
-			message.error('Failed to fetch prediction. Please try again.');
+			message.error(err?.message || 'Failed to fetch prediction. Please try again.');
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [curr, form]);
 
 	return (
 		<main style={{ padding: `24px` }}>
@@ -143,14 +163,7 @@ export default function Home() {
 				labelCol={{ span: 4 }}
 				wrapperCol={{ span: 14 }}
 				layout="horizontal"
-				initialValues={{
-					ml_model: 'Support Vector Regression',
-					town: 'ANG MO KIO',
-					storey_range: '01 TO 03',
-					flat_model: '2-room',
-					floor_area_sqm: 1,
-					lease_commence_date: curr
-				}}
+				initialValues={initialFormValues}
 				onFinish={handleFinish}
 			>
 				<Form.Item<FieldType>
@@ -221,7 +234,8 @@ export default function Home() {
 				</Form.Item>
 				<Row gutter={16}>
 					<Col span={12}>
-						<Statistic title="Prediction" value={output} prefix="$" precision={2} />
+						<Statistic title="Prediction" value={output} prefix="$" precision={2} valueStyle={{ fontWeight: 600 }} />
+						<span style={{ position: 'absolute', left: '-9999px' }} aria-live="polite">${output.toFixed(2)}</span>
 						<Button style={{ marginTop: 16 }} type="primary" htmlType="submit" loading={loading} disabled={loading} aria-label="Get prediction">
 							Get prediction
 						</Button>
@@ -229,7 +243,7 @@ export default function Home() {
 				</Row>
 			</Form>
 			<Divider>Predicted Trends for Past 12 Months</Divider>
-			<Line ref={chartRef} options={options} data={config} />
+			<Line ref={chartRef} options={chartOptions} data={config} />
 		</main>
 	);
 }
