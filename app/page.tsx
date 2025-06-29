@@ -69,7 +69,7 @@ const defaultChartConfig = {
 	]
 };
 
-import { ml_model_list, town_list, storey_range_list, flat_model_list } from '../lib/lists';
+import { ML_MODELS, TOWNS, STOREY_RANGES, FLAT_MODELS } from '../lib/lists';
 
 const { Option } = Select;
 const { Title } = Typography;
@@ -172,7 +172,7 @@ export default function Home() {
 					rules={[{ required: true, message: 'Please choose an ML Model!' }]}
 				>
 					<Select>
-						{ml_model_list.map((ml_model: string) => (
+						{ML_MODELS.map((ml_model) => (
 							<Option key={ml_model} value={ml_model}>
 								{ml_model}
 							</Option>
@@ -185,7 +185,7 @@ export default function Home() {
 					rules={[{ required: true, message: 'Missing Town!' }]}
 				>
 					<Select>
-						{town_list.map((town: string) => (
+						{TOWNS.map((town) => (
 							<Option key={town} value={town}>
 								{town}
 							</Option>
@@ -198,7 +198,7 @@ export default function Home() {
 					rules={[{ required: true, message: 'Missing Storey Range!' }]}
 				>
 					<Select>
-						{storey_range_list.map((storey_range: string) => (
+						{STOREY_RANGES.map((storey_range) => (
 							<Option key={storey_range} value={storey_range}>
 								{storey_range}
 							</Option>
@@ -211,7 +211,7 @@ export default function Home() {
 					rules={[{ required: true, message: 'Missing Flat Model!' }]}
 				>
 					<Select>
-						{flat_model_list.map((flat_model: string) => (
+						{FLAT_MODELS.map((flat_model) => (
 							<Option key={flat_model} value={flat_model}>
 								{flat_model}
 							</Option>
