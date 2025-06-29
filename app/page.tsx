@@ -21,6 +21,7 @@ import '../app/i18n';
 import { useTranslation } from 'react-i18next';
 import './i18n';
 import { BulbOutlined, BulbFilled } from '@ant-design/icons';
+import { motion, AnimatePresence } from 'framer-motion';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
@@ -213,6 +214,20 @@ export default function Home() {
 		}
 	}, [curr, form]);
 
+	// Animation variants
+	const cardVariants = {
+		hidden: { opacity: 0, y: 40 },
+		visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+	};
+	const chartVariants = {
+		hidden: { opacity: 0, y: 30 },
+		visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+	};
+	const valueVariants = {
+		initial: { scale: 1, color: darkMode ? '#ffe066' : '#2563eb' },
+		animate: { scale: [1, 1.2, 1], color: darkMode ? '#ffe066' : '#2563eb', transition: { duration: 0.6 } },
+	};
+
 	return (
 		<main style={{
 			padding: isMobile ? 0 : 24,
@@ -239,163 +254,203 @@ export default function Home() {
 				</Button>
 			</div>
 			<Title level={2} style={{ marginBottom: isMobile ? 12 : 24, textAlign: 'center', fontSize: isMobile ? 26 : 36, fontWeight: 800, letterSpacing: 1, color: darkMode ? '#ffe066' : '#1e293b', textShadow: darkMode ? '0 2px 8px #232946' : '0 2px 8px #e0e7ff' }}>{t('price_prediction')}</Title>
-			<Card
-				style={{
-					maxWidth: isMobile ? '100vw' : 600,
-					width: '100vw',
-					margin: isMobile ? 0 : '0 auto 24px auto',
-					boxShadow: isMobile ? 'none' : (darkMode ? '0 8px 32px 0 rgba(31,38,135,0.25)' : '0 8px 32px 0 rgba(31, 38, 135, 0.15)'),
-					borderRadius: isMobile ? 0 : 24,
-					padding: isMobile ? 8 : 32,
-					background: darkMode ? 'rgba(36,37,46,0.95)' : 'rgba(255,255,255,0.85)',
-					backdropFilter: isMobile ? undefined : 'blur(8px)',
-					border: darkMode ? '1px solid #232946' : '1px solid #e0e7ff',
-					fontFamily: `system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif`,
-					transition: 'box-shadow 0.3s, background 0.3s'
-				}}
-			>
-				<Title level={4} style={{ marginBottom: isMobile ? 8 : 16, textAlign: 'center', fontSize: isMobile ? 18 : 22, fontWeight: 700, color: '#2563eb' }}>{t('prediction_form')}</Title>
-				<Form
-					form={form}
-					labelCol={{ xs: { span: 24 }, sm: { span: 8 } }}
-					wrapperCol={{ xs: { span: 24 }, sm: { span: 16 } }}
-					layout={isMobile ? 'vertical' : 'horizontal'}
-					initialValues={initialFormValues}
-					onFinish={handleFinish}
-					onValuesChange={handleFormChange}
+			<AnimatePresence>
+				<motion.div
+					key="form-card"
+					initial="hidden"
+					animate="visible"
+					exit="hidden"
+					variants={cardVariants}
+					style={{ width: '100%' }}
 				>
-					<Space direction="vertical" size={isMobile ? 8 : 20} style={{ width: '100%' }}>
-						<Form.Item<FieldType>
-							name="ml_model"
-							label={t('ml_model')}
-							rules={[{ required: true, message: t('choose_ml_model') }]}
+					<Card
+						style={{
+							maxWidth: isMobile ? '100vw' : 600,
+							width: '100vw',
+							margin: isMobile ? 0 : '0 auto 24px auto',
+							boxShadow: isMobile ? 'none' : (darkMode ? '0 8px 32px 0 rgba(31,38,135,0.25)' : '0 8px 32px 0 rgba(31, 38, 135, 0.15)'),
+							borderRadius: isMobile ? 0 : 24,
+							padding: isMobile ? 8 : 32,
+							background: darkMode ? 'rgba(36,37,46,0.95)' : 'rgba(255,255,255,0.85)',
+							backdropFilter: isMobile ? undefined : 'blur(8px)',
+							border: darkMode ? '1px solid #232946' : '1px solid #e0e7ff',
+							fontFamily: `system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif`,
+							transition: 'box-shadow 0.3s, background 0.3s'
+						}}
+					>
+						<Title level={4} style={{ marginBottom: isMobile ? 8 : 16, textAlign: 'center', fontSize: isMobile ? 18 : 22, fontWeight: 700, color: '#2563eb' }}>{t('prediction_form')}</Title>
+						<Form
+							form={form}
+							labelCol={{ xs: { span: 24 }, sm: { span: 8 } }}
+							wrapperCol={{ xs: { span: 24 }, sm: { span: 16 } }}
+							layout={isMobile ? 'vertical' : 'horizontal'}
+							initialValues={initialFormValues}
+							onFinish={handleFinish}
+							onValuesChange={handleFormChange}
 						>
-							<Select placeholder={t('select_ml_model')} autoFocus aria-label={t('ml_model')}>
-								{ML_MODELS.map((ml_model) => (
-									<Option key={ml_model} value={ml_model}>
-										{t(`ml_models.${ml_model}`, ml_model)}
-									</Option>
-								))}
-							</Select>
-						</Form.Item>
-						<Form.Item<FieldType>
-							name="town"
-							label={t('town')}
-							rules={[{ required: true, message: t('missing_town') }]}
-						>
-							<Select placeholder={t('select_town')} aria-label={t('town')}>
-								{TOWNS.map((town) => (
-									<Option key={town} value={town}>
-										{t(`towns.${town}`, town)}
-									</Option>
-								))}
-							</Select>
-						</Form.Item>
-						<Form.Item<FieldType>
-							name="storey_range"
-							label={t('storey_range')}
-							rules={[{ required: true, message: t('missing_storey_range') }]}
-						>
-							<Select placeholder={t('select_storey_range')} aria-label={t('storey_range')}>
-								{STOREY_RANGES.map((storey_range) => (
-									<Option key={storey_range} value={storey_range}>
-										{t(`storey_ranges.${storey_range}`, storey_range)}
-									</Option>
-								))}
-							</Select>
-						</Form.Item>
-						<Form.Item<FieldType>
-							name="flat_model"
-							label={t('flat_model')}
-							rules={[{ required: true, message: t('missing_flat_model') }]}
-						>
-							<Select placeholder={t('select_flat_model')} aria-label={t('flat_model')}>
-								{FLAT_MODELS.map((flat_model) => (
-									<Option key={flat_model} value={flat_model}>
-										{t(`flat_models.${flat_model}`, flat_model)}
-									</Option>
-								))}
-							</Select>
-						</Form.Item>
-						<Form.Item<FieldType>
-							name="floor_area_sqm"
-							label={t('floor_area')}
-							rules={[
-								{ required: true, message: t('missing_floor_area') },
-								{ type: 'number', min: 20, max: 300, message: t('floor_area_range') }
-							]}
-						>
-							<InputNumber type="number" min={20} max={300} addonAfter="m²" style={{ width: '100%' }} placeholder={t('enter_floor_area')} aria-label={t('floor_area')} />
-						</Form.Item>
-						<Form.Item<FieldType>
-							name="lease_commence_date"
-							label={t('lease_commence_date')}
-							rules={[{ required: true, message: t('missing_lease_commence_date') }]}
-						>
-							<DatePicker picker="year" inputReadOnly={true} disabledDate={disabledYear} style={{ width: '100%' }} placeholder={t('select_year')} aria-label={t('lease_commence_date')} />
-						</Form.Item>
-						<Row gutter={8} justify={isMobile ? 'center' : 'end'}>
-							<Col xs={24} sm={12} style={{ display: 'flex', gap: 12 }}>
-								<Button
-									style={{ marginTop: 8, flex: 1, minHeight: 48, fontSize: 18, borderRadius: 12, background: 'linear-gradient(90deg, #6366f1 0%, #60a5fa 100%)', color: '#fff', fontWeight: 700, boxShadow: '0 2px 8px #dbeafe', border: 'none', transition: 'background 0.2s' }}
-									type="primary"
-									htmlType="submit"
-									loading={loading}
-									disabled={loading}
-									aria-label={t('get_prediction')}
-									block
+							<Space direction="vertical" size={isMobile ? 8 : 20} style={{ width: '100%' }}>
+								<Form.Item<FieldType>
+									name="ml_model"
+									label={t('ml_model')}
+									rules={[{ required: true, message: t('choose_ml_model') }]}
 								>
-									{t('get_prediction')}
-								</Button>
-								<Button
-									style={{ marginTop: 8, flex: 1, minHeight: 48, fontSize: 18, borderRadius: 12, background: '#fff', color: '#6366f1', fontWeight: 700, border: '1.5px solid #6366f1', boxShadow: '0 2px 8px #e0e7ff', transition: 'background 0.2s' }}
-									onClick={handleReset}
-									disabled={loading}
-									aria-label={t('reset_form')}
-									block
+									<Select placeholder={t('select_ml_model')} autoFocus aria-label={t('ml_model')}>
+										{ML_MODELS.map((ml_model) => (
+											<Option key={ml_model} value={ml_model}>
+												{t(`ml_models.${ml_model}`, ml_model)}
+											</Option>
+										))}
+									</Select>
+								</Form.Item>
+								<Form.Item<FieldType>
+									name="town"
+									label={t('town')}
+									rules={[{ required: true, message: t('missing_town') }]}
 								>
-									{t('reset_form')}
-								</Button>
-							</Col>
-						</Row>
-					</Space>
-				</Form>
-			</Card>
-			<Card
-				style={{
-					maxWidth: isMobile ? '100vw' : 900,
-					width: '100vw',
-					margin: isMobile ? 0 : '0 auto',
-					boxShadow: isMobile ? 'none' : (darkMode ? '0 8px 32px 0 rgba(31,38,135,0.18)' : '0 8px 32px 0 rgba(31, 38, 135, 0.10)'),
-					borderRadius: isMobile ? 0 : 24,
-					padding: isMobile ? 8 : 32,
-					background: darkMode ? 'rgba(36,37,46,0.95)' : 'rgba(255,255,255,0.85)',
-					backdropFilter: isMobile ? undefined : 'blur(8px)',
-					border: darkMode ? '1px solid #232946' : '1px solid #e0e7ff',
-					fontFamily: `system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif`,
-					transition: 'box-shadow 0.3s, background 0.3s'
-				}}
-			>
-				<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: isMobile ? 8 : 16 }}>
-					<span role="img" aria-label="chart" style={{ fontSize: isMobile ? 22 : 28, color: '#6366f1', filter: 'drop-shadow(0 2px 8px #e0e7ff)' }}>📈</span>
-					<Title level={4} style={{ margin: 0, textAlign: 'center', fontSize: isMobile ? 18 : 22, fontWeight: 700, color: '#2563eb' }}>{t('predicted_trends')}</Title>
-				</div>
-				<Divider style={{ margin: isMobile ? '8px 0' : '16px 0', borderColor: darkMode ? '#232946' : '#e0e7ff' }} />
-				<Row gutter={[8, 8]} align="middle">
-					<Col xs={24} md={12} style={{ marginBottom: isMobile ? 8 : 12 }}>
-						<Statistic title={t('prediction')} value={output} prefix="$" precision={2} valueStyle={{ fontWeight: 600, fontSize: isMobile ? 20 : 22, color: darkMode ? '#ffe066' : undefined }} aria-live="polite" aria-busy={loading} />
-						<span style={{ position: 'absolute', left: '-9999px' }} aria-live="polite">${output.toFixed(2)}</span>
-					</Col>
-					<Col xs={24} md={12}>
-						<div style={{ minHeight: isMobile ? 180 : 240, position: 'relative', overflowX: 'auto' }}>
-							{loading && <div style={{ position: 'absolute', inset: 0, background: darkMode ? 'rgba(36,37,46,0.7)' : 'rgba(255,255,255,0.7)', zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span>{t('loading_chart')}</span></div>}
-							<div style={{ minWidth: isMobile ? 220 : 320 }}>
-								<Line ref={chartRef} options={chartOptions} data={config} aria-busy={loading} />
-							</div>
+									<Select placeholder={t('select_town')} aria-label={t('town')}>
+										{TOWNS.map((town) => (
+											<Option key={town} value={town}>
+												{t(`towns.${town}`, town)}
+											</Option>
+										))}
+									</Select>
+								</Form.Item>
+								<Form.Item<FieldType>
+									name="storey_range"
+									label={t('storey_range')}
+									rules={[{ required: true, message: t('missing_storey_range') }]}
+								>
+									<Select placeholder={t('select_storey_range')} aria-label={t('storey_range')}>
+										{STOREY_RANGES.map((storey_range) => (
+											<Option key={storey_range} value={storey_range}>
+												{t(`storey_ranges.${storey_range}`, storey_range)}
+											</Option>
+										))}
+									</Select>
+								</Form.Item>
+								<Form.Item<FieldType>
+									name="flat_model"
+									label={t('flat_model')}
+									rules={[{ required: true, message: t('missing_flat_model') }]}
+								>
+									<Select placeholder={t('select_flat_model')} aria-label={t('flat_model')}>
+										{FLAT_MODELS.map((flat_model) => (
+											<Option key={flat_model} value={flat_model}>
+												{t(`flat_models.${flat_model}`, flat_model)}
+											</Option>
+										))}
+									</Select>
+								</Form.Item>
+								<Form.Item<FieldType>
+									name="floor_area_sqm"
+									label={t('floor_area')}
+									rules={[
+										{ required: true, message: t('missing_floor_area') },
+										{ type: 'number', min: 20, max: 300, message: t('floor_area_range') }
+									]}
+								>
+									<InputNumber type="number" min={20} max={300} addonAfter="m²" style={{ width: '100%' }} placeholder={t('enter_floor_area')} aria-label={t('floor_area')} />
+								</Form.Item>
+								<Form.Item<FieldType>
+									name="lease_commence_date"
+									label={t('lease_commence_date')}
+									rules={[{ required: true, message: t('missing_lease_commence_date') }]}
+								>
+									<DatePicker picker="year" inputReadOnly={true} disabledDate={disabledYear} style={{ width: '100%' }} placeholder={t('select_year')} aria-label={t('lease_commence_date')} />
+								</Form.Item>
+								<Row gutter={8} justify={isMobile ? 'center' : 'end'}>
+									<Col xs={24} sm={12} style={{ display: 'flex', gap: 12 }}>
+										<Button
+											style={{ marginTop: 8, flex: 1, minHeight: 48, fontSize: 18, borderRadius: 12, background: 'linear-gradient(90deg, #6366f1 0%, #60a5fa 100%)', color: '#fff', fontWeight: 700, boxShadow: '0 2px 8px #dbeafe', border: 'none', transition: 'background 0.2s' }}
+											type="primary"
+											htmlType="submit"
+											loading={loading}
+											disabled={loading}
+											aria-label={t('get_prediction')}
+											block
+										>
+											{t('get_prediction')}
+										</Button>
+										<Button
+											style={{ marginTop: 8, flex: 1, minHeight: 48, fontSize: 18, borderRadius: 12, background: '#fff', color: '#6366f1', fontWeight: 700, border: '1.5px solid #6366f1', boxShadow: '0 2px 8px #e0e7ff', transition: 'background 0.2s' }}
+											onClick={handleReset}
+											disabled={loading}
+											aria-label={t('reset_form')}
+											block
+										>
+											{t('reset_form')}
+										</Button>
+									</Col>
+								</Row>
+							</Space>
+						</Form>
+					</Card>
+				</motion.div>
+			</AnimatePresence>
+			<AnimatePresence mode="wait">
+				<motion.div
+					key="chart-card"
+					initial="hidden"
+					animate="visible"
+					exit="hidden"
+					variants={cardVariants}
+					style={{ width: '100%' }}
+				>
+					<Card
+						style={{
+							maxWidth: isMobile ? '100vw' : 900,
+							width: '100vw',
+							margin: isMobile ? 0 : '0 auto',
+							boxShadow: isMobile ? 'none' : (darkMode ? '0 8px 32px 0 rgba(31,38,135,0.18)' : '0 8px 32px 0 rgba(31, 38, 135, 0.10)'),
+							borderRadius: isMobile ? 0 : 24,
+							padding: isMobile ? 8 : 32,
+							background: darkMode ? 'rgba(36,37,46,0.95)' : 'rgba(255,255,255,0.85)',
+							backdropFilter: isMobile ? undefined : 'blur(8px)',
+							border: darkMode ? '1px solid #232946' : '1px solid #e0e7ff',
+							fontFamily: `system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif`,
+							transition: 'box-shadow 0.3s, background 0.3s'
+						}}
+					>
+						<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: isMobile ? 8 : 16 }}>
+							<span role="img" aria-label="chart" style={{ fontSize: isMobile ? 22 : 28, color: '#6366f1', filter: 'drop-shadow(0 2px 8px #e0e7ff)' }}>📈</span>
+							<Title level={4} style={{ margin: 0, textAlign: 'center', fontSize: isMobile ? 18 : 22, fontWeight: 700, color: '#2563eb' }}></Title>
 						</div>
-					</Col>
-				</Row>
-			</Card>
+						<Divider style={{ margin: isMobile ? '8px 0' : '16px 0', borderColor: darkMode ? '#232946' : '#e0e7ff' }} />
+						<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: isMobile ? 220 : 320, width: '100%' }}>
+							<AnimatePresence mode="wait">
+								<motion.div
+									key={JSON.stringify(config.labels)}
+									initial="hidden"
+									animate="visible"
+									exit="hidden"
+									variants={chartVariants}
+									style={{ minHeight: 220, width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+								>
+									<Line ref={chartRef} options={chartOptions} data={config} style={{ maxHeight: isMobile ? 220 : 320, width: '100%' }} />
+								</motion.div>
+							</AnimatePresence>
+						</div>
+						<Divider style={{ margin: isMobile ? '8px 0' : '16px 0', borderColor: darkMode ? '#232946' : '#e0e7ff' }} />
+						<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: isMobile ? 'column' : 'row', gap: 16 }}>
+							<motion.div
+								key={output}
+								initial="initial"
+								animate="animate"
+								variants={valueVariants}
+								style={{ fontWeight: 800, fontSize: isMobile ? 28 : 40, minWidth: 120, textAlign: 'center', marginBottom: isMobile ? 8 : 0 }}
+							>
+								<Statistic
+									value={output}
+									precision={0}
+									prefix="$"
+									valueStyle={{ color: darkMode ? '#ffe066' : '#2563eb', fontWeight: 800, fontSize: isMobile ? 28 : 40 }}
+									title={t('predicted_price')}
+								/>
+							</motion.div>
+						</div>
+					</Card>
+				</motion.div>
+			</AnimatePresence>
 		</main>
 	);
 }
