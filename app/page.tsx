@@ -170,9 +170,8 @@ export default function Home() {
 					margin: isMobile ? 0 : '0 auto 24px auto',
 					boxShadow: isMobile ? 'none' : '0 2px 8px #f0f1f2',
 					borderRadius: isMobile ? 0 : 12,
-					padding: 0
+					padding: isMobile ? 8 : 16
 				}}
-				bodyStyle={{ padding: isMobile ? 8 : 16 }}
 			>
 				<Title level={4} style={{ marginBottom: isMobile ? 8 : 16, textAlign: 'center', fontSize: isMobile ? 16 : 18 }}>Prediction Form</Title>
 				<Form
@@ -284,9 +283,8 @@ export default function Home() {
 					margin: isMobile ? 0 : '0 auto',
 					boxShadow: isMobile ? 'none' : '0 2px 8px #f0f1f2',
 					borderRadius: isMobile ? 0 : 12,
-					padding: 0
+					padding: isMobile ? 8 : 16 
 				}}
-				bodyStyle={{ padding: isMobile ? 8 : 16 }}
 			>
 				<Title level={4} style={{ marginBottom: isMobile ? 8 : 16, textAlign: 'center', fontSize: isMobile ? 16 : 18 }}>Predicted Trends for Past 12 Months</Title>
 				<Row gutter={[8, 8]} align="middle">
