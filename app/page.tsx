@@ -1,6 +1,6 @@
 'use client';
 import '@ant-design/v5-patch-for-react-19';
-import React, { useState, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import {
 	Chart as ChartJS,
 	CategoryScale,
@@ -114,6 +114,39 @@ export default function Home() {
 	const [form] = Form.useForm<FieldType>();
 	const chartRef = useRef(null);
 
+	// --- Persistence: Load on mount ---
+	useEffect(() => {
+		// Language
+		const savedLang = typeof window !== 'undefined' && localStorage.getItem('lang');
+		if (savedLang && savedLang !== i18n.language) {
+			i18n.changeLanguage(savedLang);
+		}
+		// Form
+		const savedForm = typeof window !== 'undefined' && localStorage.getItem('form');
+		if (savedForm) {
+			try {
+				const parsed = JSON.parse(savedForm);
+				if (parsed.lease_commence_date) {
+					parsed.lease_commence_date = dayjs(parsed.lease_commence_date);
+				}
+				form.setFieldsValue(parsed);
+			} catch {}
+		}
+	}, [form, i18n]);
+
+	// --- Persistence: Save on change ---
+	const handleFormChange = useCallback((_: unknown, allValues: Partial<FieldType>) => {
+		const persist: Record<string, any> = { ...allValues };
+		if (persist.lease_commence_date && typeof persist.lease_commence_date.toISOString === 'function') {
+			persist.lease_commence_date = persist.lease_commence_date.toISOString();
+		}
+		localStorage.setItem('form', JSON.stringify(persist));
+	}, []);
+
+	useEffect(() => {
+		localStorage.setItem('lang', i18n.language);
+	}, [i18n.language]);
+
 	const disabledYear = useCallback((current: Dayjs) => {
 		return current.isBefore('1960-01-01') || current.isAfter('2022-01-01', 'year');
 	}, []);
@@ -173,7 +206,11 @@ export default function Home() {
 			fontFamily: `system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif`
 		}}>
 			<div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: isMobile ? 8 : 16 }}>
-				<Button size="small" onClick={() => i18n.changeLanguage(i18n.language === 'en' ? 'zh' : 'en')}>
+				<Button size="small" onClick={() => {
+					const nextLang = i18n.language === 'en' ? 'zh' : 'en';
+					i18n.changeLanguage(nextLang);
+					localStorage.setItem('lang', nextLang);
+				}}>
 					{t('switch_language')}
 				</Button>
 			</div>
@@ -197,6 +234,7 @@ export default function Home() {
 					layout={isMobile ? 'vertical' : 'horizontal'}
 					initialValues={initialFormValues}
 					onFinish={handleFinish}
+					onValuesChange={handleFormChange}
 				>
 					<Space direction="vertical" size={isMobile ? 8 : 16} style={{ width: '100%' }}>
 						<Form.Item<FieldType>
