@@ -1,5 +1,5 @@
 'use client';
-
+import '@ant-design/v5-patch-for-react-19';
 import React, { useState, useRef, useMemo, useCallback } from 'react';
 import {
 	Chart as ChartJS,
