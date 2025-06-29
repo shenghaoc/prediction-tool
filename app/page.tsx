@@ -103,6 +103,7 @@ const MLModelSelect = React.memo(({ value }: { value?: MLModel }) => (
 		))}
 	</Select>
 ));
+MLModelSelect.displayName = 'MLModelSelect';
 
 const TownSelect = React.memo(({ value }: { value?: Town }) => (
 	<Select placeholder="Select Town" defaultValue={value} aria-label="Town">
@@ -113,6 +114,7 @@ const TownSelect = React.memo(({ value }: { value?: Town }) => (
 		))}
 	</Select>
 ));
+TownSelect.displayName = 'TownSelect';
 
 const StoreyRangeSelect = React.memo(({ value }: { value?: StoreyRange }) => (
 	<Select placeholder="Select Storey Range" defaultValue={value} aria-label="Storey Range">
@@ -123,6 +125,7 @@ const StoreyRangeSelect = React.memo(({ value }: { value?: StoreyRange }) => (
 		))}
 	</Select>
 ));
+StoreyRangeSelect.displayName = 'StoreyRangeSelect';
 
 const FlatModelSelect = React.memo(({ value }: { value?: FlatModel }) => (
 	<Select placeholder="Select Flat Model" defaultValue={value} aria-label="Flat Model">
@@ -133,6 +136,7 @@ const FlatModelSelect = React.memo(({ value }: { value?: FlatModel }) => (
 		))}
 	</Select>
 ));
+FlatModelSelect.displayName = 'FlatModelSelect';
 
 export default function Home() {
 	const curr = useMemo(() => initialFormValues.lease_commence_date, []);
