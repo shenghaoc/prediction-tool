@@ -12,7 +12,7 @@ import {
 	Legend
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { Form, Select, InputNumber, Button, Typography, Statistic, Col, Row, Divider, message, Card, Space } from 'antd';
+import { Form, Select, InputNumber, Button, Typography, Statistic, Col, Row, Divider, message, Card, Space, Grid } from 'antd';
 import { DatePicker } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -95,6 +95,8 @@ type ChartConfig = {
 };
 
 export default function Home() {
+	const screens = Grid.useBreakpoint();
+	const isMobile = !screens.md;
 	const curr = useMemo(() => initialFormValues.lease_commence_date, []);
 	const labels = useMemo(
 		() => [...Array(13).keys()].reverse().map((x) => curr.subtract(x, 'month').format('YYYY-MM')),
@@ -151,7 +153,6 @@ export default function Home() {
 				]
 			});
 			setOutput(server_data[server_data.length - 1]?.data ?? 0.0);
-
 		} catch (err: any) {
 			message.error(err?.message || 'Failed to fetch prediction. Please try again.');
 		} finally {
@@ -160,19 +161,29 @@ export default function Home() {
 	}, [curr, form]);
 
 	return (
-		<main style={{ padding: 24, background: '#f5f7fa', minHeight: '100vh' }}>
-			<Title level={2} style={{ marginBottom: 24 }}>Price Prediction</Title>
-			<Card style={{ maxWidth: 600, margin: '0 auto', marginBottom: 32, boxShadow: '0 2px 8px #f0f1f2' }}>
-				<Title level={4} style={{ marginBottom: 24 }}>Prediction Form</Title>
+		<main style={{ padding: isMobile ? 0 : 24, background: '#f5f7fa', minHeight: '100vh' }}>
+			<Title level={2} style={{ marginBottom: isMobile ? 12 : 24, textAlign: 'center', fontSize: isMobile ? 22 : 28 }}>Price Prediction</Title>
+			<Card
+				style={{
+					maxWidth: isMobile ? '100vw' : 600,
+					width: '100vw',
+					margin: isMobile ? 0 : '0 auto 24px auto',
+					boxShadow: isMobile ? 'none' : '0 2px 8px #f0f1f2',
+					borderRadius: isMobile ? 0 : 12,
+					padding: 0
+				}}
+				bodyStyle={{ padding: isMobile ? 8 : 16 }}
+			>
+				<Title level={4} style={{ marginBottom: isMobile ? 8 : 16, textAlign: 'center', fontSize: isMobile ? 16 : 18 }}>Prediction Form</Title>
 				<Form
 					form={form}
-					labelCol={{ span: 8 }}
-					wrapperCol={{ span: 16 }}
-					layout="horizontal"
+					labelCol={{ xs: { span: 24 }, sm: { span: 8 } }}
+					wrapperCol={{ xs: { span: 24 }, sm: { span: 16 } }}
+					layout={isMobile ? 'vertical' : 'horizontal'}
 					initialValues={initialFormValues}
 					onFinish={handleFinish}
 				>
-					<Space direction="vertical" size={16} style={{ width: '100%' }}>
+					<Space direction="vertical" size={isMobile ? 8 : 16} style={{ width: '100%' }}>
 						<Form.Item<FieldType>
 							name="ml_model"
 							label="ML Model"
@@ -239,12 +250,26 @@ export default function Home() {
 						>
 							<DatePicker picker="year" inputReadOnly={true} disabledDate={disabledYear} style={{ width: '100%' }} placeholder="Select year" aria-label="Lease Commence Date" />
 						</Form.Item>
-						<Row gutter={16} justify="end">
-							<Col>
-								<Button style={{ marginTop: 8, marginRight: 8 }} type="primary" htmlType="submit" loading={loading} disabled={loading} aria-label="Get prediction">
+						<Row gutter={8} justify={isMobile ? 'center' : 'end'}>
+							<Col xs={24} sm={12} style={{ display: 'flex', gap: 8 }}>
+								<Button
+									style={{ marginTop: 8, flex: 1, minHeight: 48, fontSize: 18 }}
+									type="primary"
+									htmlType="submit"
+									loading={loading}
+									disabled={loading}
+									aria-label="Get prediction"
+									block
+								>
 									Get prediction
 								</Button>
-								<Button style={{ marginTop: 8 }} onClick={handleReset} disabled={loading} aria-label="Reset form">
+								<Button
+									style={{ marginTop: 8, flex: 1, minHeight: 48, fontSize: 18 }}
+									onClick={handleReset}
+									disabled={loading}
+									aria-label="Reset form"
+									block
+								>
 									Reset
 								</Button>
 							</Col>
@@ -252,17 +277,29 @@ export default function Home() {
 					</Space>
 				</Form>
 			</Card>
-			<Card style={{ maxWidth: 900, margin: '0 auto', boxShadow: '0 2px 8px #f0f1f2', padding: 24 }}>
-				<Title level={4} style={{ marginBottom: 24 }}>Predicted Trends for Past 12 Months</Title>
-				<Row gutter={[24, 24]} align="middle">
-					<Col xs={24} md={12}>
-						<Statistic title="Prediction" value={output} prefix="$" precision={2} valueStyle={{ fontWeight: 600 }} aria-live="polite" aria-busy={loading} />
+			<Card
+				style={{
+					maxWidth: isMobile ? '100vw' : 900,
+					width: '100vw',
+					margin: isMobile ? 0 : '0 auto',
+					boxShadow: isMobile ? 'none' : '0 2px 8px #f0f1f2',
+					borderRadius: isMobile ? 0 : 12,
+					padding: 0
+				}}
+				bodyStyle={{ padding: isMobile ? 8 : 16 }}
+			>
+				<Title level={4} style={{ marginBottom: isMobile ? 8 : 16, textAlign: 'center', fontSize: isMobile ? 16 : 18 }}>Predicted Trends for Past 12 Months</Title>
+				<Row gutter={[8, 8]} align="middle">
+					<Col xs={24} md={12} style={{ marginBottom: isMobile ? 8 : 12 }}>
+						<Statistic title="Prediction" value={output} prefix="$" precision={2} valueStyle={{ fontWeight: 600, fontSize: isMobile ? 20 : 22 }} aria-live="polite" aria-busy={loading} />
 						<span style={{ position: 'absolute', left: '-9999px' }} aria-live="polite">${output.toFixed(2)}</span>
 					</Col>
 					<Col xs={24} md={12}>
-						<div style={{ minHeight: 320, position: 'relative' }}>
+						<div style={{ minHeight: isMobile ? 180 : 240, position: 'relative', overflowX: 'auto' }}>
 							{loading && <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.7)', zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span>Loading chart...</span></div>}
-							<Line ref={chartRef} options={chartOptions} data={config} aria-busy={loading} />
+							<div style={{ minWidth: isMobile ? 220 : 320 }}>
+								<Line ref={chartRef} options={chartOptions} data={config} aria-busy={loading} />
+							</div>
 						</div>
 					</Col>
 				</Row>
