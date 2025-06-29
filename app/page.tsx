@@ -12,7 +12,7 @@ import {
 	Legend
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { Form, Select, InputNumber, Button, Typography, Statistic, Col, Row, Divider, message } from 'antd';
+import { Form, Select, InputNumber, Button, Typography, Statistic, Col, Row, Divider, message, Card, Space } from 'antd';
 import { DatePicker } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -160,100 +160,113 @@ export default function Home() {
 	}, [curr, form]);
 
 	return (
-		<main style={{ padding: `24px` }}>
-			<Title level={2}>Price Prediction</Title>
-			<Form
-				form={form}
-				labelCol={{ span: 4 }}
-				wrapperCol={{ span: 14 }}
-				layout="horizontal"
-				initialValues={initialFormValues}
-				onFinish={handleFinish}
-			>
-				<Form.Item<FieldType>
-					name="ml_model"
-					label="ML Model"
-					rules={[{ required: true, message: 'Please choose an ML Model!' }]}
+		<main style={{ padding: 24, background: '#f5f7fa', minHeight: '100vh' }}>
+			<Title level={2} style={{ marginBottom: 24 }}>Price Prediction</Title>
+			<Card style={{ maxWidth: 600, margin: '0 auto', marginBottom: 32, boxShadow: '0 2px 8px #f0f1f2' }}>
+				<Title level={4} style={{ marginBottom: 24 }}>Prediction Form</Title>
+				<Form
+					form={form}
+					labelCol={{ span: 8 }}
+					wrapperCol={{ span: 16 }}
+					layout="horizontal"
+					initialValues={initialFormValues}
+					onFinish={handleFinish}
 				>
-					<Select placeholder="Select ML Model" autoFocus aria-label="ML Model">
-						{ML_MODELS.map((ml_model) => (
-							<Option key={ml_model} value={ml_model}>
-								{ml_model}
-							</Option>
-						))}
-					</Select>
-				</Form.Item>
-				<Form.Item<FieldType>
-					name="town"
-					label="Town"
-					rules={[{ required: true, message: 'Missing Town!' }]}
-				>
-					<Select placeholder="Select Town" aria-label="Town">
-						{TOWNS.map((town) => (
-							<Option key={town} value={town}>
-								{town}
-							</Option>
-						))}
-					</Select>
-				</Form.Item>
-				<Form.Item<FieldType>
-					name="storey_range"
-					label="Storey Range"
-					rules={[{ required: true, message: 'Missing Storey Range!' }]}
-				>
-					<Select placeholder="Select Storey Range" aria-label="Storey Range">
-						{STOREY_RANGES.map((storey_range) => (
-							<Option key={storey_range} value={storey_range}>
-								{storey_range}
-							</Option>
-						))}
-					</Select>
-				</Form.Item>
-				<Form.Item<FieldType>
-					name="flat_model"
-					label="Flat Model"
-					rules={[{ required: true, message: 'Missing Flat Model!' }]}
-				>
-					<Select placeholder="Select Flat Model" aria-label="Flat Model">
-						{FLAT_MODELS.map((flat_model) => (
-							<Option key={flat_model} value={flat_model}>
-								{flat_model}
-							</Option>
-						))}
-					</Select>
-				</Form.Item>
-				<Form.Item<FieldType>
-					name="floor_area_sqm"
-					label="Floor Area"
-					rules={[{ required: true, message: 'Missing Floor Area!' }, { type: 'number', min: 20, max: 300, message: 'Floor area must be between 20 and 300 m²' }]}
-				>
-					<InputNumber type="number" min={20} max={300} addonAfter="m²" style={{ width: '100%' }} placeholder="Enter floor area" aria-label="Floor Area" />
-				</Form.Item>
-				<Form.Item<FieldType>
-					name="lease_commence_date"
-					label="Lease Commence Date"
-					rules={[{ required: true, message: 'Missing Lease Commence Date!' }]}
-				>
-					<DatePicker picker="year" inputReadOnly={true} disabledDate={disabledYear} style={{ width: '100%' }} placeholder="Select year" aria-label="Lease Commence Date" />
-				</Form.Item>
-				<Row gutter={16}>
-					<Col span={12}>
+					<Space direction="vertical" size={16} style={{ width: '100%' }}>
+						<Form.Item<FieldType>
+							name="ml_model"
+							label="ML Model"
+							rules={[{ required: true, message: 'Please choose an ML Model!' }]}
+						>
+							<Select placeholder="Select ML Model" autoFocus aria-label="ML Model">
+								{ML_MODELS.map((ml_model) => (
+									<Option key={ml_model} value={ml_model}>
+										{ml_model}
+									</Option>
+								))}
+							</Select>
+						</Form.Item>
+						<Form.Item<FieldType>
+							name="town"
+							label="Town"
+							rules={[{ required: true, message: 'Missing Town!' }]}
+						>
+							<Select placeholder="Select Town" aria-label="Town">
+								{TOWNS.map((town) => (
+									<Option key={town} value={town}>
+										{town}
+									</Option>
+								))}
+							</Select>
+						</Form.Item>
+						<Form.Item<FieldType>
+							name="storey_range"
+							label="Storey Range"
+							rules={[{ required: true, message: 'Missing Storey Range!' }]}
+						>
+							<Select placeholder="Select Storey Range" aria-label="Storey Range">
+								{STOREY_RANGES.map((storey_range) => (
+									<Option key={storey_range} value={storey_range}>
+										{storey_range}
+									</Option>
+								))}
+							</Select>
+						</Form.Item>
+						<Form.Item<FieldType>
+							name="flat_model"
+							label="Flat Model"
+							rules={[{ required: true, message: 'Missing Flat Model!' }]}
+						>
+							<Select placeholder="Select Flat Model" aria-label="Flat Model">
+								{FLAT_MODELS.map((flat_model) => (
+									<Option key={flat_model} value={flat_model}>
+										{flat_model}
+									</Option>
+								))}
+							</Select>
+						</Form.Item>
+						<Form.Item<FieldType>
+							name="floor_area_sqm"
+							label="Floor Area"
+							rules={[{ required: true, message: 'Missing Floor Area!' }, { type: 'number', min: 20, max: 300, message: 'Floor area must be between 20 and 300 m²' }]}
+						>
+							<InputNumber type="number" min={20} max={300} addonAfter="m²" style={{ width: '100%' }} placeholder="Enter floor area" aria-label="Floor Area" />
+						</Form.Item>
+						<Form.Item<FieldType>
+							name="lease_commence_date"
+							label="Lease Commence Date"
+							rules={[{ required: true, message: 'Missing Lease Commence Date!' }]}
+						>
+							<DatePicker picker="year" inputReadOnly={true} disabledDate={disabledYear} style={{ width: '100%' }} placeholder="Select year" aria-label="Lease Commence Date" />
+						</Form.Item>
+						<Row gutter={16} justify="end">
+							<Col>
+								<Button style={{ marginTop: 8, marginRight: 8 }} type="primary" htmlType="submit" loading={loading} disabled={loading} aria-label="Get prediction">
+									Get prediction
+								</Button>
+								<Button style={{ marginTop: 8 }} onClick={handleReset} disabled={loading} aria-label="Reset form">
+									Reset
+								</Button>
+							</Col>
+						</Row>
+					</Space>
+				</Form>
+			</Card>
+			<Card style={{ maxWidth: 900, margin: '0 auto', boxShadow: '0 2px 8px #f0f1f2', padding: 24 }}>
+				<Title level={4} style={{ marginBottom: 24 }}>Predicted Trends for Past 12 Months</Title>
+				<Row gutter={[24, 24]} align="middle">
+					<Col xs={24} md={12}>
 						<Statistic title="Prediction" value={output} prefix="$" precision={2} valueStyle={{ fontWeight: 600 }} aria-live="polite" aria-busy={loading} />
 						<span style={{ position: 'absolute', left: '-9999px' }} aria-live="polite">${output.toFixed(2)}</span>
-						<Button style={{ marginTop: 16, marginRight: 8 }} type="primary" htmlType="submit" loading={loading} disabled={loading} aria-label="Get prediction">
-							Get prediction
-						</Button>
-						<Button style={{ marginTop: 16 }} onClick={handleReset} disabled={loading} aria-label="Reset form">
-							Reset
-						</Button>
+					</Col>
+					<Col xs={24} md={12}>
+						<div style={{ minHeight: 320, position: 'relative' }}>
+							{loading && <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.7)', zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span>Loading chart...</span></div>}
+							<Line ref={chartRef} options={chartOptions} data={config} aria-busy={loading} />
+						</div>
 					</Col>
 				</Row>
-			</Form>
-			<Divider>Predicted Trends for Past 12 Months</Divider>
-			<div style={{ minHeight: 320, position: 'relative' }}>
-				{loading && <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.7)', zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span>Loading chart...</span></div>}
-				<Line ref={chartRef} options={chartOptions} data={config} aria-busy={loading} />
-			</div>
+			</Card>
 		</main>
 	);
 }
