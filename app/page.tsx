@@ -20,6 +20,7 @@ import utc from 'dayjs/plugin/utc';
 import '../app/i18n';
 import { useTranslation } from 'react-i18next';
 import './i18n';
+import { BulbOutlined, BulbFilled } from '@ant-design/icons';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
@@ -102,6 +103,18 @@ export default function Home() {
 	const { t, i18n } = useTranslation();
 	const screens = Grid.useBreakpoint();
 	const isMobile = !screens.md;
+	const [darkMode, setDarkMode] = useState(() => {
+		if (typeof window !== 'undefined') {
+			return localStorage.getItem('theme') === 'dark';
+		}
+		return false;
+	});
+	useEffect(() => {
+		if (typeof window !== 'undefined') {
+			document.body.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+			localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+		}
+	}, [darkMode]);
 	const curr = useMemo(() => initialFormValues.lease_commence_date, []);
 	const labels = useMemo(
 		() => [...Array(13).keys()].reverse().map((x) => curr.subtract(x, 'month').format('YYYY-MM')),
@@ -203,13 +216,21 @@ export default function Home() {
 	return (
 		<main style={{
 			padding: isMobile ? 0 : 24,
-			background: 'linear-gradient(135deg, #e0e7ff 0%, #f5f7fa 100%)',
+			background: darkMode
+				? 'linear-gradient(135deg, #232946 0%, #16161a 100%)'
+				: 'linear-gradient(135deg, #e0e7ff 0%, #f5f7fa 100%)',
 			minHeight: '100vh',
 			fontFamily: `system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif`,
 			transition: 'background 0.5s'
 		}}>
-			<div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: isMobile ? 8 : 16 }}>
-				<Button size="small" style={{ borderRadius: 20, background: '#fff', boxShadow: '0 1px 4px #dbeafe', fontWeight: 500 }} onClick={() => {
+			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? 8 : 16 }}>
+				<Button
+					icon={darkMode ? <BulbFilled /> : <BulbOutlined />}
+					style={{ borderRadius: 20, background: darkMode ? '#232946' : '#fff', color: darkMode ? '#ffe066' : '#6366f1', boxShadow: '0 1px 4px #dbeafe', fontWeight: 500, marginRight: 8 }}
+					onClick={() => setDarkMode((d) => !d)}
+					aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+				/>
+				<Button size="small" style={{ borderRadius: 20, background: darkMode ? '#232946' : '#fff', color: darkMode ? '#ffe066' : '#6366f1', boxShadow: '0 1px 4px #dbeafe', fontWeight: 500 }} onClick={() => {
 					const nextLang = i18n.language === 'en' ? 'zh' : 'en';
 					i18n.changeLanguage(nextLang);
 					localStorage.setItem('lang', nextLang);
@@ -217,18 +238,18 @@ export default function Home() {
 					{t('switch_language')}
 				</Button>
 			</div>
-			<Title level={2} style={{ marginBottom: isMobile ? 12 : 24, textAlign: 'center', fontSize: isMobile ? 26 : 36, fontWeight: 800, letterSpacing: 1, color: '#1e293b', textShadow: '0 2px 8px #e0e7ff' }}>{t('price_prediction')}</Title>
+			<Title level={2} style={{ marginBottom: isMobile ? 12 : 24, textAlign: 'center', fontSize: isMobile ? 26 : 36, fontWeight: 800, letterSpacing: 1, color: darkMode ? '#ffe066' : '#1e293b', textShadow: darkMode ? '0 2px 8px #232946' : '0 2px 8px #e0e7ff' }}>{t('price_prediction')}</Title>
 			<Card
 				style={{
 					maxWidth: isMobile ? '100vw' : 600,
 					width: '100vw',
 					margin: isMobile ? 0 : '0 auto 24px auto',
-					boxShadow: isMobile ? 'none' : '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
+					boxShadow: isMobile ? 'none' : (darkMode ? '0 8px 32px 0 rgba(31,38,135,0.25)' : '0 8px 32px 0 rgba(31, 38, 135, 0.15)'),
 					borderRadius: isMobile ? 0 : 24,
 					padding: isMobile ? 8 : 32,
-					background: 'rgba(255,255,255,0.85)',
+					background: darkMode ? 'rgba(36,37,46,0.95)' : 'rgba(255,255,255,0.85)',
 					backdropFilter: isMobile ? undefined : 'blur(8px)',
-					border: '1px solid #e0e7ff',
+					border: darkMode ? '1px solid #232946' : '1px solid #e0e7ff',
 					fontFamily: `system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif`,
 					transition: 'box-shadow 0.3s, background 0.3s'
 				}}
@@ -345,12 +366,12 @@ export default function Home() {
 					maxWidth: isMobile ? '100vw' : 900,
 					width: '100vw',
 					margin: isMobile ? 0 : '0 auto',
-					boxShadow: isMobile ? 'none' : '0 8px 32px 0 rgba(31, 38, 135, 0.10)',
+					boxShadow: isMobile ? 'none' : (darkMode ? '0 8px 32px 0 rgba(31,38,135,0.18)' : '0 8px 32px 0 rgba(31, 38, 135, 0.10)'),
 					borderRadius: isMobile ? 0 : 24,
 					padding: isMobile ? 8 : 32,
-					background: 'rgba(255,255,255,0.85)',
+					background: darkMode ? 'rgba(36,37,46,0.95)' : 'rgba(255,255,255,0.85)',
 					backdropFilter: isMobile ? undefined : 'blur(8px)',
-					border: '1px solid #e0e7ff',
+					border: darkMode ? '1px solid #232946' : '1px solid #e0e7ff',
 					fontFamily: `system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif`,
 					transition: 'box-shadow 0.3s, background 0.3s'
 				}}
@@ -359,15 +380,15 @@ export default function Home() {
 					<span role="img" aria-label="chart" style={{ fontSize: isMobile ? 22 : 28, color: '#6366f1', filter: 'drop-shadow(0 2px 8px #e0e7ff)' }}>📈</span>
 					<Title level={4} style={{ margin: 0, textAlign: 'center', fontSize: isMobile ? 18 : 22, fontWeight: 700, color: '#2563eb' }}>{t('predicted_trends')}</Title>
 				</div>
-				<Divider style={{ margin: isMobile ? '8px 0' : '16px 0', borderColor: '#e0e7ff' }} />
+				<Divider style={{ margin: isMobile ? '8px 0' : '16px 0', borderColor: darkMode ? '#232946' : '#e0e7ff' }} />
 				<Row gutter={[8, 8]} align="middle">
 					<Col xs={24} md={12} style={{ marginBottom: isMobile ? 8 : 12 }}>
-						<Statistic title={t('prediction')} value={output} prefix="$" precision={2} valueStyle={{ fontWeight: 600, fontSize: isMobile ? 20 : 22 }} aria-live="polite" aria-busy={loading} />
+						<Statistic title={t('prediction')} value={output} prefix="$" precision={2} valueStyle={{ fontWeight: 600, fontSize: isMobile ? 20 : 22, color: darkMode ? '#ffe066' : undefined }} aria-live="polite" aria-busy={loading} />
 						<span style={{ position: 'absolute', left: '-9999px' }} aria-live="polite">${output.toFixed(2)}</span>
 					</Col>
 					<Col xs={24} md={12}>
 						<div style={{ minHeight: isMobile ? 180 : 240, position: 'relative', overflowX: 'auto' }}>
-							{loading && <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.7)', zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span>{t('loading_chart')}</span></div>}
+							{loading && <div style={{ position: 'absolute', inset: 0, background: darkMode ? 'rgba(36,37,46,0.7)' : 'rgba(255,255,255,0.7)', zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span>{t('loading_chart')}</span></div>}
 							<div style={{ minWidth: isMobile ? 220 : 320 }}>
 								<Line ref={chartRef} options={chartOptions} data={config} aria-busy={loading} />
 							</div>
