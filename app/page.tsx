@@ -245,7 +245,7 @@ export default function Home() {
 							<Select placeholder={t('select_ml_model')} autoFocus aria-label={t('ml_model')}>
 								{ML_MODELS.map((ml_model) => (
 									<Option key={ml_model} value={ml_model}>
-										{ml_model}
+										{t(`ml_models.${ml_model}`, ml_model)}
 									</Option>
 								))}
 							</Select>
@@ -258,7 +258,7 @@ export default function Home() {
 							<Select placeholder={t('select_town')} aria-label={t('town')}>
 								{TOWNS.map((town) => (
 									<Option key={town} value={town}>
-										{town}
+										{t(`towns.${town}`, town)}
 									</Option>
 								))}
 							</Select>
@@ -271,7 +271,7 @@ export default function Home() {
 							<Select placeholder={t('select_storey_range')} aria-label={t('storey_range')}>
 								{STOREY_RANGES.map((storey_range) => (
 									<Option key={storey_range} value={storey_range}>
-										{storey_range}
+										{t(`storey_ranges.${storey_range}`, storey_range)}
 									</Option>
 								))}
 							</Select>
@@ -284,7 +284,7 @@ export default function Home() {
 							<Select placeholder={t('select_flat_model')} aria-label={t('flat_model')}>
 								{FLAT_MODELS.map((flat_model) => (
 									<Option key={flat_model} value={flat_model}>
-										{flat_model}
+										{t(`flat_models.${flat_model}`, flat_model)}
 									</Option>
 								))}
 							</Select>
