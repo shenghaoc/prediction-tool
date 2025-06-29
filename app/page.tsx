@@ -46,12 +46,12 @@ const chartOptions = {
 	}
 };
 
-const initialFormValues = {
-	ml_model: 'Support Vector Regression',
-	town: 'ANG MO KIO',
-	storey_range: '01 TO 03',
-	flat_model: '2-room',
-	floor_area_sqm: 1,
+const initialFormValues: FieldType = {
+	ml_model: ML_MODELS[0],
+	town: TOWNS[0],
+	storey_range: STOREY_RANGES[0],
+	flat_model: FLAT_MODELS[0],
+	floor_area_sqm: 20,
 	lease_commence_date: dayjs.utc('2022-02', 'YYYY-MM')
 };
 
@@ -69,16 +69,16 @@ const defaultChartConfig = {
 	]
 };
 
-import { ML_MODELS, TOWNS, STOREY_RANGES, FLAT_MODELS } from '../lib/lists';
+import { ML_MODELS, TOWNS, STOREY_RANGES, FLAT_MODELS, MLModel, Town, StoreyRange, FlatModel } from '../lib/lists';
 
 const { Option } = Select;
 const { Title } = Typography;
 
 export type FieldType = {
-	ml_model: string;
-	town: string;
-	storey_range: string;
-	flat_model: string;
+	ml_model: MLModel;
+	town: Town;
+	storey_range: StoreyRange;
+	flat_model: FlatModel;
 	floor_area_sqm: number;
 	lease_commence_date: Dayjs;
 };
@@ -93,6 +93,46 @@ type ChartConfig = {
 		backgroundColor: string;
 	}>;
 };
+
+const MLModelSelect = React.memo(({ value }: { value?: MLModel }) => (
+	<Select placeholder="Select ML Model" autoFocus defaultValue={value} aria-label="ML Model">
+		{ML_MODELS.map((ml_model) => (
+			<Option key={ml_model} value={ml_model}>
+				{ml_model}
+			</Option>
+		))}
+	</Select>
+));
+
+const TownSelect = React.memo(({ value }: { value?: Town }) => (
+	<Select placeholder="Select Town" defaultValue={value} aria-label="Town">
+		{TOWNS.map((town) => (
+			<Option key={town} value={town}>
+				{town}
+			</Option>
+		))}
+	</Select>
+));
+
+const StoreyRangeSelect = React.memo(({ value }: { value?: StoreyRange }) => (
+	<Select placeholder="Select Storey Range" defaultValue={value} aria-label="Storey Range">
+		{STOREY_RANGES.map((storey_range) => (
+			<Option key={storey_range} value={storey_range}>
+				{storey_range}
+			</Option>
+		))}
+	</Select>
+));
+
+const FlatModelSelect = React.memo(({ value }: { value?: FlatModel }) => (
+	<Select placeholder="Select Flat Model" defaultValue={value} aria-label="Flat Model">
+		{FLAT_MODELS.map((flat_model) => (
+			<Option key={flat_model} value={flat_model}>
+				{flat_model}
+			</Option>
+		))}
+	</Select>
+));
 
 export default function Home() {
 	const curr = useMemo(() => initialFormValues.lease_commence_date, []);
@@ -110,6 +150,10 @@ export default function Home() {
 	const disabledYear = useCallback((current: Dayjs) => {
 		return current.isBefore('1960-01-01') || current.isAfter('2022-01-01', 'year');
 	}, []);
+
+	const handleReset = useCallback(() => {
+		form.setFieldsValue(initialFormValues);
+	}, [form]);
 
 	const handleFinish = useCallback(async (values: FieldType) => {
 		setLoading(true);
@@ -147,7 +191,14 @@ export default function Home() {
 				]
 			});
 			setOutput(server_data[server_data.length - 1]?.data ?? 0.0);
-			form.resetFields();
+			// Only reset fields except lease_commence_date
+			form.setFieldsValue({
+				ml_model: initialFormValues.ml_model,
+				town: initialFormValues.town,
+				storey_range: initialFormValues.storey_range,
+				flat_model: initialFormValues.flat_model,
+				floor_area_sqm: initialFormValues.floor_area_sqm
+			});
 		} catch (err: any) {
 			message.error(err?.message || 'Failed to fetch prediction. Please try again.');
 		} finally {
@@ -171,79 +222,61 @@ export default function Home() {
 					label="ML Model"
 					rules={[{ required: true, message: 'Please choose an ML Model!' }]}
 				>
-					<Select>
-						{ML_MODELS.map((ml_model) => (
-							<Option key={ml_model} value={ml_model}>
-								{ml_model}
-							</Option>
-						))}
-					</Select>
+					<MLModelSelect value={initialFormValues.ml_model} />
 				</Form.Item>
 				<Form.Item<FieldType>
 					name="town"
 					label="Town"
 					rules={[{ required: true, message: 'Missing Town!' }]}
 				>
-					<Select>
-						{TOWNS.map((town) => (
-							<Option key={town} value={town}>
-								{town}
-							</Option>
-						))}
-					</Select>
+					<TownSelect value={initialFormValues.town} />
 				</Form.Item>
 				<Form.Item<FieldType>
 					name="storey_range"
 					label="Storey Range"
 					rules={[{ required: true, message: 'Missing Storey Range!' }]}
 				>
-					<Select>
-						{STOREY_RANGES.map((storey_range) => (
-							<Option key={storey_range} value={storey_range}>
-								{storey_range}
-							</Option>
-						))}
-					</Select>
+					<StoreyRangeSelect value={initialFormValues.storey_range} />
 				</Form.Item>
 				<Form.Item<FieldType>
 					name="flat_model"
 					label="Flat Model"
 					rules={[{ required: true, message: 'Missing Flat Model!' }]}
 				>
-					<Select>
-						{FLAT_MODELS.map((flat_model) => (
-							<Option key={flat_model} value={flat_model}>
-								{flat_model}
-							</Option>
-						))}
-					</Select>
+					<FlatModelSelect value={initialFormValues.flat_model} />
 				</Form.Item>
 				<Form.Item<FieldType>
 					name="floor_area_sqm"
 					label="Floor Area"
-					rules={[{ required: true, message: 'Missing Floor Area!' }]}
+					rules={[{ required: true, message: 'Missing Floor Area!' }, { type: 'number', min: 20, max: 300, message: 'Floor area must be between 20 and 300 m²' }]}
 				>
-					<InputNumber type="number" min={1} addonAfter="m²" />
+					<InputNumber type="number" min={20} max={300} addonAfter="m²" style={{ width: '100%' }} placeholder="Enter floor area" aria-label="Floor Area" />
 				</Form.Item>
 				<Form.Item<FieldType>
 					name="lease_commence_date"
 					label="Lease Commence Date"
 					rules={[{ required: true, message: 'Missing Lease Commence Date!' }]}
 				>
-					<DatePicker picker="year" inputReadOnly={true} disabledDate={disabledYear} />
+					<DatePicker picker="year" inputReadOnly={true} disabledDate={disabledYear} style={{ width: '100%' }} placeholder="Select year" aria-label="Lease Commence Date" />
 				</Form.Item>
 				<Row gutter={16}>
 					<Col span={12}>
-						<Statistic title="Prediction" value={output} prefix="$" precision={2} valueStyle={{ fontWeight: 600 }} />
+						<Statistic title="Prediction" value={output} prefix="$" precision={2} valueStyle={{ fontWeight: 600 }} aria-live="polite" aria-busy={loading} />
 						<span style={{ position: 'absolute', left: '-9999px' }} aria-live="polite">${output.toFixed(2)}</span>
-						<Button style={{ marginTop: 16 }} type="primary" htmlType="submit" loading={loading} disabled={loading} aria-label="Get prediction">
+						<Button style={{ marginTop: 16, marginRight: 8 }} type="primary" htmlType="submit" loading={loading} disabled={loading} aria-label="Get prediction">
 							Get prediction
+						</Button>
+						<Button style={{ marginTop: 16 }} onClick={handleReset} disabled={loading} aria-label="Reset form">
+							Reset
 						</Button>
 					</Col>
 				</Row>
 			</Form>
 			<Divider>Predicted Trends for Past 12 Months</Divider>
-			<Line ref={chartRef} options={chartOptions} data={config} />
+			<div style={{ minHeight: 320, position: 'relative' }}>
+				{loading && <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.7)', zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span>Loading chart...</span></div>}
+				<Line ref={chartRef} options={chartOptions} data={config} aria-busy={loading} />
+			</div>
 		</main>
 	);
 }
