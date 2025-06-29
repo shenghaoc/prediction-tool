@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
 	Chart as ChartJS,
 	CategoryScale,
@@ -57,15 +57,25 @@ export type FieldType = {
 };
 
 type ApiResponse = { labels: string; data: number }[];
+type ChartConfig = {
+	labels: string[];
+	datasets: Array<{
+		label: string;
+		data: number[];
+		borderColor: string;
+		backgroundColor: string;
+	}>;
+};
 
 export default function Home() {
-	let curr = dayjs.utc('2022-02', 'YYYY-MM');
-	let labels = [...Array(13).keys()]
-		.reverse()
-		.map((x) => curr.subtract(x, 'month').format('YYYY-MM'));
+	const curr = useMemo(() => dayjs.utc('2022-02', 'YYYY-MM'), []);
+	const labels = useMemo(
+		() => [...Array(13).keys()].reverse().map((x) => curr.subtract(x, 'month').format('YYYY-MM')),
+		[curr]
+	);
 
 	const [output, setOutput] = useState(0.0);
-	const [config, setConfig] = useState({
+	const [config, setConfig] = useState<ChartConfig>({
 		labels,
 		datasets: [
 			{
@@ -77,6 +87,7 @@ export default function Home() {
 		]
 	});
 	const [loading, setLoading] = useState(false);
+	const [form] = Form.useForm<FieldType>();
 	const chartRef = useRef(null);
 
 	function disabledYear(current: Dayjs) {
@@ -116,6 +127,7 @@ export default function Home() {
 				]
 			});
 			setOutput(server_data[server_data.length - 1]?.data ?? 0.0);
+			form.resetFields();
 		} catch (err: any) {
 			message.error('Failed to fetch prediction. Please try again.');
 		} finally {
@@ -127,6 +139,7 @@ export default function Home() {
 		<main style={{ padding: `24px` }}>
 			<Title level={2}>Price Prediction</Title>
 			<Form
+				form={form}
 				labelCol={{ span: 4 }}
 				wrapperCol={{ span: 14 }}
 				layout="horizontal"
@@ -209,7 +222,7 @@ export default function Home() {
 				<Row gutter={16}>
 					<Col span={12}>
 						<Statistic title="Prediction" value={output} prefix="$" precision={2} />
-						<Button style={{ marginTop: 16 }} type="primary" htmlType="submit" loading={loading} disabled={loading}>
+						<Button style={{ marginTop: 16 }} type="primary" htmlType="submit" loading={loading} disabled={loading} aria-label="Get prediction">
 							Get prediction
 						</Button>
 					</Col>
