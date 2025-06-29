@@ -166,7 +166,12 @@ export default function Home() {
 	}, [curr, form]);
 
 	return (
-		<main style={{ padding: isMobile ? 0 : 24, background: '#f5f7fa', minHeight: '100vh' }}>
+		<main style={{
+			padding: isMobile ? 0 : 24,
+			background: '#f5f7fa',
+			minHeight: '100vh',
+			fontFamily: `system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif`
+		}}>
 			<div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: isMobile ? 8 : 16 }}>
 				<Button size="small" onClick={() => i18n.changeLanguage(i18n.language === 'en' ? 'zh' : 'en')}>
 					{t('switch_language')}
@@ -180,7 +185,8 @@ export default function Home() {
 					margin: isMobile ? 0 : '0 auto 24px auto',
 					boxShadow: isMobile ? 'none' : '0 2px 8px #f0f1f2',
 					borderRadius: isMobile ? 0 : 12,
-					padding: isMobile ? 8 : 16
+					padding: isMobile ? 8 : 16,
+					fontFamily: `system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif`
 				}}
 			>
 				<Title level={4} style={{ marginBottom: isMobile ? 8 : 16, textAlign: 'center', fontSize: isMobile ? 16 : 18 }}>{t('prediction_form')}</Title>
@@ -296,7 +302,8 @@ export default function Home() {
 					margin: isMobile ? 0 : '0 auto',
 					boxShadow: isMobile ? 'none' : '0 2px 8px #f0f1f2',
 					borderRadius: isMobile ? 0 : 12,
-					padding: isMobile ? 8 : 16 
+					padding: isMobile ? 8 : 16,
+					fontFamily: `system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif`
 				}}
 			>
 				<Title level={4} style={{ marginBottom: isMobile ? 8 : 16, textAlign: 'center', fontSize: isMobile ? 16 : 18 }}>{t('predicted_trends')}</Title>
