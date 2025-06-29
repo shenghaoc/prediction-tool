@@ -153,6 +153,7 @@ export default function Home() {
 
 	const handleReset = useCallback(() => {
 		form.setFieldsValue(initialFormValues);
+		setOutput(0.0);
 	}, [form]);
 
 	const handleFinish = useCallback(async (values: FieldType) => {
