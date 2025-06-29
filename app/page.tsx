@@ -12,8 +12,7 @@ import {
 	Legend
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { Suspense } from 'react';
-import { Form, Select, InputNumber, Button, Typography, Statistic, Col, Row, Divider } from 'antd';
+import { Form, Select, InputNumber, Button, Typography, Statistic, Col, Row, Divider, message } from 'antd';
 import { DatePicker } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -43,10 +42,7 @@ const options = {
 	}
 };
 
-import { ml_model_list } from '../lib/lists';
-import { town_list } from '../lib/lists';
-import { storey_range_list } from '../lib/lists';
-import { flat_model_list } from '../lib/lists';
+import { ml_model_list, town_list, storey_range_list, flat_model_list } from '../lib/lists';
 
 const { Option } = Select;
 const { Title } = Typography;
@@ -60,7 +56,8 @@ export type FieldType = {
 	lease_commence_date: Dayjs;
 };
 
-// markup
+type ApiResponse = { labels: string; data: number }[];
+
 export default function Home() {
 	let curr = dayjs.utc('2022-02', 'YYYY-MM');
 	let labels = [...Array(13).keys()]
@@ -79,13 +76,53 @@ export default function Home() {
 			}
 		]
 	});
+	const [loading, setLoading] = useState(false);
+	const chartRef = useRef(null);
 
-	// 1960 (first HDB flats) to 2022 (current year)
 	function disabledYear(current: Dayjs) {
 		return current.isBefore('1960-01-01') || current.isAfter('2022-01-01', 'year');
 	}
 
-	const chartRef = useRef(null);
+	const handleFinish = async (values: FieldType) => {
+		setLoading(true);
+		const formData = new FormData();
+		formData.append('ml_model', values.ml_model);
+		formData.append('month_start', curr.subtract(12, 'month').format('YYYY-MM'));
+		formData.append('month_end', curr.format('YYYY-MM'));
+		formData.append('town', values.town);
+		formData.append('storey_range', values.storey_range);
+		formData.append('flat_model', values.flat_model);
+		formData.append('floor_area_sqm', values.floor_area_sqm.toString());
+		formData.append('lease_commence_date', dayjs(values.lease_commence_date).year().toString());
+		try {
+			const response = await fetch(
+				'https://ee4802-g20-tool.shenghaoc.workers.dev/api/prices',
+				{
+					method: 'POST',
+					body: formData
+				}
+			);
+			if (!response.ok) throw new Error('API request failed');
+			const server_data: ApiResponse = await response.json();
+			setConfig({
+				labels: server_data.map((x) => x.labels),
+				datasets: [
+					{
+						label: 'Trends',
+						data: server_data.map((x) => x.data),
+						borderColor: 'rgb(53, 162, 235)',
+						backgroundColor: 'rgba(53, 162, 235, 0.5)'
+					}
+				]
+			});
+			setOutput(server_data[server_data.length - 1]?.data ?? 0.0);
+		} catch (err: any) {
+			message.error('Failed to fetch prediction. Please try again.');
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	return (
 		<main style={{ padding: `24px` }}>
 			<Title level={2}>Price Prediction</Title>
@@ -101,40 +138,7 @@ export default function Home() {
 					floor_area_sqm: 1,
 					lease_commence_date: curr
 				}}
-				onFinish={(values: FieldType) => {
-					const formData = new FormData();
-					formData.append("ml_model", values.ml_model);
-					formData.append("month_start", curr.subtract(12, 'month').format('YYYY-MM'));
-					formData.append("month_end", curr.format('YYYY-MM'));
-					formData.append("town", values.town);
-					formData.append("storey_range", values.storey_range);
-					formData.append("flat_model", values.flat_model);
-					formData.append("floor_area_sqm", values.floor_area_sqm.toString());
-					formData.append("lease_commence_date", dayjs(values.lease_commence_date).year().toString());
-					const res = fetch(
-						'https://ee4802-g20-tool.shenghaoc.workers.dev/api/prices',
-						{
-							method: 'POST', // *GET, POST, PUT, DELETE, etc.
-							body: formData
-						}
-					);
-					res.then((response) =>
-						response.json().then((server_data: [{ labels: string; data: number }]) => {
-							setConfig({
-								labels: server_data.map((x: { labels: string; data: number }) => x['labels']),
-								datasets: [
-									{
-										label: 'Trends',
-										data: server_data.map((x: { labels: string; data: number }) => x['data']),
-										borderColor: 'rgb(53, 162, 235)',
-										backgroundColor: 'rgba(53, 162, 235, 0.5)'
-									}
-								]
-							});
-							setOutput(server_data[server_data.length - 1]['data']);
-						})
-					);
-				}}
+				onFinish={handleFinish}
 			>
 				<Form.Item<FieldType>
 					name="ml_model"
@@ -205,16 +209,14 @@ export default function Home() {
 				<Row gutter={16}>
 					<Col span={12}>
 						<Statistic title="Prediction" value={output} prefix="$" precision={2} />
-						<Button style={{ marginTop: 16 }} type="primary" htmlType="submit">
+						<Button style={{ marginTop: 16 }} type="primary" htmlType="submit" loading={loading} disabled={loading}>
 							Get prediction
 						</Button>
 					</Col>
 				</Row>
 			</Form>
 			<Divider>Predicted Trends for Past 12 Months</Divider>
-			<Suspense fallback={<div>Loading...</div>}>
-				<Line ref={chartRef} options={options} data={config} />
-			</Suspense>
+			<Line ref={chartRef} options={options} data={config} />
 		</main>
 	);
 }
