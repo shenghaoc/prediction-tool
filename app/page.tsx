@@ -154,6 +154,7 @@ export default function Home() {
 	const handleReset = useCallback(() => {
 		form.setFieldsValue(initialFormValues);
 		setOutput(0.0);
+		setConfig(defaultChartConfig);
 	}, [form]);
 
 	const handleFinish = useCallback(async (values: FieldType) => {
