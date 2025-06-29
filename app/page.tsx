@@ -202,12 +202,13 @@ export default function Home() {
 	return (
 		<main style={{
 			padding: isMobile ? 0 : 24,
-			background: '#f5f7fa',
+			background: 'linear-gradient(135deg, #e0e7ff 0%, #f5f7fa 100%)',
 			minHeight: '100vh',
-			fontFamily: `system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif`
+			fontFamily: `system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif`,
+			transition: 'background 0.5s'
 		}}>
 			<div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: isMobile ? 8 : 16 }}>
-				<Button size="small" onClick={() => {
+				<Button size="small" style={{ borderRadius: 20, background: '#fff', boxShadow: '0 1px 4px #dbeafe', fontWeight: 500 }} onClick={() => {
 					const nextLang = i18n.language === 'en' ? 'zh' : 'en';
 					i18n.changeLanguage(nextLang);
 					localStorage.setItem('lang', nextLang);
@@ -215,19 +216,23 @@ export default function Home() {
 					{t('switch_language')}
 				</Button>
 			</div>
-			<Title level={2} style={{ marginBottom: isMobile ? 12 : 24, textAlign: 'center', fontSize: isMobile ? 22 : 28 }}>{t('price_prediction')}</Title>
+			<Title level={2} style={{ marginBottom: isMobile ? 12 : 24, textAlign: 'center', fontSize: isMobile ? 26 : 36, fontWeight: 800, letterSpacing: 1, color: '#1e293b', textShadow: '0 2px 8px #e0e7ff' }}>{t('price_prediction')}</Title>
 			<Card
 				style={{
 					maxWidth: isMobile ? '100vw' : 600,
 					width: '100vw',
 					margin: isMobile ? 0 : '0 auto 24px auto',
-					boxShadow: isMobile ? 'none' : '0 2px 8px #f0f1f2',
-					borderRadius: isMobile ? 0 : 12,
-					padding: isMobile ? 8 : 16,
-					fontFamily: `system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif`
+					boxShadow: isMobile ? 'none' : '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
+					borderRadius: isMobile ? 0 : 24,
+					padding: isMobile ? 8 : 32,
+					background: 'rgba(255,255,255,0.85)',
+					backdropFilter: isMobile ? undefined : 'blur(8px)',
+					border: '1px solid #e0e7ff',
+					fontFamily: `system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif`,
+					transition: 'box-shadow 0.3s, background 0.3s'
 				}}
 			>
-				<Title level={4} style={{ marginBottom: isMobile ? 8 : 16, textAlign: 'center', fontSize: isMobile ? 16 : 18 }}>{t('prediction_form')}</Title>
+				<Title level={4} style={{ marginBottom: isMobile ? 8 : 16, textAlign: 'center', fontSize: isMobile ? 18 : 22, fontWeight: 700, color: '#2563eb' }}>{t('prediction_form')}</Title>
 				<Form
 					form={form}
 					labelCol={{ xs: { span: 24 }, sm: { span: 8 } }}
@@ -237,7 +242,7 @@ export default function Home() {
 					onFinish={handleFinish}
 					onValuesChange={handleFormChange}
 				>
-					<Space direction="vertical" size={isMobile ? 8 : 16} style={{ width: '100%' }}>
+					<Space direction="vertical" size={isMobile ? 8 : 20} style={{ width: '100%' }}>
 						<Form.Item<FieldType>
 							name="ml_model"
 							label={t('ml_model')}
@@ -308,9 +313,9 @@ export default function Home() {
 							<DatePicker picker="year" inputReadOnly={true} disabledDate={disabledYear} style={{ width: '100%' }} placeholder={t('select_year')} aria-label={t('lease_commence_date')} />
 						</Form.Item>
 						<Row gutter={8} justify={isMobile ? 'center' : 'end'}>
-							<Col xs={24} sm={12} style={{ display: 'flex', gap: 8 }}>
+							<Col xs={24} sm={12} style={{ display: 'flex', gap: 12 }}>
 								<Button
-									style={{ marginTop: 8, flex: 1, minHeight: 48, fontSize: 18 }}
+									style={{ marginTop: 8, flex: 1, minHeight: 48, fontSize: 18, borderRadius: 12, background: 'linear-gradient(90deg, #6366f1 0%, #60a5fa 100%)', color: '#fff', fontWeight: 700, boxShadow: '0 2px 8px #dbeafe', border: 'none', transition: 'background 0.2s' }}
 									type="primary"
 									htmlType="submit"
 									loading={loading}
@@ -321,7 +326,7 @@ export default function Home() {
 									{t('get_prediction')}
 								</Button>
 								<Button
-									style={{ marginTop: 8, flex: 1, minHeight: 48, fontSize: 18 }}
+									style={{ marginTop: 8, flex: 1, minHeight: 48, fontSize: 18, borderRadius: 12, background: '#fff', color: '#6366f1', fontWeight: 700, border: '1.5px solid #6366f1', boxShadow: '0 2px 8px #e0e7ff', transition: 'background 0.2s' }}
 									onClick={handleReset}
 									disabled={loading}
 									aria-label={t('reset_form')}
@@ -339,13 +344,21 @@ export default function Home() {
 					maxWidth: isMobile ? '100vw' : 900,
 					width: '100vw',
 					margin: isMobile ? 0 : '0 auto',
-					boxShadow: isMobile ? 'none' : '0 2px 8px #f0f1f2',
-					borderRadius: isMobile ? 0 : 12,
-					padding: isMobile ? 8 : 16,
-					fontFamily: `system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif`
+					boxShadow: isMobile ? 'none' : '0 8px 32px 0 rgba(31, 38, 135, 0.10)',
+					borderRadius: isMobile ? 0 : 24,
+					padding: isMobile ? 8 : 32,
+					background: 'rgba(255,255,255,0.85)',
+					backdropFilter: isMobile ? undefined : 'blur(8px)',
+					border: '1px solid #e0e7ff',
+					fontFamily: `system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif`,
+					transition: 'box-shadow 0.3s, background 0.3s'
 				}}
 			>
-				<Title level={4} style={{ marginBottom: isMobile ? 8 : 16, textAlign: 'center', fontSize: isMobile ? 16 : 18 }}>{t('predicted_trends')}</Title>
+				<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: isMobile ? 8 : 16 }}>
+					<span role="img" aria-label="chart" style={{ fontSize: isMobile ? 22 : 28, color: '#6366f1', filter: 'drop-shadow(0 2px 8px #e0e7ff)' }}>📈</span>
+					<Title level={4} style={{ margin: 0, textAlign: 'center', fontSize: isMobile ? 18 : 22, fontWeight: 700, color: '#2563eb' }}>{t('predicted_trends')}</Title>
+				</div>
+				<Divider style={{ margin: isMobile ? '8px 0' : '16px 0', borderColor: '#e0e7ff' }} />
 				<Row gutter={[8, 8]} align="middle">
 					<Col xs={24} md={12} style={{ marginBottom: isMobile ? 8 : 12 }}>
 						<Statistic title={t('prediction')} value={output} prefix="$" precision={2} valueStyle={{ fontWeight: 600, fontSize: isMobile ? 20 : 22 }} aria-live="polite" aria-busy={loading} />
