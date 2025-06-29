@@ -1,0 +1,27 @@
+{
+  "title": "价格预测",
+  "form": {
+    "section": "预测表单",
+    "ml_model": "机器学习模型",
+    "town": "城镇",
+    "storey_range": "楼层范围",
+    "flat_model": "房型",
+    "floor_area": "面积 (平方米)",
+    "lease_commence_date": "租约开始年份",
+    "get_prediction": "获取预测",
+    "reset": "重置",
+    "missing_ml_model": "请选择机器学习模型！",
+    "missing_town": "请选择城镇！",
+    "missing_storey_range": "请选择楼层范围！",
+    "missing_flat_model": "请选择房型！",
+    "missing_floor_area": "请输入面积！",
+    "missing_lease_commence_date": "请选择租约开始年份！",
+    "floor_area_range": "面积必须在20到300平方米之间"
+  },
+  "chart": {
+    "section": "过去12个月的预测趋势",
+    "prediction": "预测"
+  },
+  "loading_chart": "图表加载中...",
+  "error_fetch": "获取预测失败，请重试。"
+}

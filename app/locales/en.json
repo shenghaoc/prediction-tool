@@ -1,0 +1,27 @@
+{
+  "title": "Price Prediction",
+  "form": {
+    "section": "Prediction Form",
+    "ml_model": "ML Model",
+    "town": "Town",
+    "storey_range": "Storey Range",
+    "flat_model": "Flat Model",
+    "floor_area": "Floor Area",
+    "lease_commence_date": "Lease Commence Date",
+    "get_prediction": "Get prediction",
+    "reset": "Reset",
+    "missing_ml_model": "Please choose an ML Model!",
+    "missing_town": "Missing Town!",
+    "missing_storey_range": "Missing Storey Range!",
+    "missing_flat_model": "Missing Flat Model!",
+    "missing_floor_area": "Missing Floor Area!",
+    "missing_lease_commence_date": "Missing Lease Commence Date!",
+    "floor_area_range": "Floor area must be between 20 and 300 m²"
+  },
+  "chart": {
+    "section": "Predicted Trends for Past 12 Months",
+    "prediction": "Prediction"
+  },
+  "loading_chart": "Loading chart...",
+  "error_fetch": "Failed to fetch prediction. Please try again."
+}

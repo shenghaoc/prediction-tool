@@ -17,6 +17,10 @@ import { DatePicker } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import utc from 'dayjs/plugin/utc';
+import '../app/i18n';
+import { useTranslation } from 'react-i18next';
+import './i18n';
+
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
 ChartJS.register(
@@ -95,6 +99,7 @@ type ChartConfig = {
 };
 
 export default function Home() {
+	const { t, i18n } = useTranslation();
 	const screens = Grid.useBreakpoint();
 	const isMobile = !screens.md;
 	const curr = useMemo(() => initialFormValues.lease_commence_date, []);
@@ -162,7 +167,12 @@ export default function Home() {
 
 	return (
 		<main style={{ padding: isMobile ? 0 : 24, background: '#f5f7fa', minHeight: '100vh' }}>
-			<Title level={2} style={{ marginBottom: isMobile ? 12 : 24, textAlign: 'center', fontSize: isMobile ? 22 : 28 }}>Price Prediction</Title>
+			<div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: isMobile ? 8 : 16 }}>
+				<Button size="small" onClick={() => i18n.changeLanguage(i18n.language === 'en' ? 'zh' : 'en')}>
+					{t('switch_language')}
+				</Button>
+			</div>
+			<Title level={2} style={{ marginBottom: isMobile ? 12 : 24, textAlign: 'center', fontSize: isMobile ? 22 : 28 }}>{t('price_prediction')}</Title>
 			<Card
 				style={{
 					maxWidth: isMobile ? '100vw' : 600,
@@ -173,7 +183,7 @@ export default function Home() {
 					padding: isMobile ? 8 : 16
 				}}
 			>
-				<Title level={4} style={{ marginBottom: isMobile ? 8 : 16, textAlign: 'center', fontSize: isMobile ? 16 : 18 }}>Prediction Form</Title>
+				<Title level={4} style={{ marginBottom: isMobile ? 8 : 16, textAlign: 'center', fontSize: isMobile ? 16 : 18 }}>{t('prediction_form')}</Title>
 				<Form
 					form={form}
 					labelCol={{ xs: { span: 24 }, sm: { span: 8 } }}
@@ -185,10 +195,10 @@ export default function Home() {
 					<Space direction="vertical" size={isMobile ? 8 : 16} style={{ width: '100%' }}>
 						<Form.Item<FieldType>
 							name="ml_model"
-							label="ML Model"
-							rules={[{ required: true, message: 'Please choose an ML Model!' }]}
+							label={t('ml_model')}
+							rules={[{ required: true, message: t('choose_ml_model') }]}
 						>
-							<Select placeholder="Select ML Model" autoFocus aria-label="ML Model">
+							<Select placeholder={t('select_ml_model')} autoFocus aria-label={t('ml_model')}>
 								{ML_MODELS.map((ml_model) => (
 									<Option key={ml_model} value={ml_model}>
 										{ml_model}
@@ -198,10 +208,10 @@ export default function Home() {
 						</Form.Item>
 						<Form.Item<FieldType>
 							name="town"
-							label="Town"
-							rules={[{ required: true, message: 'Missing Town!' }]}
+							label={t('town')}
+							rules={[{ required: true, message: t('missing_town') }]}
 						>
-							<Select placeholder="Select Town" aria-label="Town">
+							<Select placeholder={t('select_town')} aria-label={t('town')}>
 								{TOWNS.map((town) => (
 									<Option key={town} value={town}>
 										{town}
@@ -211,10 +221,10 @@ export default function Home() {
 						</Form.Item>
 						<Form.Item<FieldType>
 							name="storey_range"
-							label="Storey Range"
-							rules={[{ required: true, message: 'Missing Storey Range!' }]}
+							label={t('storey_range')}
+							rules={[{ required: true, message: t('missing_storey_range') }]}
 						>
-							<Select placeholder="Select Storey Range" aria-label="Storey Range">
+							<Select placeholder={t('select_storey_range')} aria-label={t('storey_range')}>
 								{STOREY_RANGES.map((storey_range) => (
 									<Option key={storey_range} value={storey_range}>
 										{storey_range}
@@ -224,10 +234,10 @@ export default function Home() {
 						</Form.Item>
 						<Form.Item<FieldType>
 							name="flat_model"
-							label="Flat Model"
-							rules={[{ required: true, message: 'Missing Flat Model!' }]}
+							label={t('flat_model')}
+							rules={[{ required: true, message: t('missing_flat_model') }]}
 						>
-							<Select placeholder="Select Flat Model" aria-label="Flat Model">
+							<Select placeholder={t('select_flat_model')} aria-label={t('flat_model')}>
 								{FLAT_MODELS.map((flat_model) => (
 									<Option key={flat_model} value={flat_model}>
 										{flat_model}
@@ -237,17 +247,20 @@ export default function Home() {
 						</Form.Item>
 						<Form.Item<FieldType>
 							name="floor_area_sqm"
-							label="Floor Area"
-							rules={[{ required: true, message: 'Missing Floor Area!' }, { type: 'number', min: 20, max: 300, message: 'Floor area must be between 20 and 300 m²' }]}
+							label={t('floor_area')}
+							rules={[
+								{ required: true, message: t('missing_floor_area') },
+								{ type: 'number', min: 20, max: 300, message: t('floor_area_range') }
+							]}
 						>
-							<InputNumber type="number" min={20} max={300} addonAfter="m²" style={{ width: '100%' }} placeholder="Enter floor area" aria-label="Floor Area" />
+							<InputNumber type="number" min={20} max={300} addonAfter="m²" style={{ width: '100%' }} placeholder={t('enter_floor_area')} aria-label={t('floor_area')} />
 						</Form.Item>
 						<Form.Item<FieldType>
 							name="lease_commence_date"
-							label="Lease Commence Date"
-							rules={[{ required: true, message: 'Missing Lease Commence Date!' }]}
+							label={t('lease_commence_date')}
+							rules={[{ required: true, message: t('missing_lease_commence_date') }]}
 						>
-							<DatePicker picker="year" inputReadOnly={true} disabledDate={disabledYear} style={{ width: '100%' }} placeholder="Select year" aria-label="Lease Commence Date" />
+							<DatePicker picker="year" inputReadOnly={true} disabledDate={disabledYear} style={{ width: '100%' }} placeholder={t('select_year')} aria-label={t('lease_commence_date')} />
 						</Form.Item>
 						<Row gutter={8} justify={isMobile ? 'center' : 'end'}>
 							<Col xs={24} sm={12} style={{ display: 'flex', gap: 8 }}>
@@ -257,19 +270,19 @@ export default function Home() {
 									htmlType="submit"
 									loading={loading}
 									disabled={loading}
-									aria-label="Get prediction"
+									aria-label={t('get_prediction')}
 									block
 								>
-									Get prediction
+									{t('get_prediction')}
 								</Button>
 								<Button
 									style={{ marginTop: 8, flex: 1, minHeight: 48, fontSize: 18 }}
 									onClick={handleReset}
 									disabled={loading}
-									aria-label="Reset form"
+									aria-label={t('reset_form')}
 									block
 								>
-									Reset
+									{t('reset_form')}
 								</Button>
 							</Col>
 						</Row>
@@ -286,15 +299,15 @@ export default function Home() {
 					padding: isMobile ? 8 : 16 
 				}}
 			>
-				<Title level={4} style={{ marginBottom: isMobile ? 8 : 16, textAlign: 'center', fontSize: isMobile ? 16 : 18 }}>Predicted Trends for Past 12 Months</Title>
+				<Title level={4} style={{ marginBottom: isMobile ? 8 : 16, textAlign: 'center', fontSize: isMobile ? 16 : 18 }}>{t('predicted_trends')}</Title>
 				<Row gutter={[8, 8]} align="middle">
 					<Col xs={24} md={12} style={{ marginBottom: isMobile ? 8 : 12 }}>
-						<Statistic title="Prediction" value={output} prefix="$" precision={2} valueStyle={{ fontWeight: 600, fontSize: isMobile ? 20 : 22 }} aria-live="polite" aria-busy={loading} />
+						<Statistic title={t('prediction')} value={output} prefix="$" precision={2} valueStyle={{ fontWeight: 600, fontSize: isMobile ? 20 : 22 }} aria-live="polite" aria-busy={loading} />
 						<span style={{ position: 'absolute', left: '-9999px' }} aria-live="polite">${output.toFixed(2)}</span>
 					</Col>
 					<Col xs={24} md={12}>
 						<div style={{ minHeight: isMobile ? 180 : 240, position: 'relative', overflowX: 'auto' }}>
-							{loading && <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.7)', zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span>Loading chart...</span></div>}
+							{loading && <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.7)', zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span>{t('loading_chart')}</span></div>}
 							<div style={{ minWidth: isMobile ? 220 : 320 }}>
 								<Line ref={chartRef} options={chartOptions} data={config} aria-busy={loading} />
 							</div>
