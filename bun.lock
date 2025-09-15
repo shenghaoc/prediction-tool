@@ -4,7 +4,7 @@
     "": {
       "name": "prediction-tool",
       "dependencies": {
-        "@ant-design/nextjs-registry": "^1.0.2",
+        "@ant-design/nextjs-registry": "^1.1.0",
         "@ant-design/v5-patch-for-react-19": "^1.0.3",
         "antd": "^5.27.3",
         "chart.js": "^4.5.0",
@@ -44,7 +44,7 @@
 
     "@ant-design/icons-svg": ["@ant-design/icons-svg@4.4.2", "", {}, "sha512-vHbT+zJEVzllwP+CM+ul7reTEfBR0vgxFe7+lREAsAA7YGsYpboiq2sQNeQeRvh09GfQgs/GyFEvZpJ9cLXpXA=="],
 
-    "@ant-design/nextjs-registry": ["@ant-design/nextjs-registry@1.0.2", "", { "peerDependencies": { "@ant-design/cssinjs": "^1.18.2", "antd": "^5.0.0", "next": "^14.0.0 || ^15.0.0", "react": ">=16.0.0", "react-dom": ">=16.0.0" } }, "sha512-hmeBsD3Aq+bR9zlzvnE+zU0jGX6uamad5dk9nw/O5oZ7Pu+zonL+MuyUUw/olMOzqjq9iY+DZciJr9F86th3YQ=="],
+    "@ant-design/nextjs-registry": ["@ant-design/nextjs-registry@1.1.0", "", { "peerDependencies": { "@ant-design/cssinjs": "^1.24.0", "antd": "^5.0.0", "next": "^14.0.0 || ^15.0.0", "react": ">=16.0.0", "react-dom": ">=16.0.0" } }, "sha512-zZ9SKyqTHonUK7l/z/ixpVx0LSnZTlIqYFOccSDI7jx7ojCMTGxzkl3ugGWPPh8xPYDsVxqzwJZBic84H7LgLw=="],
 
     "@ant-design/react-slick": ["@ant-design/react-slick@1.1.2", "", { "dependencies": { "@babel/runtime": "^7.10.4", "classnames": "^2.2.5", "json2mq": "^0.2.0", "resize-observer-polyfill": "^1.5.1", "throttle-debounce": "^5.0.0" }, "peerDependencies": { "react": ">=16.9.0" } }, "sha512-EzlvzE6xQUBrZuuhSAFTdsr4P2bBBHGZwKFemEfq8gIGyIQCxalYfZW/T2ORbtQx5rU69o+WycP3exY/7T1hGA=="],
 
