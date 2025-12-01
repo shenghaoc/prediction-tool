@@ -9,9 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ant-design/icons": "6",
     "@ant-design/nextjs-registry": "^1.2.0",
-    "@ant-design/v5-patch-for-react-19": "^1.0.3",
-    "antd": "^5.27.3",
+    "antd": "6",
     "chart.js": "^4.5.0",
     "dayjs": "^1.11.13",
     "framer-motion": "^12.19.2",

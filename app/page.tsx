@@ -1,5 +1,4 @@
 'use client';
-import '@ant-design/v5-patch-for-react-19';
 import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import {
 	Chart as ChartJS,
@@ -288,7 +287,7 @@ export default function Home() {
 							onFinish={handleFinish}
 							onValuesChange={handleFormChange}
 						>
-							<Space direction="vertical" size={isMobile ? 8 : 20} style={{ width: '100%' }}>
+							<Space orientation="vertical" size={isMobile ? 8 : 20} style={{ width: '100%' }}>
 								<Form.Item<FieldType>
 									name="ml_model"
 									label={t('ml_model')}
