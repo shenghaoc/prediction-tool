@@ -52,6 +52,11 @@
   "get_prediction": "Get prediction",
   "reset_form": "Reset",
   "predicted_trends": "Predicted Trends for Past 12 Months",
+  "chart_story_title": "How the estimate has moved over the last year",
+  "chart_latest": "Latest",
+  "chart_range": "12M Range",
+  "chart_delta": "12M Change",
+  "vs_12m_ago": "vs 12 months ago",
   "prediction": "Prediction",
   "ml_models": {
     "Support Vector Regression": "Support Vector Regression",

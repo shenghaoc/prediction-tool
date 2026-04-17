@@ -99,10 +99,14 @@ export default function PredictionPage() {
 	}, [form, i18n]);
 
 	useEffect(() => {
-		if (typeof window !== 'undefined') {
-			localStorage.setItem('lang', i18n.language);
+		if (!mounted) {
+			return;
 		}
-	}, [i18n.language]);
+
+		document.documentElement.lang = i18n.language;
+		document.documentElement.setAttribute('data-lang', i18n.language);
+		localStorage.setItem('lang', i18n.language);
+	}, [i18n.language, mounted]);
 
 	const disabledYear = useCallback((current: FieldType['lease_commence_date']) => {
 		return current.isBefore('1960-01-01') || current.isAfter('2022-01-01', 'year');
@@ -141,20 +145,18 @@ export default function PredictionPage() {
 	const handleFinish = useCallback(
 		async (values: FieldType) => {
 			setLoading(true);
+			const floorArea = Math.max(20, Math.min(300, Math.round(values.floor_area_sqm)));
 			const formData = new FormData();
 			formData.append('ml_model', values.ml_model);
 			formData.append(
 				'month_start',
-				initialFormValues.lease_commence_date.subtract(12, 'month').format('YYYY-MM')
+				values.lease_commence_date.subtract(12, 'month').format('YYYY-MM')
 			);
-			formData.append(
-				'month_end',
-				initialFormValues.lease_commence_date.format('YYYY-MM')
-			);
+			formData.append('month_end', values.lease_commence_date.format('YYYY-MM'));
 			formData.append('town', values.town);
 			formData.append('storey_range', values.storey_range);
 			formData.append('flat_model', values.flat_model);
-			formData.append('floor_area_sqm', values.floor_area_sqm.toString());
+			formData.append('floor_area_sqm', floorArea.toString());
 			formData.append(
 				'lease_commence_date',
 				dayjs(values.lease_commence_date).year().toString()

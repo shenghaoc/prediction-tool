@@ -118,17 +118,24 @@ export default function PredictionForm({
 					<Form.Item<FieldType>
 						className={styles.fieldFull}
 						label={t('floor_area')}
-						rules={[
-							{ required: true, message: t('missing_floor_area') },
-							{ type: 'number', min: 20, max: 300, message: t('floor_area_range') }
-						]}
 					>
 						<div className={styles.unitWrap}>
-							<Form.Item<FieldType> name="floor_area_sqm" noStyle>
+							<Form.Item<FieldType>
+								name="floor_area_sqm"
+								noStyle
+								rules={[
+									{ required: true, message: t('missing_floor_area') },
+									{ type: 'number', min: 20, max: 300, message: t('floor_area_range') }
+								]}
+							>
 								<InputNumber
-									type="number"
 									min={20}
 									max={300}
+									precision={0}
+									step={1}
+									changeOnWheel={false}
+									controls={false}
+									parser={(value) => Number((value ?? '').replace(/[^\d]/g, ''))}
 									style={{ width: '100%' }}
 									placeholder={t('enter_floor_area')}
 									aria-label={t('floor_area')}

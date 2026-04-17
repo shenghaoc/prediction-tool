@@ -125,7 +125,7 @@
 }
 
 .headlineCjk {
-	font-family: var(--font-body), 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+	font-family: var(--font-body-cjk, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif);
 	font-weight: 800;
 	letter-spacing: -0.02em;
 	line-height: 1.02;
@@ -337,6 +337,70 @@
 	border-top: 1px solid var(--line-soft, rgba(116, 92, 68, 0.14));
 }
 
+.chartHeader {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 16px;
+	align-items: end;
+	margin-bottom: 14px;
+}
+
+.chartKicker {
+	display: block;
+	color: var(--text-muted, #72695f);
+	font-size: 10px;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: 1.3px;
+}
+
+.chartTitle {
+	margin: 6px 0 0;
+	color: var(--text-color, #1f2328);
+	font-size: 1.2rem;
+	font-weight: 800;
+	letter-spacing: -0.03em;
+}
+
+.chartSummaryGrid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 10px;
+}
+
+.chartSummaryCard {
+	min-width: 130px;
+	padding: 12px 14px;
+	border: 1px solid var(--line-soft, rgba(116, 92, 68, 0.14));
+	border-radius: 18px;
+	background: var(--panel-strong, rgba(255, 255, 255, 0.48));
+}
+
+.chartSummaryCard span,
+.chartSummaryCard small {
+	display: block;
+	color: var(--text-muted, #72695f);
+	font-size: 10px;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: 1.2px;
+}
+
+.chartSummaryCard strong {
+	display: block;
+	margin-top: 6px;
+	color: var(--text-color, #1f2328);
+	font-size: 1rem;
+	font-weight: 800;
+	line-height: 1.35;
+	letter-spacing: -0.03em;
+}
+
+.chartSummaryCard small {
+	margin-top: 4px;
+	font-size: 9px;
+}
+
 .chartFrame {
 	min-height: 320px;
 	display: flex;
@@ -430,6 +494,11 @@
 
 	.resultsHeader {
 		flex-direction: column;
+	}
+
+	.chartHeader,
+	.chartSummaryGrid {
+		grid-template-columns: 1fr;
 	}
 
 	.pricePanel {

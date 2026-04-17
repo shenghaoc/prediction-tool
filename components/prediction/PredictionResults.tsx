@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useMemo } from 'react';
 import { Statistic } from 'antd';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { TFunction } from 'i18next';
@@ -40,6 +41,25 @@ export default function PredictionResults({
 	trendData,
 	valueVariants
 }: PredictionResultsProps) {
+	const chartStats = useMemo(() => {
+		const latestValue = trendData[trendData.length - 1]?.value ?? 0;
+		const firstValue = trendData[0]?.value ?? 0;
+		const peakValue = Math.max(...trendData.map((point) => point.value), 0);
+		const lowValue = trendData.reduce(
+			(currentLowest, point) =>
+				point.value > 0 ? Math.min(currentLowest, point.value) : currentLowest,
+			Number.POSITIVE_INFINITY
+		);
+		const deltaValue = latestValue - firstValue;
+
+		return {
+			latestValue,
+			peakValue,
+			lowValue: Number.isFinite(lowValue) ? lowValue : 0,
+			deltaValue
+		};
+	}, [trendData]);
+
 	return (
 		<div className={styles.resultsCard}>
 			<div className={styles.resultsHeader}>
@@ -88,6 +108,29 @@ export default function PredictionResults({
 			</div>
 
 			<div className={styles.chartShell}>
+				<div className={styles.chartHeader}>
+					<div>
+						<span className={styles.chartKicker}>{t('predicted_trends')}</span>
+						<h3 className={styles.chartTitle}>{t('chart_story_title')}</h3>
+					</div>
+					<div className={styles.chartSummaryGrid}>
+						<div className={styles.chartSummaryCard}>
+							<span>{t('chart_latest')}</span>
+							<strong>{`$${chartStats.latestValue.toLocaleString()}`}</strong>
+						</div>
+						<div className={styles.chartSummaryCard}>
+							<span>{t('chart_range')}</span>
+							<strong>{`$${chartStats.lowValue.toLocaleString()} - $${chartStats.peakValue.toLocaleString()}`}</strong>
+						</div>
+						<div className={styles.chartSummaryCard}>
+							<span>{t('chart_delta')}</span>
+							<strong>
+								{`${chartStats.deltaValue >= 0 ? '+' : '-'}$${Math.abs(chartStats.deltaValue).toLocaleString()}`}
+							</strong>
+							<small>{t('vs_12m_ago')}</small>
+						</div>
+					</div>
+				</div>
 				<AnimatePresence mode="wait">
 					<motion.div
 						key={JSON.stringify(trendData)}

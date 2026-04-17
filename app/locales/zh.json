@@ -52,6 +52,11 @@
   "get_prediction": "获取预测",
   "reset_form": "重置",
   "predicted_trends": "过去12个月预测趋势",
+  "chart_story_title": "过去一年估值变化",
+  "chart_latest": "最新估值",
+  "chart_range": "12个月区间",
+  "chart_delta": "12个月变化",
+  "vs_12m_ago": "对比12个月前",
   "prediction": "预测",
   "ml_models": {
     "Support Vector Regression": "支持向量回归",
