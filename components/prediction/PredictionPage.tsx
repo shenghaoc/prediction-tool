@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
 import dayjs from '../../lib/dayjs';
+import en from '../../app/locales/en.json';
 import styles from './styles.module.css';
 import '../../app/i18n';
 import { FLAT_MODELS, ML_MODELS, TOWNS } from '../../lib/lists';
@@ -202,6 +203,46 @@ export default function PredictionPage() {
 			transition: { duration: 0.6 }
 		}
 	};
+
+	const initialShellTheme = getPredictionTheme(false);
+
+	if (!mounted) {
+		return (
+			<main
+				className={styles.shell}
+				style={{
+					background: initialShellTheme.background,
+					padding: '26px 28px 42px',
+					...getThemeVars(initialShellTheme)
+				}}
+			>
+				<div className={styles.surface}>
+					<div className={styles.topbar}>
+						<div className={styles.pill}>{en.intro_eyebrow}</div>
+					</div>
+
+					<div className={styles.layout}>
+						<section className={styles.panel}>
+							<div className={styles.card}>
+								<div className={styles.cardInner}>
+									<div className={styles.introBlock}>
+										<h1 className={styles.headline}>{en.price_prediction}</h1>
+										<p className={styles.lead}>{en.intro_blurb}</p>
+									</div>
+								</div>
+							</div>
+						</section>
+
+						<section className={styles.resultsPanel}>
+							<div className={styles.resultsCard}>
+								<div className={styles.chartFrame} />
+							</div>
+						</section>
+					</div>
+				</div>
+			</main>
+		);
+	}
 
 	return (
 		<main
