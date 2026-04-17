@@ -214,7 +214,7 @@ export default function PredictionPage() {
 		>
 			<div className={styles.surface}>
 				<div className={styles.topbar}>
-					<div className={styles.pill}>{t('hero_eyebrow')}</div>
+					<div className={styles.pill}>{t('intro_eyebrow')}</div>
 
 					<div className={styles.actions}>
 						<Button
@@ -249,9 +249,9 @@ export default function PredictionPage() {
 						>
 							<div className={styles.card}>
 								<div className={styles.cardInner}>
-									<div className={styles.heroBlock}>
+									<div className={styles.introBlock}>
 										<h1 className={headlineClassName}>{t('price_prediction')}</h1>
-										<p className={styles.lead}>{t('hero_blurb')}</p>
+										<p className={styles.lead}>{t('intro_blurb')}</p>
 
 										<div className={styles.figureRow}>
 											{[
@@ -275,7 +275,7 @@ export default function PredictionPage() {
 											))}
 										</div>
 
-										<p className={styles.caption}>{t('hero_caption')}</p>
+										<p className={styles.caption}>{t('intro_caption')}</p>
 									</div>
 
 									<PredictionForm
