@@ -12,7 +12,7 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import type { ChartData, ChartOptions } from 'chart.js';
-import { Form, Select, InputNumber, Button, Typography, Statistic, Col, Row, Divider, message, Card, Space, Grid } from 'antd';
+import { App as AntdApp, Form, Select, InputNumber, Button, Typography, Statistic, Col, Row, Divider, Card, Space, Grid } from 'antd';
 import { DatePicker } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -106,21 +106,28 @@ function getErrorMessage(error: unknown, fallback: string) {
 }
 
 export default function Home() {
+	const { message: messageApi } = AntdApp.useApp();
 	const { t, i18n } = useTranslation();
 	const screens = Grid.useBreakpoint();
-	const isMobile = !screens.md;
-	const [darkMode, setDarkMode] = useState(() => {
-		if (typeof window !== 'undefined') {
-			return localStorage.getItem('theme') === 'dark';
-		}
-		return false;
-	});
+	const [mounted, setMounted] = useState(false);
+	const [darkMode, setDarkMode] = useState(false);
+	const isMobile = mounted ? !screens.md : false;
+
 	useEffect(() => {
-		if (typeof window !== 'undefined') {
-			document.body.setAttribute('data-theme', darkMode ? 'dark' : 'light');
-			localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+		setMounted(true);
+		if (localStorage.getItem('theme') === 'dark') {
+			setDarkMode(true);
 		}
-	}, [darkMode]);
+	}, []);
+
+	useEffect(() => {
+		if (!mounted) {
+			return;
+		}
+
+		document.body.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+		localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+	}, [darkMode, mounted]);
 	const curr = initialFormValues.lease_commence_date;
 
 	const [output, setOutput] = useState(0.0);
@@ -217,11 +224,11 @@ export default function Home() {
 			});
 			setOutput(server_data[server_data.length - 1]?.data ?? 0.0);
 		} catch (error: unknown) {
-			message.error(getErrorMessage(error, t('error_fetch')));
+			messageApi.error(getErrorMessage(error, t('error_fetch')));
 		} finally {
 			setLoading(false);
 		}
-	}, [curr, t]);
+	}, [curr, messageApi, t]);
 
 	// Animation variants
 	const cardVariants = {
@@ -358,7 +365,19 @@ export default function Home() {
 										{ type: 'number', min: 20, max: 300, message: t('floor_area_range') }
 									]}
 								>
-									<InputNumber type="number" min={20} max={300} addonAfter="m²" style={{ width: '100%' }} placeholder={t('enter_floor_area')} aria-label={t('floor_area')} />
+									<Space.Compact style={{ width: '100%' }}>
+										<InputNumber
+											type="number"
+											min={20}
+											max={300}
+											style={{ width: '100%' }}
+											placeholder={t('enter_floor_area')}
+											aria-label={t('floor_area')}
+										/>
+										<Button disabled style={{ width: 72 }}>
+											m²
+										</Button>
+									</Space.Compact>
 								</Form.Item>
 								<Form.Item<FieldType>
 									name="lease_commence_date"
@@ -454,7 +473,13 @@ export default function Home() {
 									value={output}
 									precision={0}
 									prefix="$"
-									valueStyle={{ color: darkMode ? '#ffe066' : '#2563eb', fontWeight: 800, fontSize: isMobile ? 28 : 40 }}
+									styles={{
+										content: {
+											color: darkMode ? '#ffe066' : '#2563eb',
+											fontWeight: 800,
+											fontSize: isMobile ? 28 : 40
+										}
+									}}
 									title={t('predicted_price')}
 								/>
 							</motion.div>

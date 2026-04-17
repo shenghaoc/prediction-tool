@@ -9,13 +9,15 @@ const resources = {
   zh: { translation: zh },
 };
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: 'en',
-    fallbackLng: 'en',
-    interpolation: { escapeValue: false },
-  });
+if (!i18n.isInitialized) {
+  i18n
+    .use(initReactI18next)
+    .init({
+      resources,
+      lng: 'en',
+      fallbackLng: 'en',
+      interpolation: { escapeValue: false },
+    });
+}
 
 export default i18n;
