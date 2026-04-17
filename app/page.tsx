@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import {
 	Chart as ChartJS,
 	CategoryScale,
@@ -11,16 +11,26 @@ import {
 	Legend
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import type { ChartData, ChartOptions } from 'chart.js';
 import { Form, Select, InputNumber, Button, Typography, Statistic, Col, Row, Divider, message, Card, Space, Grid } from 'antd';
 import { DatePicker } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import utc from 'dayjs/plugin/utc';
-import '../app/i18n';
 import { useTranslation } from 'react-i18next';
 import './i18n';
 import { BulbOutlined, BulbFilled } from '@ant-design/icons';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+	ML_MODELS,
+	TOWNS,
+	STOREY_RANGES,
+	FLAT_MODELS,
+	type MLModel,
+	type Town,
+	type StoreyRange,
+	type FlatModel
+} from '../lib/lists';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
@@ -34,7 +44,7 @@ ChartJS.register(
 	Legend
 );
 
-const chartOptions = {
+const chartOptions: ChartOptions<'line'> = {
 	responsive: true,
 	plugins: {
 		legend: {
@@ -62,7 +72,7 @@ const initialFormValues: FieldType = {
 
 const defaultLabels = [...Array(13).keys()].reverse().map((x) => initialFormValues.lease_commence_date.subtract(x, 'month').format('YYYY-MM'));
 
-const defaultChartConfig = {
+const defaultChartConfig: ChartData<'line'> = {
 	labels: defaultLabels,
 	datasets: [
 		{
@@ -73,8 +83,6 @@ const defaultChartConfig = {
 		}
 	]
 };
-
-import { ML_MODELS, TOWNS, STOREY_RANGES, FLAT_MODELS, MLModel, Town, StoreyRange, FlatModel } from '../lib/lists';
 
 const { Option } = Select;
 const { Title } = Typography;
@@ -89,15 +97,13 @@ export type FieldType = {
 };
 
 type ApiResponse = { labels: string; data: number }[];
-type ChartConfig = {
-	labels: string[];
-	datasets: Array<{
-		label: string;
-		data: number[];
-		borderColor: string;
-		backgroundColor: string;
-	}>;
+type PersistedFieldValues = Omit<Partial<FieldType>, 'lease_commence_date'> & {
+	lease_commence_date?: string;
 };
+
+function getErrorMessage(error: unknown, fallback: string) {
+	return error instanceof Error && error.message ? error.message : fallback;
+}
 
 export default function Home() {
 	const { t, i18n } = useTranslation();
@@ -115,14 +121,10 @@ export default function Home() {
 			localStorage.setItem('theme', darkMode ? 'dark' : 'light');
 		}
 	}, [darkMode]);
-	const curr = useMemo(() => initialFormValues.lease_commence_date, []);
-	const labels = useMemo(
-		() => [...Array(13).keys()].reverse().map((x) => curr.subtract(x, 'month').format('YYYY-MM')),
-		[curr]
-	);
+	const curr = initialFormValues.lease_commence_date;
 
 	const [output, setOutput] = useState(0.0);
-	const [config, setConfig] = useState<ChartConfig>(defaultChartConfig);
+	const [config, setConfig] = useState<ChartData<'line'>>(defaultChartConfig);
 	const [loading, setLoading] = useState(false);
 	const [form] = Form.useForm<FieldType>();
 	const chartRef = useRef(null);
@@ -138,26 +140,31 @@ export default function Home() {
 		const savedForm = typeof window !== 'undefined' && localStorage.getItem('form');
 		if (savedForm) {
 			try {
-				const parsed = JSON.parse(savedForm);
-				if (parsed.lease_commence_date) {
-					parsed.lease_commence_date = dayjs(parsed.lease_commence_date);
-				}
-				form.setFieldsValue(parsed);
+				const parsed = JSON.parse(savedForm) as PersistedFieldValues;
+				const restoredValues: Partial<FieldType> = {
+					...parsed,
+					lease_commence_date: parsed.lease_commence_date
+						? dayjs(parsed.lease_commence_date)
+						: undefined
+				};
+				form.setFieldsValue(restoredValues);
 			} catch {}
 		}
 	}, [form, i18n]);
 
 	// --- Persistence: Save on change ---
 	const handleFormChange = useCallback((_: unknown, allValues: Partial<FieldType>) => {
-		const persist: Record<string, any> = { ...allValues };
-		if (persist.lease_commence_date && typeof persist.lease_commence_date.toISOString === 'function') {
-			persist.lease_commence_date = persist.lease_commence_date.toISOString();
-		}
+		const persist: PersistedFieldValues = {
+			...allValues,
+			lease_commence_date: allValues.lease_commence_date?.toISOString()
+		};
 		localStorage.setItem('form', JSON.stringify(persist));
 	}, []);
 
 	useEffect(() => {
-		localStorage.setItem('lang', i18n.language);
+		if (typeof window !== 'undefined') {
+			localStorage.setItem('lang', i18n.language);
+		}
 	}, [i18n.language]);
 
 	const disabledYear = useCallback((current: Dayjs) => {
@@ -168,6 +175,9 @@ export default function Home() {
 		form.setFieldsValue(initialFormValues);
 		setOutput(0.0);
 		setConfig(defaultChartConfig);
+		if (typeof window !== 'undefined') {
+			localStorage.removeItem('form');
+		}
 	}, [form]);
 
 	const handleFinish = useCallback(async (values: FieldType) => {
@@ -206,12 +216,12 @@ export default function Home() {
 				]
 			});
 			setOutput(server_data[server_data.length - 1]?.data ?? 0.0);
-		} catch (err: any) {
-			message.error(err?.message || 'Failed to fetch prediction. Please try again.');
+		} catch (error: unknown) {
+			message.error(getErrorMessage(error, t('error_fetch')));
 		} finally {
 			setLoading(false);
 		}
-	}, [curr, form]);
+	}, [curr, t]);
 
 	// Animation variants
 	const cardVariants = {
@@ -265,7 +275,7 @@ export default function Home() {
 					<Card
 						style={{
 							maxWidth: isMobile ? '100vw' : 600,
-							width: '100vw',
+							width: '100%',
 							margin: isMobile ? 0 : '0 auto 24px auto',
 							boxShadow: isMobile ? 'none' : (darkMode ? '0 8px 32px 0 rgba(31,38,135,0.25)' : '0 8px 32px 0 rgba(31, 38, 135, 0.15)'),
 							borderRadius: isMobile ? 0 : 24,
@@ -398,7 +408,7 @@ export default function Home() {
 					<Card
 						style={{
 							maxWidth: isMobile ? '100vw' : 900,
-							width: '100vw',
+							width: '100%',
 							margin: isMobile ? 0 : '0 auto',
 							boxShadow: isMobile ? 'none' : (darkMode ? '0 8px 32px 0 rgba(31,38,135,0.18)' : '0 8px 32px 0 rgba(31, 38, 135, 0.10)'),
 							borderRadius: isMobile ? 0 : 24,
@@ -412,7 +422,9 @@ export default function Home() {
 					>
 						<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: isMobile ? 8 : 16 }}>
 							<span role="img" aria-label="chart" style={{ fontSize: isMobile ? 22 : 28, color: '#6366f1', filter: 'drop-shadow(0 2px 8px #e0e7ff)' }}>📈</span>
-							<Title level={4} style={{ margin: 0, textAlign: 'center', fontSize: isMobile ? 18 : 22, fontWeight: 700, color: '#2563eb' }}></Title>
+							<Title level={4} style={{ margin: 0, textAlign: 'center', fontSize: isMobile ? 18 : 22, fontWeight: 700, color: '#2563eb' }}>
+								{t('predicted_trends')}
+							</Title>
 						</div>
 						<Divider style={{ margin: isMobile ? '8px 0' : '16px 0', borderColor: darkMode ? '#232946' : '#e0e7ff' }} />
 						<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: isMobile ? 220 : 320, width: '100%' }}>
