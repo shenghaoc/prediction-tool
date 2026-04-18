@@ -9,12 +9,24 @@ import {
 	useState,
 	type ReactNode
 } from 'react';
-import { App as AntdApp, Button, Form, Grid } from 'antd';
+import {
+	App as AntdApp,
+	Button,
+	Card,
+	ConfigProvider,
+	Flex,
+	Form,
+	Grid,
+	Segmented,
+	Tag,
+	theme as antTheme
+} from 'antd';
 import { BulbFilled, BulbOutlined } from '@ant-design/icons';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
 import dayjs from '../../lib/dayjs';
+import { getAntdLocale } from '../../lib/antdLocale';
 import styles from './styles.module.css';
 import '../../app/i18n';
 import {
@@ -71,6 +83,47 @@ export default function PredictionClient({
 	const isMobile = mounted ? !screens.md : false;
 	const theme = useMemo(() => getPredictionTheme(darkMode), [darkMode]);
 	const cssVars = useMemo(() => getThemeVars(theme), [theme]);
+	const antdLocale = getAntdLocale(i18n.language);
+	const predictionAntTheme = useMemo(
+		() => ({
+			algorithm: darkMode ? antTheme.darkAlgorithm : antTheme.defaultAlgorithm,
+			token: {
+				colorBgBase: theme.pageBg,
+				colorBgContainer: theme.panelStrong,
+				colorBgElevated: theme.panelStrong,
+				colorBorder: theme.lineSoft,
+				colorBorderSecondary: theme.lineSoft,
+				colorFillSecondary: theme.fieldBg,
+				colorPrimary: theme.primary,
+				colorText: theme.text,
+				colorTextSecondary: theme.textMuted,
+				boxShadowSecondary: `0 24px 70px ${theme.shadow}`,
+				borderRadius: 18,
+				borderRadiusLG: 24,
+				fontFamily:
+					'var(--font-body), "PingFang SC", "Noto Sans SC", sans-serif'
+			},
+			components: {
+				Button: {
+					borderRadius: 999,
+					fontWeight: 700
+				},
+				Card: {
+					bodyPadding: 24
+				},
+				DatePicker: {
+					controlHeightLG: 52
+				},
+				InputNumber: {
+					controlHeightLG: 52
+				},
+				Select: {
+					controlHeightLG: 52
+				}
+			}
+		}),
+		[darkMode, theme]
+	);
 
 	useEffect(() => {
 		setMounted(true);
@@ -248,122 +301,155 @@ export default function PredictionClient({
 
 	if (!mounted) {
 		return (
-			<main
-				className={styles.shell}
-				style={{
-					background: initialShellTheme.background,
-					padding: '26px 28px 42px',
-					...getThemeVars(initialShellTheme)
-				}}
+			<ConfigProvider
+				componentSize="large"
+				locale={getAntdLocale('en')}
+				theme={predictionAntTheme}
+				variant="filled"
 			>
-				<div className={styles.surface}>
-					<div className={styles.topbar}>
-						<div className={styles.pill}>{pillContent}</div>
-					</div>
+				<main
+					className={styles.shell}
+					style={{
+						background: initialShellTheme.background,
+						padding: '26px 28px 42px',
+						...getThemeVars(initialShellTheme)
+					}}
+				>
+					<div className={styles.surface}>
+						<Flex
+							className={styles.topbar}
+							justify="space-between"
+							align="center"
+							gap="middle"
+							wrap
+						>
+							<Tag className={styles.pill} variant="filled">
+								{pillContent}
+							</Tag>
+						</Flex>
 
-					<div className={styles.layout}>
-						<section className={styles.panel}>
-							<div className={styles.card}>
-								<div className={styles.cardInner}>{introContent}</div>
-							</div>
-						</section>
+						<div className={styles.layout}>
+							<section className={styles.panel}>
+								<Card className={styles.card} variant="borderless">
+									<div className={styles.cardInner}>{introContent}</div>
+								</Card>
+							</section>
 
-						<section className={styles.resultsPanel}>
-							<div className={styles.resultsCard}>
-								<div className={styles.chartFrame} />
-							</div>
-						</section>
+							<section className={styles.resultsPanel}>
+								<Card className={styles.resultsCard} variant="borderless">
+									<div className={styles.chartFrame} />
+								</Card>
+							</section>
+						</div>
 					</div>
-				</div>
-			</main>
+				</main>
+			</ConfigProvider>
 		);
 	}
 
 	return (
-		<main
-			className={styles.shell}
-			style={{
-				background: theme.background,
-				padding: isMobile ? '18px 14px 30px' : '26px 28px 42px',
-				...cssVars
-			}}
+		<ConfigProvider
+			componentSize="large"
+			locale={antdLocale}
+			theme={predictionAntTheme}
+			variant="filled"
 		>
-			<div className={styles.surface}>
-				<div className={styles.topbar}>
-					<div className={styles.pill}>{pillContent}</div>
+			<main
+				className={styles.shell}
+				style={{
+					background: theme.background,
+					padding: isMobile ? '18px 14px 30px' : '26px 28px 42px',
+					...cssVars
+				}}
+			>
+				<div className={styles.surface}>
+					<Flex
+						className={styles.topbar}
+						justify="space-between"
+						align="center"
+						gap="middle"
+						wrap
+					>
+						<Tag className={styles.pill} variant="filled">
+							{pillContent}
+						</Tag>
 
-					<div className={styles.actions}>
-						<Button
-							className={styles.ghostButton}
-							icon={darkMode ? <BulbFilled /> : <BulbOutlined />}
-							onClick={() => setDarkMode((value) => !value)}
-							aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-						/>
-						<Button
-							className={styles.ghostButton}
-							size="small"
-							onClick={() => {
-								const nextLang = i18n.language === 'en' ? 'zh' : 'en';
-								startTransition(() => {
-									i18n.changeLanguage(nextLang);
-								});
-							}}
-						>
-							{t('switch_language')}
-						</Button>
+						<Flex className={styles.actions} gap="small" wrap>
+							<Button
+								className={styles.ghostButton}
+								icon={darkMode ? <BulbFilled /> : <BulbOutlined />}
+								onClick={() => setDarkMode((value) => !value)}
+								aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+							/>
+							<Segmented
+								className={styles.languageSwitch}
+								options={[
+									{ label: 'EN', value: 'en' },
+									{ label: '中文', value: 'zh' }
+								]}
+								shape="round"
+								size="large"
+								value={i18n.language}
+								onChange={(value) => {
+									startTransition(() => {
+										i18n.changeLanguage(String(value));
+									});
+								}}
+							/>
+						</Flex>
+					</Flex>
+
+					<div className={styles.layout}>
+						<AnimatePresence>
+							<motion.section
+								key="form-card"
+								initial="hidden"
+								animate="visible"
+								exit="hidden"
+								variants={motionVariants}
+								className={styles.panel}
+							>
+								<Card className={styles.card} variant="borderless">
+									<div className={styles.cardInner}>
+										{introContent}
+
+										<PredictionForm
+											form={form}
+											loading={loading}
+											onFinish={handleFinish}
+											onReset={handleReset}
+											onValuesChange={handleFormChange}
+											disabledYear={disabledYear}
+											t={t}
+										/>
+									</div>
+								</Card>
+							</motion.section>
+						</AnimatePresence>
+
+						<AnimatePresence mode="wait">
+							<motion.section
+								key="results-card"
+								initial="hidden"
+								animate="visible"
+								exit="hidden"
+								variants={motionVariants}
+								className={styles.resultsPanel}
+							>
+								<PredictionResults
+									isMobile={isMobile}
+									output={output}
+									summaryValues={summaryValues}
+									t={t}
+									theme={theme}
+									trendData={trendData}
+									valueVariants={valueVariants}
+								/>
+							</motion.section>
+						</AnimatePresence>
 					</div>
 				</div>
-
-				<div className={styles.layout}>
-					<AnimatePresence>
-						<motion.section
-							key="form-card"
-							initial="hidden"
-							animate="visible"
-							exit="hidden"
-							variants={motionVariants}
-							className={styles.panel}
-						>
-							<div className={styles.card}>
-								<div className={styles.cardInner}>
-									{introContent}
-
-									<PredictionForm
-										form={form}
-										loading={loading}
-										onFinish={handleFinish}
-										onReset={handleReset}
-										onValuesChange={handleFormChange}
-										disabledYear={disabledYear}
-										t={t}
-									/>
-								</div>
-							</div>
-						</motion.section>
-					</AnimatePresence>
-
-					<AnimatePresence mode="wait">
-						<motion.section
-							key="results-card"
-							initial="hidden"
-							animate="visible"
-							exit="hidden"
-							variants={motionVariants}
-							className={styles.resultsPanel}
-						>
-							<PredictionResults
-								isMobile={isMobile}
-								output={output}
-								summaryValues={summaryValues}
-								t={t}
-								theme={theme}
-								trendData={trendData}
-								valueVariants={valueVariants}
-							/>
-						</motion.section>
-					</AnimatePresence>
-				</div>
-			</div>
-		</main>
+			</main>
+		</ConfigProvider>
 	);
 }

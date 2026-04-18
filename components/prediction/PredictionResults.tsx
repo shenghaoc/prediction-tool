@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useMemo } from 'react';
-import { Statistic } from 'antd';
+import { Card, Descriptions, Divider, Flex, Statistic, Typography } from 'antd';
 import { motion } from 'framer-motion';
 import type { TFunction } from 'i18next';
 
@@ -59,15 +59,66 @@ export default function PredictionResults({
 			deltaValue
 		};
 	}, [trendData]);
+	const summaryItems = useMemo(
+		() => [
+			{
+				key: 'ml-model',
+				label: t('ml_model'),
+				children: summaryValues.ml_model
+			},
+			{
+				key: 'town',
+				label: t('town'),
+				children: summaryValues.town
+			},
+			{
+				key: 'lease',
+				label: t('lease_commence_date'),
+				children: summaryValues.lease_commence_date.format('YYYY')
+			}
+		],
+		[summaryValues.lease_commence_date, summaryValues.ml_model, summaryValues.town, t]
+	);
+	const chartSummaryItems = useMemo(
+		() => [
+			{
+				key: 'latest',
+				label: t('chart_latest'),
+				value: `$${chartStats.latestValue.toLocaleString()}`
+			},
+			{
+				key: 'range',
+				label: t('chart_range'),
+				value: `$${chartStats.lowValue.toLocaleString()} - $${chartStats.peakValue.toLocaleString()}`
+			},
+			{
+				key: 'delta',
+				label: t('chart_delta'),
+				value: `${chartStats.deltaValue >= 0 ? '+' : '-'}$${Math.abs(chartStats.deltaValue).toLocaleString()}`,
+				caption: t('vs_12m_ago')
+			}
+		],
+		[chartStats.deltaValue, chartStats.latestValue, chartStats.lowValue, chartStats.peakValue, t]
+	);
 
 	return (
-		<div className={styles.resultsCard}>
-			<div className={styles.resultsHeader}>
-				<div>
-					<span className={styles.resultsLabel}>{t('predicted_trends')}</span>
-					<h2 className={styles.resultsTitle}>{t('predicted_price')}</h2>
-				</div>
-				<div className={styles.pricePanel}>
+		<Card className={styles.resultsCard} variant="borderless">
+			<Flex
+				className={styles.resultsHeader}
+				justify="space-between"
+				align={isMobile ? 'stretch' : 'flex-start'}
+				gap="large"
+				wrap
+			>
+				<Flex vertical gap={6}>
+					<Typography.Text className={styles.resultsLabel}>
+						{t('predicted_trends')}
+					</Typography.Text>
+					<Typography.Title level={2} className={styles.resultsTitle}>
+						{t('predicted_price')}
+					</Typography.Title>
+				</Flex>
+				<Card className={styles.pricePanel} variant="borderless">
 					<motion.div
 						key={output}
 						initial="initial"
@@ -88,57 +139,65 @@ export default function PredictionResults({
 							title={t('prediction')}
 						/>
 					</motion.div>
-				</div>
-			</div>
+				</Card>
+			</Flex>
 
-			<div className={styles.resultsGrid}>
-				{[
-					{ label: t('ml_model'), value: summaryValues.ml_model },
-					{ label: t('town'), value: summaryValues.town },
-					{
-						label: t('lease_commence_date'),
-						value: summaryValues.lease_commence_date.format('YYYY')
-					}
-				].map((item) => (
-					<div key={item.label} className={styles.metricCard}>
-						<span>{item.label}</span>
-						<strong>{item.value}</strong>
-					</div>
-				))}
-			</div>
+			<Descriptions
+				className={styles.resultsMeta}
+				column={isMobile ? 1 : 3}
+				colon={false}
+				items={summaryItems}
+				layout="vertical"
+			/>
 
-			<div className={styles.chartShell}>
-				<div className={styles.chartHeader}>
-					<div>
-						<span className={styles.chartKicker}>{t('predicted_trends')}</span>
-						<h3 className={styles.chartTitle}>{t('chart_story_title')}</h3>
-					</div>
-					<div className={styles.chartSummaryGrid}>
-						<div className={styles.chartSummaryCard}>
-							<span>{t('chart_latest')}</span>
-							<strong>{`$${chartStats.latestValue.toLocaleString()}`}</strong>
-						</div>
-						<div className={styles.chartSummaryCard}>
-							<span>{t('chart_range')}</span>
-							<strong>{`$${chartStats.lowValue.toLocaleString()} - $${chartStats.peakValue.toLocaleString()}`}</strong>
-						</div>
-						<div className={styles.chartSummaryCard}>
-							<span>{t('chart_delta')}</span>
-							<strong>
-								{`${chartStats.deltaValue >= 0 ? '+' : '-'}$${Math.abs(chartStats.deltaValue).toLocaleString()}`}
-							</strong>
-							<small>{t('vs_12m_ago')}</small>
-						</div>
-					</div>
+			<Divider className={styles.resultsDivider} />
+
+			<Flex
+				className={styles.chartHeader}
+				justify="space-between"
+				align={isMobile ? 'stretch' : 'flex-start'}
+				gap="middle"
+				wrap
+			>
+				<Flex vertical gap={6}>
+					<Typography.Text className={styles.chartKicker}>
+						{t('predicted_trends')}
+					</Typography.Text>
+					<Typography.Title level={3} className={styles.chartTitle}>
+						{t('chart_story_title')}
+					</Typography.Title>
+				</Flex>
+				<div className={styles.chartSummaryGrid}>
+					{chartSummaryItems.map((item) => (
+						<Card
+							key={item.key}
+							className={styles.chartSummaryCard}
+							size="small"
+							variant="borderless"
+						>
+							<Statistic
+								title={item.label}
+								value={item.value}
+								formatter={(value) => (
+									<span className={styles.chartSummaryValue}>{String(value)}</span>
+								)}
+							/>
+							{item.caption ? (
+								<Typography.Text className={styles.chartSummaryCaption}>
+									{item.caption}
+								</Typography.Text>
+							) : null}
+						</Card>
+					))}
 				</div>
-				<div className={styles.chartFrame}>
-					<PriceTrendChart
-						data={trendData}
-						isMobile={isMobile}
-						theme={theme}
-					/>
-				</div>
+			</Flex>
+			<div className={styles.chartFrame}>
+				<PriceTrendChart
+					data={trendData}
+					isMobile={isMobile}
+					theme={theme}
+				/>
 			</div>
-		</div>
+		</Card>
 	);
 }
