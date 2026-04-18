@@ -113,7 +113,12 @@
 	gap: 20px;
 }
 
+.headlineStack {
+	display: grid;
+}
+
 .headline {
+	display: block;
 	margin: 0;
 	max-width: 10ch;
 	color: var(--text-color, #1f2328);
@@ -129,6 +134,22 @@
 	font-weight: 800;
 	letter-spacing: -0.02em;
 	line-height: 1.02;
+}
+
+.langEn {
+	display: inline;
+}
+
+.langZh {
+	display: none;
+}
+
+html[data-lang='zh'] .langEn {
+	display: none;
+}
+
+html[data-lang='zh'] .langZh {
+	display: inline;
 }
 
 .lead {

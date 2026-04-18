@@ -2,14 +2,53 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import { App as AntdApp, ConfigProvider } from 'antd';
+import {
+	SITE_DESCRIPTION,
+	SITE_KEYWORDS,
+	SITE_NAME,
+	SITE_OG_IMAGE,
+	SITE_URL
+} from '../lib/site';
 
 export const metadata: Metadata = {
-	title: 'Prediction Tool',
-	description: 'An app for HDB resale price prediction',
-	metadataBase: new URL('https://ee4802-g20-tool.pages.dev/'),
+	title: {
+		default: SITE_NAME,
+		template: `%s | ${SITE_NAME}`
+	},
+	description: SITE_DESCRIPTION,
+	applicationName: SITE_NAME,
+	keywords: [...SITE_KEYWORDS],
+	metadataBase: new URL(SITE_URL),
 	alternates: {
 		canonical: '/'
-	}
+	},
+	openGraph: {
+		title: SITE_NAME,
+		description: SITE_DESCRIPTION,
+		url: SITE_URL,
+		siteName: SITE_NAME,
+		locale: 'en_SG',
+		type: 'website',
+		images: [
+			{
+				url: SITE_OG_IMAGE,
+				width: 1200,
+				height: 630,
+				alt: 'Prediction Tool HDB resale estimator overview'
+			}
+		]
+	},
+	twitter: {
+		card: 'summary_large_image',
+		title: SITE_NAME,
+		description: SITE_DESCRIPTION,
+		images: [SITE_OG_IMAGE]
+	},
+	robots: {
+		index: true,
+		follow: true
+	},
+	category: 'finance'
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
