@@ -1,6 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+	startTransition,
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState
+} from 'react';
 import { App as AntdApp, Button, Form, Grid } from 'antd';
 import { BulbFilled, BulbOutlined } from '@ant-design/icons';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -10,6 +17,13 @@ import dayjs from '../../lib/dayjs';
 import en from '../../app/locales/en.json';
 import styles from './styles.module.css';
 import '../../app/i18n';
+import {
+	MAX_LEASE_COMMENCE_YEAR,
+	MIN_LEASE_COMMENCE_YEAR,
+	STORAGE_KEYS,
+	type PredictionRequestBody,
+	serializeLeaseCommenceDate
+} from '../../lib/prediction';
 import { FLAT_MODELS, ML_MODELS, TOWNS } from '../../lib/lists';
 import PredictionForm from './PredictionForm';
 import PredictionResults from './PredictionResults';
@@ -21,7 +35,13 @@ import type {
 	PersistedFieldValues,
 	SummaryValues
 } from './types';
-import { getErrorMessage, normalizePrice, normalizeTrendData } from './utils';
+import {
+	getErrorMessage,
+	getResponseErrorMessage,
+	isAbortError,
+	normalizePrice,
+	normalizeTrendData
+} from './utils';
 
 export default function PredictionPage() {
 	const { message: messageApi } = AntdApp.useApp();
@@ -39,6 +59,7 @@ export default function PredictionPage() {
 	});
 	const [form] = Form.useForm<FieldType>();
 	const hasRestoredRef = useRef(false);
+	const requestControllerRef = useRef<AbortController | null>(null);
 
 	const isMobile = mounted ? !screens.md : false;
 	const theme = useMemo(() => getPredictionTheme(darkMode), [darkMode]);
@@ -50,7 +71,7 @@ export default function PredictionPage() {
 
 	useEffect(() => {
 		setMounted(true);
-		if (localStorage.getItem('theme') === 'dark') {
+		if (localStorage.getItem(STORAGE_KEYS.theme) === 'dark') {
 			setDarkMode(true);
 		}
 	}, []);
@@ -61,7 +82,7 @@ export default function PredictionPage() {
 		}
 
 		document.body.setAttribute('data-theme', darkMode ? 'dark' : 'light');
-		localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+		localStorage.setItem(STORAGE_KEYS.theme, darkMode ? 'dark' : 'light');
 	}, [darkMode, mounted]);
 
 	useEffect(() => {
@@ -70,12 +91,12 @@ export default function PredictionPage() {
 		}
 
 		hasRestoredRef.current = true;
-		const savedLang = typeof window !== 'undefined' && localStorage.getItem('lang');
+		const savedLang = localStorage.getItem(STORAGE_KEYS.language);
 		if (savedLang && savedLang !== i18n.language) {
 			i18n.changeLanguage(savedLang);
 		}
 
-		const savedForm = typeof window !== 'undefined' && localStorage.getItem('form');
+		const savedForm = localStorage.getItem(STORAGE_KEYS.form);
 		if (!savedForm) {
 			return;
 		}
@@ -96,7 +117,9 @@ export default function PredictionPage() {
 				lease_commence_date:
 					restoredValues.lease_commence_date ?? initialFormValues.lease_commence_date
 			});
-		} catch {}
+		} catch {
+			localStorage.removeItem(STORAGE_KEYS.form);
+		}
 	}, [form, i18n]);
 
 	useEffect(() => {
@@ -106,20 +129,31 @@ export default function PredictionPage() {
 
 		document.documentElement.lang = i18n.language;
 		document.documentElement.setAttribute('data-lang', i18n.language);
-		localStorage.setItem('lang', i18n.language);
+		localStorage.setItem(STORAGE_KEYS.language, i18n.language);
 	}, [i18n.language, mounted]);
 
+	useEffect(() => {
+		return () => {
+			requestControllerRef.current?.abort();
+		};
+	}, []);
+
 	const disabledYear = useCallback((current: FieldType['lease_commence_date']) => {
-		return current.isBefore('1960-01-01') || current.isAfter('2022-01-01', 'year');
+		return (
+			current.isBefore(`${MIN_LEASE_COMMENCE_YEAR}-01-01`) ||
+			current.isAfter(`${MAX_LEASE_COMMENCE_YEAR}-01-01`, 'year')
+		);
 	}, []);
 
 	const handleFormChange = useCallback((_: unknown, allValues: Partial<FieldType>) => {
 		const persist: PersistedFieldValues = {
 			...allValues,
-			lease_commence_date: allValues.lease_commence_date?.toISOString()
+			lease_commence_date: allValues.lease_commence_date
+				? serializeLeaseCommenceDate(allValues.lease_commence_date)
+				: undefined
 		};
 
-		localStorage.setItem('form', JSON.stringify(persist));
+		localStorage.setItem(STORAGE_KEYS.form, JSON.stringify(persist));
 		setSummaryValues({
 			ml_model: allValues.ml_model ?? initialFormValues.ml_model,
 			town: allValues.town ?? initialFormValues.town,
@@ -129,6 +163,9 @@ export default function PredictionPage() {
 	}, []);
 
 	const handleReset = useCallback(() => {
+		requestControllerRef.current?.abort();
+		requestControllerRef.current = null;
+		setLoading(false);
 		form.setFieldsValue(initialFormValues);
 		setOutput(0);
 		setTrendData(defaultTrendData);
@@ -138,43 +175,36 @@ export default function PredictionPage() {
 			lease_commence_date: initialFormValues.lease_commence_date
 		});
 
-		if (typeof window !== 'undefined') {
-			localStorage.removeItem('form');
-		}
+		localStorage.removeItem(STORAGE_KEYS.form);
 	}, [form]);
 
 	const handleFinish = useCallback(
 		async (values: FieldType) => {
+			requestControllerRef.current?.abort();
+			const controller = new AbortController();
+			requestControllerRef.current = controller;
 			setLoading(true);
-			const floorArea = Math.max(20, Math.min(300, Math.round(values.floor_area_sqm)));
-			const formData = new FormData();
-			formData.append('ml_model', values.ml_model);
-			formData.append(
-				'month_start',
-				values.lease_commence_date.subtract(12, 'month').format('YYYY-MM')
-			);
-			formData.append('month_end', values.lease_commence_date.format('YYYY-MM'));
-			formData.append('town', values.town);
-			formData.append('storey_range', values.storey_range);
-			formData.append('flat_model', values.flat_model);
-			formData.append('floor_area_sqm', floorArea.toString());
-			formData.append(
-				'lease_commence_date',
-				dayjs(values.lease_commence_date).year().toString()
-			);
+			const requestBody: PredictionRequestBody = {
+				mlModel: values.ml_model,
+				town: values.town,
+				storeyRange: values.storey_range,
+				flatModel: values.flat_model,
+				floorAreaSqm: values.floor_area_sqm,
+				leaseCommenceDate: serializeLeaseCommenceDate(values.lease_commence_date)
+			};
 
 			try {
-				const response = await fetch(
-					'https://ee4802-g20-tool.shenghaoc.workers.dev/api/prices',
-					{
-						method: 'POST',
-						body: formData
-					}
-				);
+				const response = await fetch('/api/prices', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(requestBody),
+					signal: controller.signal
+				});
 
 				if (!response.ok) {
-					const errorText = await response.text();
-					throw new Error(`API request failed: ${errorText}`);
+					throw new Error(await getResponseErrorMessage(response, t('error_fetch')));
 				}
 
 				const serverData: ApiResponse = await response.json();
@@ -182,9 +212,16 @@ export default function PredictionPage() {
 				setTrendData(normalizedData);
 				setOutput(normalizePrice(normalizedData[normalizedData.length - 1]?.value ?? 0));
 			} catch (error: unknown) {
+				if (isAbortError(error)) {
+					return;
+				}
+
 				messageApi.error(getErrorMessage(error, t('error_fetch')));
 			} finally {
-				setLoading(false);
+				if (requestControllerRef.current === controller) {
+					requestControllerRef.current = null;
+					setLoading(false);
+				}
 			}
 		},
 		[messageApi, t]
@@ -269,8 +306,9 @@ export default function PredictionPage() {
 							size="small"
 							onClick={() => {
 								const nextLang = i18n.language === 'en' ? 'zh' : 'en';
-								i18n.changeLanguage(nextLang);
-								localStorage.setItem('lang', nextLang);
+								startTransition(() => {
+									i18n.changeLanguage(nextLang);
+								});
 							}}
 						>
 							{t('switch_language')}

@@ -1,4 +1,5 @@
 import type { Dayjs } from '../../lib/dayjs';
+import type { PredictionApiResponse } from '../../lib/prediction';
 
 import type { MLModel, Town, StoreyRange, FlatModel } from '../../lib/lists';
 
@@ -17,7 +18,7 @@ export type PersistedFieldValues = Omit<Partial<FieldType>, 'lease_commence_date
 	lease_commence_date?: string;
 };
 
-export type ApiResponse = { labels: string; data: number }[];
+export type ApiResponse = PredictionApiResponse;
 
 export type TrendPoint = {
 	label: string;

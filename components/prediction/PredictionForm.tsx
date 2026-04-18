@@ -5,11 +5,10 @@ import type { FormInstance } from 'antd';
 import type { TFunction } from 'i18next';
 
 import {
-	FLAT_MODELS,
-	ML_MODELS,
-	STOREY_RANGES,
-	TOWNS
-} from '../../lib/lists';
+	MAX_FLOOR_AREA_SQM,
+	MIN_FLOOR_AREA_SQM,
+} from '../../lib/prediction';
+import { FLAT_MODELS, ML_MODELS, STOREY_RANGES, TOWNS } from '../../lib/lists';
 import { initialFormValues } from './constants';
 import styles from './styles.module.css';
 import type { FieldType } from './types';
@@ -125,12 +124,17 @@ export default function PredictionForm({
 								noStyle
 								rules={[
 									{ required: true, message: t('missing_floor_area') },
-									{ type: 'number', min: 20, max: 300, message: t('floor_area_range') }
+									{
+										type: 'number',
+										min: MIN_FLOOR_AREA_SQM,
+										max: MAX_FLOOR_AREA_SQM,
+										message: t('floor_area_range')
+									}
 								]}
 							>
 								<InputNumber
-									min={20}
-									max={300}
+									min={MIN_FLOOR_AREA_SQM}
+									max={MAX_FLOOR_AREA_SQM}
 									precision={0}
 									step={1}
 									changeOnWheel={false}

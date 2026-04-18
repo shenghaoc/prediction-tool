@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useMemo } from 'react';
 import { Statistic } from 'antd';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import type { TFunction } from 'i18next';
 
 import styles from './styles.module.css';
@@ -131,21 +131,13 @@ export default function PredictionResults({
 						</div>
 					</div>
 				</div>
-				<AnimatePresence mode="wait">
-					<motion.div
-						key={JSON.stringify(trendData)}
-						initial={{ opacity: 0, y: 30 }}
-						animate={{ opacity: 1, y: 0, transition: { duration: 0.6 } }}
-						exit={{ opacity: 0, y: 30 }}
-						className={styles.chartFrame}
-					>
-						<PriceTrendChart
-							data={trendData}
-							isMobile={isMobile}
-							theme={theme}
-						/>
-					</motion.div>
-				</AnimatePresence>
+				<div className={styles.chartFrame}>
+					<PriceTrendChart
+						data={trendData}
+						isMobile={isMobile}
+						theme={theme}
+					/>
+				</div>
 			</div>
 		</div>
 	);
