@@ -23,6 +23,12 @@ Because of the one-hot encoding constraints used in the original project data fl
 - TypeScript
 - Bun test runner
 
+## Chart Strategy
+
+For the React variant, charts are implemented with `recharts` (`components/prediction/PriceTrendChart.tsx`).
+
+This is intentional because `recharts` is React-native, declarative, and integrates cleanly with component-driven theming.
+
 ## Local Development
 
 Install dependencies:
