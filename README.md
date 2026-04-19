@@ -1,46 +1,83 @@
 # Prediction Tool
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/f95e6bac-be11-4252-94ac-22c6b3714dc8/deploy-status)](https://app.netlify.com/sites/ee4802-g20-tool/deploys)
+HDB resale price estimator built with Next.js App Router.
 
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app). The purpose is to create a website on which the user can obtain a predicted HDB resale flat price by filling in a form.
+This project started as an EE4802 mini-project and was later refactored into a modern web app with:
+- Ant Design UI for form and results surfaces
+- Recharts for trend visualization
+- `/api/prices` as a typed server proxy to the upstream prediction service
+- English/Chinese UI support with i18next
 
-As part of a minor project in EE4802, only regression models are available to avoid having to maintain a Python backend runnning scikit-learn for the neural network model.
+## Model and Data Notes
 
-Due to limitations of one-hot encoding in EE4802, prediction of future prices is not possible and the output is hardcoded to show a year before the last month in the data set.
+Only regression models are used to avoid maintaining a separate Python model-serving backend.
 
-This repository was updated about one and a half years later for me to expriment with web development, code was refactored but the UI has not changed.
+Because of the one-hot encoding constraints used in the original project data flow, future price prediction is not supported here. The trend output is scoped to the historical window used by the dataset.
 
-## Getting Started
+## Tech Stack
 
-First, run the development server:
+- Next.js 16 (App Router)
+- React 19
+- Ant Design 6
+- Recharts
+- TypeScript
+- Bun test runner
+
+## Local Development
+
+Install dependencies:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
+bun install
+```
+
+Run development server:
+
+```bash
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+```bash
+bun dev      # Start dev server
+bun build    # Production build
+bun start    # Run production server
+bun lint     # ESLint
+bun test     # Unit tests
+```
 
-## Learn More
+## Environment Variables
 
-To learn more about Next.js, take a look at the following resources:
+Optional:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+PRICES_API_URL=https://ee4802-g20-tool.shenghaoc.workers.dev/api/prices
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+If unset, the app uses the default URL above.
 
-## Deploy on Vercel
+## Deployment Notes (Cloudflare Pages)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This app is compatible with Cloudflare Pages via Next-on-Pages style builds, but non-static routes must use Edge runtime.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Current API route setup:
+- `app/api/prices/route.ts` exports `runtime = 'edge'`
+
+If new dynamic routes are added, make sure each one includes:
+
+```ts
+export const runtime = 'edge';
+```
+
+Otherwise Cloudflare Pages builds will fail with:
+"The following routes were not configured to run with the Edge Runtime."
+
+## Key Project Paths
+
+- `app/page.tsx` route entry
+- `components/prediction/*` prediction UI components
+- `app/api/prices/route.ts` server route proxy
+- `lib/prediction.ts` request normalization and response guards
