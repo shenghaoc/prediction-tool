@@ -10,6 +10,8 @@ const PRICES_API_URL =
 	process.env.PRICES_API_URL ??
 	'https://ee4802-g20-tool.shenghaoc.workers.dev/api/prices';
 
+export const runtime = 'edge';
+
 export async function POST(request: Request) {
 	let requestBody: unknown;
 
