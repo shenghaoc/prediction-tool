@@ -1,6 +1,9 @@
 import dayjs from '../../lib/dayjs';
 import { FLAT_MODELS, ML_MODELS, STOREY_RANGES, TOWNS } from '../../lib/lists';
-import { DEFAULT_LEASE_COMMENCE_DATE } from '../../lib/prediction';
+import {
+	DEFAULT_LEASE_COMMENCE_DATE,
+	DEFAULT_PREDICTION_MONTH_END
+} from '../../lib/prediction';
 import type { FieldType, TrendPoint } from './types';
 
 export const initialFormValues: FieldType = {
@@ -15,6 +18,9 @@ export const initialFormValues: FieldType = {
 export const defaultTrendData: TrendPoint[] = [...Array(13).keys()]
 	.reverse()
 	.map((monthOffset) => ({
-		label: initialFormValues.lease_commence_date.subtract(monthOffset, 'month').format('YYYY-MM'),
+		label: dayjs
+			.utc(DEFAULT_PREDICTION_MONTH_END, 'YYYY-MM', true)
+			.subtract(monthOffset, 'month')
+			.format('YYYY-MM'),
 		value: 0
 	}));

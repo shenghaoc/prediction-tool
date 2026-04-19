@@ -240,14 +240,14 @@ export default function PredictionClient({
 			const controller = new AbortController();
 			requestControllerRef.current = controller;
 			setLoading(true);
-			const requestBody: PredictionRequestBody = {
-				mlModel: values.ml_model,
-				town: values.town,
-				storeyRange: values.storey_range,
-				flatModel: values.flat_model,
-				floorAreaSqm: values.floor_area_sqm,
-				leaseCommenceDate: serializeLeaseCommenceDate(values.lease_commence_date)
-			};
+				const requestBody: PredictionRequestBody = {
+					mlModel: values.ml_model,
+					town: values.town,
+					storeyRange: values.storey_range,
+					flatModel: values.flat_model,
+					floorAreaSqm: values.floor_area_sqm,
+					leaseCommenceYear: values.lease_commence_date.year()
+				};
 
 			try {
 				const response = await fetch('/api/prices', {

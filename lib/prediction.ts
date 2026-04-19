@@ -17,11 +17,16 @@ export const STORAGE_KEYS = {
 } as const;
 
 export const LEASE_COMMENCE_DATE_FORMAT = 'YYYY-MM-DD';
-export const DEFAULT_LEASE_COMMENCE_DATE = '2022-02-01';
+export const DEFAULT_PREDICTION_MONTH_END = '2022-02';
+export const DEFAULT_PREDICTION_MONTH_START = dayjs
+	.utc(DEFAULT_PREDICTION_MONTH_END, 'YYYY-MM', true)
+	.subtract(12, 'month')
+	.format('YYYY-MM');
+export const DEFAULT_LEASE_COMMENCE_DATE = `${new Date().getUTCFullYear()}-01-01`;
 export const MIN_FLOOR_AREA_SQM = 20;
 export const MAX_FLOOR_AREA_SQM = 300;
 export const MIN_LEASE_COMMENCE_YEAR = 1960;
-export const MAX_LEASE_COMMENCE_YEAR = 2022;
+export const MAX_LEASE_COMMENCE_YEAR = new Date().getUTCFullYear();
 
 export type PredictionRequestBody = {
 	mlModel: string;
@@ -29,7 +34,7 @@ export type PredictionRequestBody = {
 	storeyRange: string;
 	flatModel: string;
 	floorAreaSqm: number;
-	leaseCommenceDate: string;
+	leaseCommenceYear: number;
 };
 
 export type NormalizedPredictionRequest = {
@@ -38,10 +43,15 @@ export type NormalizedPredictionRequest = {
 	storeyRange: StoreyRange;
 	flatModel: FlatModel;
 	floorAreaSqm: number;
-	leaseCommenceDate: string;
+	leaseCommenceYear: number;
 };
 
-export type PredictionApiResponse = { labels: string; data: number }[];
+export type PredictionApiResponse = {
+	predictions: Array<{
+		month: string;
+		predictedPrice: number;
+	}>;
+};
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null;
@@ -73,7 +83,7 @@ export function normalizePredictionRequest(
 	const storeyRange = input.storeyRange;
 	const flatModel = input.flatModel;
 	const floorAreaSqm = input.floorAreaSqm;
-	const leaseCommenceDate = input.leaseCommenceDate;
+	const leaseCommenceYear = input.leaseCommenceYear;
 
 	if (typeof mlModel !== 'string' || !isOneOf(mlModel, ML_MODELS)) {
 		return { ok: false, error: 'Invalid ML model.' };
@@ -95,22 +105,9 @@ export function normalizePredictionRequest(
 		return { ok: false, error: 'Invalid floor area.' };
 	}
 
-	if (typeof leaseCommenceDate !== 'string') {
-		return { ok: false, error: 'Invalid lease commence date.' };
-	}
-
-	const parsedLeaseCommenceDate = dayjs.utc(
-		leaseCommenceDate,
-		LEASE_COMMENCE_DATE_FORMAT,
-		true
-	);
-
-	if (!parsedLeaseCommenceDate.isValid()) {
-		return { ok: false, error: 'Invalid lease commence date.' };
-	}
-
-	const leaseCommenceYear = parsedLeaseCommenceDate.year();
 	if (
+		typeof leaseCommenceYear !== 'number' ||
+		!Number.isInteger(leaseCommenceYear) ||
 		leaseCommenceYear < MIN_LEASE_COMMENCE_YEAR ||
 		leaseCommenceYear > MAX_LEASE_COMMENCE_YEAR
 	) {
@@ -123,49 +120,45 @@ export function normalizePredictionRequest(
 	return {
 		ok: true,
 		value: {
-			mlModel,
-			town,
-			storeyRange,
-			flatModel,
-			floorAreaSqm: clampFloorAreaSqm(floorAreaSqm),
-			leaseCommenceDate: parsedLeaseCommenceDate.format(LEASE_COMMENCE_DATE_FORMAT)
-		}
-	};
+				mlModel,
+				town,
+				storeyRange,
+				flatModel,
+				floorAreaSqm: clampFloorAreaSqm(floorAreaSqm),
+				leaseCommenceYear
+			}
+		};
 }
 
 export function buildPredictionUpstreamFormData(input: NormalizedPredictionRequest) {
-	const leaseCommenceDate = dayjs.utc(
-		input.leaseCommenceDate,
-		LEASE_COMMENCE_DATE_FORMAT,
-		true
-	);
 	const formData = new FormData();
 
-	formData.append('ml_model', input.mlModel);
-	formData.append('month_start', leaseCommenceDate.subtract(12, 'month').format('YYYY-MM'));
-	formData.append('month_end', leaseCommenceDate.format('YYYY-MM'));
+	formData.append('model', input.mlModel);
 	formData.append('town', input.town);
-	formData.append('storey_range', input.storeyRange);
-	formData.append('flat_model', input.flatModel);
-	formData.append('floor_area_sqm', input.floorAreaSqm.toString());
-	formData.append('lease_commence_date', leaseCommenceDate.year().toString());
+	formData.append('storeyRange', input.storeyRange);
+	formData.append('flatModel', input.flatModel);
+	formData.append('floorAreaSqm', input.floorAreaSqm.toString());
+	formData.append('leaseCommenceYear', input.leaseCommenceYear.toString());
+	formData.append('monthStart', DEFAULT_PREDICTION_MONTH_START);
+	formData.append('monthEnd', DEFAULT_PREDICTION_MONTH_END);
 
 	return formData;
 }
 
 export function isPredictionApiResponse(value: unknown): value is PredictionApiResponse {
-	return (
-		Array.isArray(value) &&
-		value.every((entry) => {
+	if (!isRecord(value) || !Array.isArray(value.predictions)) {
+		return false;
+	}
+
+	return value.predictions.every((entry) => {
 			if (!isRecord(entry)) {
 				return false;
 			}
 
 			return (
-				typeof entry.labels === 'string' &&
-				typeof entry.data === 'number' &&
-				Number.isFinite(entry.data)
+				typeof entry.month === 'string' &&
+				typeof entry.predictedPrice === 'number' &&
+				Number.isFinite(entry.predictedPrice)
 			);
-		})
-	);
+		});
 }

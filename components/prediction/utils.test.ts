@@ -11,10 +11,12 @@ describe('prediction ui utilities', () => {
 
 	test('normalizes trend data into chart points', () => {
 		expect(
-			normalizeTrendData([
-				{ labels: '2022-01', data: 450000.1 },
-				{ labels: '2022-02', data: Number.NaN }
-			])
+			normalizeTrendData({
+				predictions: [
+					{ month: '2022-01', predictedPrice: 450000.1 },
+					{ month: '2022-02', predictedPrice: Number.NaN }
+				]
+			})
 		).toEqual([
 			{ label: '2022-01', value: 450000 },
 			{ label: '2022-02', value: 0 }

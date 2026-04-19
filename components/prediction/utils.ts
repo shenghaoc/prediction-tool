@@ -15,6 +15,15 @@ export async function getResponseErrorMessage(response: Response, fallback: stri
 		if (typeof parsed.error === 'string') {
 			return parsed.error;
 		}
+
+		if (
+			parsed.error &&
+			typeof parsed.error === 'object' &&
+			'message' in parsed.error &&
+			typeof parsed.error.message === 'string'
+		) {
+			return parsed.error.message;
+		}
 	} catch {}
 
 	return text;
@@ -33,8 +42,8 @@ export function normalizePrice(value: number) {
 }
 
 export function normalizeTrendData(data: ApiResponse): TrendPoint[] {
-	return data.map((entry) => ({
-		label: entry.labels,
-		value: normalizePrice(entry.data)
+	return data.predictions.map((entry) => ({
+		label: entry.month,
+		value: normalizePrice(entry.predictedPrice)
 	}));
 }
