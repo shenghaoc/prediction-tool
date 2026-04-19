@@ -22,11 +22,11 @@ export const DEFAULT_PREDICTION_MONTH_START = dayjs
 	.utc(DEFAULT_PREDICTION_MONTH_END, 'YYYY-MM', true)
 	.subtract(12, 'month')
 	.format('YYYY-MM');
-export const DEFAULT_LEASE_COMMENCE_DATE = `${new Date().getUTCFullYear()}-01-01`;
+export const DEFAULT_LEASE_COMMENCE_DATE = '2022-01-01';
 export const MIN_FLOOR_AREA_SQM = 20;
 export const MAX_FLOOR_AREA_SQM = 300;
 export const MIN_LEASE_COMMENCE_YEAR = 1960;
-export const MAX_LEASE_COMMENCE_YEAR = new Date().getUTCFullYear();
+export const MAX_LEASE_COMMENCE_YEAR = 2022;
 
 export type PredictionRequestBody = {
 	mlModel: string;
