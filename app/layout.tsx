@@ -1,7 +1,6 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { AntdRegistry } from '@ant-design/nextjs-registry';
-import { App as AntdApp, ConfigProvider } from 'antd';
+import { DM_Sans, Lora } from 'next/font/google';
 import {
 	SITE_DESCRIPTION,
 	SITE_KEYWORDS,
@@ -9,6 +8,20 @@ import {
 	SITE_OG_IMAGE,
 	SITE_URL
 } from '../lib/site';
+
+const dmSans = DM_Sans({
+	subsets: ['latin'],
+	weight: ['400', '500', '600', '700', '800'],
+	variable: '--font-dm-sans',
+	display: 'swap'
+});
+
+const lora = Lora({
+	subsets: ['latin'],
+	weight: ['400', '500', '600', '700'],
+	variable: '--font-lora',
+	display: 'swap'
+});
 
 export const metadata: Metadata = {
 	title: {
@@ -53,38 +66,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<html lang="en">
+		<html lang="en" className={`${dmSans.variable} ${lora.variable}`}>
 			<body>
-				<AntdRegistry>
-					<ConfigProvider
-						theme={{
-							token: {
-								borderRadius: 20,
-								fontFamily: 'var(--font-body), "PingFang SC", "Noto Sans SC", sans-serif'
-							},
-							components: {
-								Button: {
-									fontWeight: 700,
-									borderRadius: 999
-								},
-								Card: {
-									bodyPadding: 0
-								},
-								InputNumber: {
-									controlHeightLG: 52
-								},
-								DatePicker: {
-									controlHeightLG: 52
-								},
-								Select: {
-									controlHeightLG: 52
-								}
-							}
-						}}
-					>
-						<AntdApp>{children}</AntdApp>
-					</ConfigProvider>
-				</AntdRegistry>
+				{children}
 			</body>
 		</html>
 	);

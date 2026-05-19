@@ -4,34 +4,14 @@ import {
 	startTransition,
 	useCallback,
 	useEffect,
-	useMemo,
 	useRef,
-	useState,
-	type ReactNode
+	useState
 } from 'react';
-import {
-	App as AntdApp,
-	Button,
-	Card,
-	ConfigProvider,
-	Flex,
-	Form,
-	Grid,
-	Segmented,
-	Tag,
-	theme as antTheme
-} from 'antd';
-import { BulbFilled, BulbOutlined } from '@ant-design/icons';
-import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
 import dayjs from '../../lib/dayjs';
-import { getAntdLocale } from '../../lib/antdLocale';
-import styles from './styles.module.css';
 import '../../app/i18n';
 import {
-	MAX_LEASE_COMMENCE_YEAR,
-	MIN_LEASE_COMMENCE_YEAR,
 	STORAGE_KEYS,
 	type PredictionRequestBody,
 	serializeLeaseCommenceDate
@@ -39,7 +19,7 @@ import {
 import PredictionForm from './PredictionForm';
 import PredictionResults from './PredictionResults';
 import { defaultTrendData, initialFormValues } from './constants';
-import { getPredictionTheme, getThemeVars } from './theme';
+import { FLAT_MODELS, ML_MODELS, TOWNS } from '../../lib/lists';
 import type {
 	ApiResponse,
 	FieldType,
@@ -54,76 +34,22 @@ import {
 	normalizeTrendData
 } from './utils';
 
-type PredictionClientProps = {
-	introContent: ReactNode;
-	pillContent: ReactNode;
-};
-
-export default function PredictionClient({
-	introContent,
-	pillContent
-}: PredictionClientProps) {
-	const { message: messageApi } = AntdApp.useApp();
+export default function PredictionClient() {
 	const { t, i18n } = useTranslation();
-	const screens = Grid.useBreakpoint();
 	const [mounted, setMounted] = useState(false);
 	const [darkMode, setDarkMode] = useState(false);
 	const [output, setOutput] = useState(0);
 	const [trendData, setTrendData] = useState(defaultTrendData);
 	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const [formValues, setFormValues] = useState<FieldType>(initialFormValues);
 	const [summaryValues, setSummaryValues] = useState<SummaryValues>({
 		ml_model: initialFormValues.ml_model,
 		town: initialFormValues.town,
 		lease_commence_date: initialFormValues.lease_commence_date
 	});
-	const [form] = Form.useForm<FieldType>();
 	const hasRestoredRef = useRef(false);
 	const requestControllerRef = useRef<AbortController | null>(null);
-
-	const isMobile = mounted ? !screens.md : false;
-	const theme = useMemo(() => getPredictionTheme(darkMode), [darkMode]);
-	const cssVars = useMemo(() => getThemeVars(theme), [theme]);
-	const antdLocale = getAntdLocale(i18n.language);
-	const predictionAntTheme = useMemo(
-		() => ({
-			algorithm: darkMode ? antTheme.darkAlgorithm : antTheme.defaultAlgorithm,
-			token: {
-				colorBgBase: theme.pageBg,
-				colorBgContainer: theme.panelStrong,
-				colorBgElevated: theme.panelStrong,
-				colorBorder: theme.lineSoft,
-				colorBorderSecondary: theme.lineSoft,
-				colorFillSecondary: theme.fieldBg,
-				colorPrimary: theme.primary,
-				colorText: theme.text,
-				colorTextSecondary: theme.textMuted,
-				boxShadowSecondary: `0 24px 70px ${theme.shadow}`,
-				borderRadius: 18,
-				borderRadiusLG: 24,
-				fontFamily:
-					'var(--font-body), "PingFang SC", "Noto Sans SC", sans-serif'
-			},
-			components: {
-				Button: {
-					borderRadius: 999,
-					fontWeight: 700
-				},
-				Card: {
-					bodyPadding: 24
-				},
-				DatePicker: {
-					controlHeightLG: 52
-				},
-				InputNumber: {
-					controlHeightLG: 52
-				},
-				Select: {
-					controlHeightLG: 52
-				}
-			}
-		}),
-		[darkMode, theme]
-	);
 
 	useEffect(() => {
 		setMounted(true);
@@ -137,7 +63,7 @@ export default function PredictionClient({
 			return;
 		}
 
-		document.body.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+		document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
 		localStorage.setItem(STORAGE_KEYS.theme, darkMode ? 'dark' : 'light');
 	}, [darkMode, mounted]);
 
@@ -166,7 +92,7 @@ export default function PredictionClient({
 					: undefined
 			};
 
-			form.setFieldsValue(restoredValues);
+			setFormValues(prev => ({ ...prev, ...restoredValues }));
 			setSummaryValues({
 				ml_model: restoredValues.ml_model ?? initialFormValues.ml_model,
 				town: restoredValues.town ?? initialFormValues.town,
@@ -176,7 +102,7 @@ export default function PredictionClient({
 		} catch {
 			localStorage.removeItem(STORAGE_KEYS.form);
 		}
-	}, [form, i18n]);
+	}, [i18n]);
 
 	useEffect(() => {
 		if (!mounted) {
@@ -194,14 +120,9 @@ export default function PredictionClient({
 		};
 	}, []);
 
-	const disabledYear = useCallback((current: FieldType['lease_commence_date']) => {
-		return (
-			current.isBefore(`${MIN_LEASE_COMMENCE_YEAR}-01-01`) ||
-			current.isAfter(`${MAX_LEASE_COMMENCE_YEAR}-01-01`, 'year')
-		);
-	}, []);
-
 	const handleFormChange = useCallback((_: unknown, allValues: Partial<FieldType>) => {
+		setError(null);
+		setFormValues(prev => ({ ...prev, ...allValues }));
 		const persist: PersistedFieldValues = {
 			...allValues,
 			lease_commence_date: allValues.lease_commence_date
@@ -222,7 +143,8 @@ export default function PredictionClient({
 		requestControllerRef.current?.abort();
 		requestControllerRef.current = null;
 		setLoading(false);
-		form.setFieldsValue(initialFormValues);
+		setError(null);
+		setFormValues(initialFormValues);
 		setOutput(0);
 		setTrendData(defaultTrendData);
 		setSummaryValues({
@@ -232,7 +154,7 @@ export default function PredictionClient({
 		});
 
 		localStorage.removeItem(STORAGE_KEYS.form);
-	}, [form]);
+	}, []);
 
 	const handleFinish = useCallback(
 		async (values: FieldType) => {
@@ -240,14 +162,15 @@ export default function PredictionClient({
 			const controller = new AbortController();
 			requestControllerRef.current = controller;
 			setLoading(true);
-				const requestBody: PredictionRequestBody = {
-					mlModel: values.ml_model,
-					town: values.town,
-					storeyRange: values.storey_range,
-					flatModel: values.flat_model,
-					floorAreaSqm: values.floor_area_sqm,
-					leaseCommenceYear: values.lease_commence_date.year()
-				};
+			setError(null);
+			const requestBody: PredictionRequestBody = {
+				mlModel: values.ml_model,
+				town: values.town,
+				storeyRange: values.storey_range,
+				flatModel: values.flat_model,
+				floorAreaSqm: values.floor_area_sqm,
+				leaseCommenceYear: values.lease_commence_date.year()
+			};
 
 			try {
 				const response = await fetch('/api/prices', {
@@ -267,12 +190,12 @@ export default function PredictionClient({
 				const normalizedData = normalizeTrendData(serverData);
 				setTrendData(normalizedData);
 				setOutput(normalizePrice(normalizedData[normalizedData.length - 1]?.value ?? 0));
-			} catch (error: unknown) {
-				if (isAbortError(error)) {
+			} catch (err: unknown) {
+				if (isAbortError(err)) {
 					return;
 				}
 
-				messageApi.error(getErrorMessage(error, t('error_fetch')));
+				setError(getErrorMessage(err, t('error_fetch')));
 			} finally {
 				if (requestControllerRef.current === controller) {
 					requestControllerRef.current = null;
@@ -280,176 +203,95 @@ export default function PredictionClient({
 				}
 			}
 		},
-		[messageApi, t]
+		[t]
 	);
 
-	const motionVariants = {
-		hidden: { opacity: 0, y: 40 },
-		visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
-	};
-
-	const valueVariants = {
-		initial: { scale: 1, color: darkMode ? '#cf8b60' : '#af6542' },
-		animate: {
-			scale: [1, 1.18, 1],
-			color: darkMode ? '#cf8b60' : '#af6542',
-			transition: { duration: 0.6 }
-		}
-	};
-
-	const initialShellTheme = getPredictionTheme(false);
+	const figures = [
+		{ label: t('ml_model'), value: ML_MODELS.length.toString().padStart(2, '0') },
+		{ label: t('town'), value: TOWNS.length.toString().padStart(2, '0') },
+		{ label: t('flat_model'), value: FLAT_MODELS.length.toString().padStart(2, '0') }
+	];
 
 	if (!mounted) {
-		return (
-			<ConfigProvider
-				componentSize="large"
-				locale={getAntdLocale('en')}
-				theme={predictionAntTheme}
-				variant="filled"
-			>
-				<main
-					className={styles.shell}
-					style={{
-						background: initialShellTheme.background,
-						padding: '26px 28px 42px',
-						...getThemeVars(initialShellTheme)
-					}}
-				>
-					<div className={styles.surface}>
-						<Flex
-							className={styles.topbar}
-							justify="space-between"
-							align="center"
-							gap="middle"
-							wrap
-						>
-							<Tag className={styles.pill} variant="filled">
-								{pillContent}
-							</Tag>
-						</Flex>
-
-						<div className={styles.layout}>
-							<section className={styles.panel}>
-								<Card className={styles.card} variant="borderless">
-									<div className={styles.cardInner}>{introContent}</div>
-								</Card>
-							</section>
-
-							<section className={styles.resultsPanel}>
-								<Card className={styles.resultsCard} variant="borderless">
-									<div className={styles.chartFrame} />
-								</Card>
-							</section>
-						</div>
-					</div>
-				</main>
-			</ConfigProvider>
-		);
+		return null;
 	}
 
 	return (
-		<ConfigProvider
-			componentSize="large"
-			locale={antdLocale}
-			theme={predictionAntTheme}
-			variant="filled"
-		>
-			<main
-				className={styles.shell}
-				style={{
-					background: theme.background,
-					padding: isMobile ? '18px 14px 30px' : '26px 28px 42px',
-					...cssVars
-				}}
-			>
-				<div className={styles.surface}>
-					<Flex
-						className={styles.topbar}
-						justify="space-between"
-						align="center"
-						gap="middle"
-						wrap
-					>
-						<Tag className={styles.pill} variant="filled">
-							{pillContent}
-						</Tag>
+		<main className="shell">
+			<div className="surface">
+				<div className="topbar">
+					<div className="pill">{t('intro_eyebrow')}</div>
 
-						<Flex className={styles.actions} gap="small" wrap>
-							<Button
-								className={styles.ghostButton}
-								icon={darkMode ? <BulbFilled /> : <BulbOutlined />}
-								onClick={() => setDarkMode((value) => !value)}
-								aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-							/>
-							<Segmented
-								className={styles.languageSwitch}
-								options={[
-									{ label: 'EN', value: 'en' },
-									{ label: '中文', value: 'zh' }
-								]}
-								shape="round"
-								size="large"
-								value={i18n.language}
-								onChange={(value) => {
-									startTransition(() => {
-										i18n.changeLanguage(String(value));
-									});
-								}}
-							/>
-						</Flex>
-					</Flex>
-
-					<div className={styles.layout}>
-						<AnimatePresence>
-							<motion.section
-								key="form-card"
-								initial="hidden"
-								animate="visible"
-								exit="hidden"
-								variants={motionVariants}
-								className={styles.panel}
-							>
-								<Card className={styles.card} variant="borderless">
-									<div className={styles.cardInner}>
-										{introContent}
-
-										<PredictionForm
-											form={form}
-											loading={loading}
-											onFinish={handleFinish}
-											onReset={handleReset}
-											onValuesChange={handleFormChange}
-											disabledYear={disabledYear}
-											t={t}
-										/>
-									</div>
-								</Card>
-							</motion.section>
-						</AnimatePresence>
-
-						<AnimatePresence mode="wait">
-							<motion.section
-								key="results-card"
-								initial="hidden"
-								animate="visible"
-								exit="hidden"
-								variants={motionVariants}
-								className={styles.resultsPanel}
-							>
-								<PredictionResults
-									isMobile={isMobile}
-									output={output}
-									summaryValues={summaryValues}
-									t={t}
-									theme={theme}
-									trendData={trendData}
-									valueVariants={valueVariants}
-								/>
-							</motion.section>
-						</AnimatePresence>
+					<div className="actions">
+						<button
+							className="ghost-btn"
+							onClick={() => setDarkMode((value) => !value)}
+							aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+						>
+							{darkMode ? 'Light' : 'Dark'}
+						</button>
+						<button
+							className="ghost-btn"
+							onClick={() => {
+								startTransition(() => {
+									i18n.changeLanguage(i18n.language === 'en' ? 'zh' : 'en');
+								});
+							}}
+						>
+							{t('switch_language')}
+						</button>
 					</div>
 				</div>
-			</main>
-		</ConfigProvider>
+
+				<div className="layout">
+					<section>
+						<div className="card">
+							<div className="card-inner">
+								<div style={{ display: 'grid', gap: 20 }}>
+									<h1 className={`headline${i18n.language === 'zh' ? ' headline-cjk' : ''}`}>
+										{t('price_prediction')}
+									</h1>
+									<p className="lead">{t('intro_blurb')}</p>
+									<div className="figure-row">
+										{figures.map(f => (
+											<div key={f.label} className="figure">
+												<span className="figure-label">{f.label}</span>
+												<strong className="figure-value">{f.value}</strong>
+											</div>
+										))}
+									</div>
+									<p className="caption">{t('intro_caption')}</p>
+								</div>
+
+								{error && (
+									<div style={{ padding: '16px', background: 'var(--accent)', color: 'white', borderRadius: '8px', marginTop: '16px' }}>
+										{error}
+									</div>
+								)}
+
+								<PredictionForm
+									formValues={formValues}
+									loading={loading}
+									onFinish={handleFinish}
+									onReset={handleReset}
+									onValuesChange={handleFormChange}
+									t={t}
+								/>
+							</div>
+						</div>
+					</section>
+
+					<section>
+						<PredictionResults
+							output={output}
+							summaryValues={summaryValues}
+							t={t}
+							trendData={trendData}
+							locale={i18n.language}
+						/>
+					</section>
+				</div>
+			</div>
+		</main>
 	);
 }

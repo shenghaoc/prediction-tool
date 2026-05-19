@@ -1,5 +1,5 @@
-import PredictionPage from '../components/prediction/PredictionPage';
+import PredictionClient from '../components/prediction/PredictionClient';
 
 export default function Page() {
-	return <PredictionPage />;
+	return <PredictionClient />;
 }

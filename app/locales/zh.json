@@ -131,5 +131,9 @@
     "Type S1": "S1型",
     "Type S2": "S2型"
   },
-  "predicted_price": "预测价格"
+  "predicting": "预测中\u2026",
+  "predicted_price": "预测价格",
+  "awaiting": "等待预测结果",
+  "placeholder_title": "提交一个情境后即可生成预测",
+  "placeholder_body": "选择模型并调整房屋资料后提交表单，即可查看预测转售价与过去12个月趋势。"
 }
