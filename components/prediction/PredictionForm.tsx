@@ -1,6 +1,7 @@
 'use client';
 
 import type { TFunction } from 'i18next';
+import dayjs from '../../lib/dayjs';
 import { MAX_FLOOR_AREA_SQM, MIN_FLOOR_AREA_SQM } from '../../lib/prediction';
 import { FLAT_MODELS, ML_MODELS, STOREY_RANGES, TOWNS, LEASE_COMMENCE_YEARS } from '../../lib/lists';
 import type { FieldType } from './types';
@@ -118,10 +119,7 @@ export default function PredictionForm({
 							className="field-select"
 							value={formValues.lease_commence_date ? formValues.lease_commence_date.year() : ''}
 							onChange={(e) => {
-								// Reconstruct a dayjs object for the selected year
-								import('../../lib/dayjs').then(({ default: dayjs }) => {
-									handleChange('lease_commence_date', dayjs(`${e.target.value}-01-01`));
-								});
+								handleChange('lease_commence_date', dayjs(`${e.target.value}-01-01`));
 							}}
 							required
 						>

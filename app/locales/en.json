@@ -131,6 +131,7 @@
     "Type S1": "Type S1",
     "Type S2": "Type S2"
   },
+  "predicting": "Predicting\u2026",
   "predicted_price": "Predicted Price",
   "awaiting": "Awaiting prediction",
   "placeholder_title": "Run a scenario to generate a forecast",

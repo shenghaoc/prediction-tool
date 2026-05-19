@@ -5,7 +5,6 @@ import type { TrendPoint } from './types';
 
 type PriceTrendChartProps = {
 	data: TrendPoint[];
-	isMobile?: boolean;
 };
 
 export default function PriceTrendChart({ data }: PriceTrendChartProps) {
@@ -60,7 +59,8 @@ export default function PriceTrendChart({ data }: PriceTrendChartProps) {
 	const peakIdx = values.indexOf(Math.max(...values));
 	const lastIdx = values.length - 1;
 	const fmtK = (v: number) => v >= 1e6 ? `$${(v/1e6).toFixed(1)}M` : v >= 1e3 ? `$${Math.round(v/1e3)}k` : `$${Math.round(v)}`;
-	const fmtFull = (v: number) => `$${Math.round(v).toLocaleString()}`;
+	const fmtFull = (v: number) =>
+		v.toLocaleString('en-SG', { style: 'currency', currency: 'SGD', maximumFractionDigits: 0 });
 
 	const handleMove = (e: React.MouseEvent) => {
 		if (!containerRef.current) return;

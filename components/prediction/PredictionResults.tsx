@@ -12,7 +12,6 @@ const PriceTrendChart = dynamic(() => import('./PriceTrendChart'), {
 });
 
 type PredictionResultsProps = {
-	isMobile: boolean;
 	output: number;
 	summaryValues: SummaryValues;
 	t: TFunction;
@@ -20,7 +19,6 @@ type PredictionResultsProps = {
 };
 
 export default function PredictionResults({
-	isMobile,
 	output,
 	summaryValues,
 	t,
@@ -47,7 +45,8 @@ export default function PredictionResults({
 		};
 	}, [trendData]);
 
-	const fmt = (v: number) => `$${Math.round(v).toLocaleString()}`;
+	const fmt = (v: number) =>
+		v.toLocaleString('en-SG', { style: 'currency', currency: 'SGD', maximumFractionDigits: 0 });
 
 	return (
 		<div className="results-card">
@@ -109,7 +108,7 @@ export default function PredictionResults({
 						</div>
 					</div>
 					<div className="chart-frame">
-						<PriceTrendChart data={trendData} isMobile={isMobile} />
+						<PriceTrendChart data={trendData} />
 					</div>
 				</div>
 			) : (

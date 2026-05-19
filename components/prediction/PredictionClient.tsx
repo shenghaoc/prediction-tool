@@ -273,7 +273,6 @@ export default function PredictionClient() {
 
 					<section>
 						<PredictionResults
-							isMobile={false}
 							output={output}
 							summaryValues={summaryValues}
 							t={t}

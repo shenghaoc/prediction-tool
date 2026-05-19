@@ -9,7 +9,7 @@
 *, *::before, *::after { margin: 0; box-sizing: border-box; }
 html, body { min-height: 100%; }
 body {
-  font-family: 'DM Sans', 'Avenir Next', 'SF Pro Text', 'Helvetica Neue', 'Segoe UI', Arial, sans-serif;
+  font-family: var(--font-dm-sans), 'Avenir Next', 'SF Pro Text', 'Helvetica Neue', 'Segoe UI', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -208,7 +208,7 @@ body {
 .headline {
   max-width: 10ch;
   color: var(--text);
-  font-family: 'Lora', 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  font-family: var(--font-lora), 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
   font-size: clamp(3rem, 6vw, 5.3rem);
   line-height: 0.9;
   font-weight: 700;
@@ -401,7 +401,7 @@ body {
 .results-title {
   margin: 6px 0 0;
   color: var(--text);
-  font-family: 'Lora', 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  font-family: var(--font-lora), 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
   font-size: clamp(2.2rem, 4vw, 3.4rem);
   line-height: 0.95;
   font-weight: 700;
