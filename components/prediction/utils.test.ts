@@ -1,5 +1,3 @@
-import { describe, expect, test } from 'vitest';
-
 import { normalizePrice, normalizeTrendData } from './utils';
 
 describe('prediction ui utilities', () => {
