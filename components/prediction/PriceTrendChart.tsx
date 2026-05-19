@@ -5,9 +5,10 @@ import type { TrendPoint } from './types';
 
 type PriceTrendChartProps = {
 	data: TrendPoint[];
+	locale: string;
 };
 
-export default function PriceTrendChart({ data }: PriceTrendChartProps) {
+export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [tooltip, setTooltip] = useState<{ idx: number; x: number; y: number; label: string; value: number } | null>(null);
 
@@ -58,9 +59,33 @@ export default function PriceTrendChart({ data }: PriceTrendChartProps) {
 
 	const peakIdx = values.indexOf(Math.max(...values));
 	const lastIdx = values.length - 1;
-	const fmtK = (v: number) => v >= 1e6 ? `$${(v/1e6).toFixed(1)}M` : v >= 1e3 ? `$${Math.round(v/1e3)}k` : `$${Math.round(v)}`;
-	const fmtFull = (v: number) =>
-		v.toLocaleString('en-SG', { style: 'currency', currency: 'SGD', maximumFractionDigits: 0 });
+
+
+	const formatter = new Intl.NumberFormat(locale === 'zh' ? 'zh-SG' : 'en-SG', {
+		style: 'currency',
+		currency: 'SGD',
+		maximumFractionDigits: 0
+	});
+	const fmtFull = (v: number) => formatter.format(Math.round(v));
+	const fmtK = (v: number) => {
+		if (v >= 1e6) {
+			const formatterM = new Intl.NumberFormat(locale === 'zh' ? 'zh-SG' : 'en-SG', {
+				style: 'currency',
+				currency: 'SGD',
+				maximumFractionDigits: 1
+			});
+			return formatterM.format(v / 1e6).replace('SGD', '').trim() + 'M';
+		}
+		if (v >= 1e3) {
+			const formatterK = new Intl.NumberFormat(locale === 'zh' ? 'zh-SG' : 'en-SG', {
+				style: 'currency',
+				currency: 'SGD',
+				maximumFractionDigits: 0
+			});
+			return formatterK.format(v / 1e3).replace('SGD', '').trim() + 'k';
+		}
+		return fmtFull(v);
+	};
 
 	const handleMove = (e: React.MouseEvent) => {
 		if (!containerRef.current) return;
@@ -82,7 +107,12 @@ export default function PriceTrendChart({ data }: PriceTrendChartProps) {
 			onMouseMove={handleMove}
 			onMouseLeave={() => setTooltip(null)}
 			style={{ cursor: 'crosshair', position: 'relative' }}>
-			<svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', overflow: 'visible', display: 'block' }}>
+			<svg 
+				viewBox={`0 0 ${W} ${H}`} 
+				style={{ width: '100%', height: 'auto', overflow: 'visible', display: 'block' }}
+				role="img"
+				aria-label="Price trend chart"
+			>
 				<defs>
 					<linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
 						<stop offset="0%" stopColor="var(--chart-line)" stopOpacity="0.42" />

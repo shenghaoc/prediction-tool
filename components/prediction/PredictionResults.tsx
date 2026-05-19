@@ -16,6 +16,7 @@ type PredictionResultsProps = {
 	summaryValues: SummaryValues;
 	t: TFunction;
 	trendData: TrendPoint[];
+	locale: string;
 };
 
 export default function PredictionResults({
@@ -23,6 +24,7 @@ export default function PredictionResults({
 	summaryValues,
 	t,
 	trendData,
+	locale
 }: PredictionResultsProps) {
 	const hasOutput = output > 0;
 
@@ -45,8 +47,12 @@ export default function PredictionResults({
 		};
 	}, [trendData]);
 
-	const fmt = (v: number) =>
-		v.toLocaleString('en-SG', { style: 'currency', currency: 'SGD', maximumFractionDigits: 0 });
+	const formatter = new Intl.NumberFormat(locale === 'zh' ? 'zh-SG' : 'en-SG', {
+		style: 'currency',
+		currency: 'SGD',
+		maximumFractionDigits: 0
+	});
+	const fmt = (v: number) => formatter.format(Math.round(v));
 
 	return (
 		<div className="results-card">
@@ -108,7 +114,7 @@ export default function PredictionResults({
 						</div>
 					</div>
 					<div className="chart-frame">
-						<PriceTrendChart data={trendData} />
+						<PriceTrendChart data={trendData} locale={locale} />
 					</div>
 				</div>
 			) : (

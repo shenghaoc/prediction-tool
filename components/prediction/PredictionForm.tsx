@@ -15,10 +15,10 @@ type PredictionFormProps = {
 	formValues: FieldType;
 };
 
-function Field({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) {
+function Field({ label, children, full, htmlFor }: { label: string; children: React.ReactNode; full?: boolean; htmlFor?: string }) {
 	return (
 		<div className={full ? 'field-full' : undefined}>
-			<label className="field-label">{label}</label>
+			<label className="field-label" htmlFor={htmlFor}>{label}</label>
 			{children}
 		</div>
 	);
@@ -47,8 +47,9 @@ export default function PredictionForm({
 			<h2 className="section-title">{t('prediction_form')}</h2>
 			<form onSubmit={handleSubmit}>
 				<div className="form-grid">
-					<Field label={t('ml_model')}>
+					<Field label={t('ml_model')} htmlFor="input-ml_model">
 						<select
+							id="input-ml_model"
 							className="field-select"
 							value={formValues.ml_model || ''}
 							onChange={(e) => handleChange('ml_model', e.target.value)}
@@ -60,8 +61,9 @@ export default function PredictionForm({
 							))}
 						</select>
 					</Field>
-					<Field label={t('town')}>
+					<Field label={t('town')} htmlFor="input-town">
 						<select
+							id="input-town"
 							className="field-select"
 							value={formValues.town || ''}
 							onChange={(e) => handleChange('town', e.target.value)}
@@ -73,8 +75,9 @@ export default function PredictionForm({
 							))}
 						</select>
 					</Field>
-					<Field label={t('storey_range')}>
+					<Field label={t('storey_range')} htmlFor="input-storey_range">
 						<select
+							id="input-storey_range"
 							className="field-select"
 							value={formValues.storey_range || ''}
 							onChange={(e) => handleChange('storey_range', e.target.value)}
@@ -86,8 +89,9 @@ export default function PredictionForm({
 							))}
 						</select>
 					</Field>
-					<Field label={t('flat_model')}>
+					<Field label={t('flat_model')} htmlFor="input-flat_model">
 						<select
+							id="input-flat_model"
 							className="field-select"
 							value={formValues.flat_model || ''}
 							onChange={(e) => handleChange('flat_model', e.target.value)}
@@ -99,9 +103,10 @@ export default function PredictionForm({
 							))}
 						</select>
 					</Field>
-					<Field label={t('floor_area')} full>
+					<Field label={t('floor_area')} full htmlFor="input-floor_area">
 						<div className="unit-wrap">
 							<input
+								id="input-floor_area"
 								type="number"
 								className="field-input"
 								min={MIN_FLOOR_AREA_SQM}
@@ -114,8 +119,9 @@ export default function PredictionForm({
 							<span className="unit-tag">m²</span>
 						</div>
 					</Field>
-					<Field label={t('lease_commence_date')} full>
+					<Field label={t('lease_commence_date')} full htmlFor="input-lease_commence_date">
 						<select
+							id="input-lease_commence_date"
 							className="field-select"
 							value={formValues.lease_commence_date ? formValues.lease_commence_date.year() : ''}
 							onChange={(e) => {

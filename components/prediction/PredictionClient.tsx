@@ -41,6 +41,7 @@ export default function PredictionClient() {
 	const [output, setOutput] = useState(0);
 	const [trendData, setTrendData] = useState(defaultTrendData);
 	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 	const [formValues, setFormValues] = useState<FieldType>(initialFormValues);
 	const [summaryValues, setSummaryValues] = useState<SummaryValues>({
 		ml_model: initialFormValues.ml_model,
@@ -120,6 +121,7 @@ export default function PredictionClient() {
 	}, []);
 
 	const handleFormChange = useCallback((_: unknown, allValues: Partial<FieldType>) => {
+		setError(null);
 		setFormValues(prev => ({ ...prev, ...allValues }));
 		const persist: PersistedFieldValues = {
 			...allValues,
@@ -141,6 +143,7 @@ export default function PredictionClient() {
 		requestControllerRef.current?.abort();
 		requestControllerRef.current = null;
 		setLoading(false);
+		setError(null);
 		setFormValues(initialFormValues);
 		setOutput(0);
 		setTrendData(defaultTrendData);
@@ -159,6 +162,7 @@ export default function PredictionClient() {
 			const controller = new AbortController();
 			requestControllerRef.current = controller;
 			setLoading(true);
+			setError(null);
 			const requestBody: PredictionRequestBody = {
 				mlModel: values.ml_model,
 				town: values.town,
@@ -186,12 +190,12 @@ export default function PredictionClient() {
 				const normalizedData = normalizeTrendData(serverData);
 				setTrendData(normalizedData);
 				setOutput(normalizePrice(normalizedData[normalizedData.length - 1]?.value ?? 0));
-			} catch (error: unknown) {
-				if (isAbortError(error)) {
+			} catch (err: unknown) {
+				if (isAbortError(err)) {
 					return;
 				}
 
-				alert(getErrorMessage(error, t('error_fetch')));
+				setError(getErrorMessage(err, t('error_fetch')));
 			} finally {
 				if (requestControllerRef.current === controller) {
 					requestControllerRef.current = null;
@@ -259,6 +263,12 @@ export default function PredictionClient() {
 									<p className="caption">{t('intro_caption')}</p>
 								</div>
 
+								{error && (
+									<div style={{ padding: '16px', background: 'var(--accent)', color: 'white', borderRadius: '8px', marginTop: '16px' }}>
+										{error}
+									</div>
+								)}
+
 								<PredictionForm
 									formValues={formValues}
 									loading={loading}
@@ -277,6 +287,7 @@ export default function PredictionClient() {
 							summaryValues={summaryValues}
 							t={t}
 							trendData={trendData}
+							locale={i18n.language}
 						/>
 					</section>
 				</div>
