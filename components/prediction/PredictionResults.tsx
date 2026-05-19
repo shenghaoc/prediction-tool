@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useMemo } from 'react';
-import { Card, Descriptions, Divider, Flex, Statistic, Typography } from 'antd';
+import { Card, Divider } from 'antd';
 import { motion } from 'framer-motion';
 import type { TFunction } from 'i18next';
 
@@ -41,6 +41,8 @@ export default function PredictionResults({
 	trendData,
 	valueVariants
 }: PredictionResultsProps) {
+	const hasOutput = output > 0;
+
 	const chartStats = useMemo(() => {
 		const latestValue = trendData[trendData.length - 1]?.value ?? 0;
 		const firstValue = trendData[0]?.value ?? 0;
@@ -59,145 +61,87 @@ export default function PredictionResults({
 			deltaValue
 		};
 	}, [trendData]);
-	const summaryItems = useMemo(
-		() => [
-			{
-				key: 'ml-model',
-				label: t('ml_model'),
-				children: summaryValues.ml_model
-			},
-			{
-				key: 'town',
-				label: t('town'),
-				children: summaryValues.town
-			},
-			{
-				key: 'lease',
-				label: t('lease_commence_date'),
-				children: summaryValues.lease_commence_date.format('YYYY')
-			}
-		],
-		[summaryValues.lease_commence_date, summaryValues.ml_model, summaryValues.town, t]
-	);
-	const chartSummaryItems = useMemo(
-		() => [
-			{
-				key: 'latest',
-				label: t('chart_latest'),
-				value: `$${chartStats.latestValue.toLocaleString()}`
-			},
-			{
-				key: 'range',
-				label: t('chart_range'),
-				value: `$${chartStats.lowValue.toLocaleString()} - $${chartStats.peakValue.toLocaleString()}`
-			},
-			{
-				key: 'delta',
-				label: t('chart_delta'),
-				value: `${chartStats.deltaValue >= 0 ? '+' : '-'}$${Math.abs(chartStats.deltaValue).toLocaleString()}`,
-				caption: t('vs_12m_ago')
-			}
-		],
-		[chartStats.deltaValue, chartStats.latestValue, chartStats.lowValue, chartStats.peakValue, t]
-	);
+
+	const fmt = (v: number) => `$${Math.round(v).toLocaleString()}`;
 
 	return (
 		<Card className={styles.resultsCard} variant="borderless">
-			<Flex
-				className={styles.resultsHeader}
-				justify="space-between"
-				align={isMobile ? 'stretch' : 'flex-start'}
-				gap="large"
-				wrap
-			>
-				<Flex vertical gap={6}>
-					<Typography.Text className={styles.resultsLabel}>
-						{t('predicted_trends')}
-					</Typography.Text>
-					<Typography.Title level={2} className={styles.resultsTitle}>
-						{t('predicted_price')}
-					</Typography.Title>
-				</Flex>
-				<Card className={styles.pricePanel} variant="borderless">
-					<motion.div
+			{/* Header */}
+			<div className={styles.resultsHeader}>
+				<div>
+					<span className={styles.resultsLabel}>{t('predicted_trends')}</span>
+					<h2 className={styles.resultsTitle}>{t('predicted_price')}</h2>
+				</div>
+				<div className={styles.pricePanel}>
+					<span className={styles.pricePanelLabel}>{t('prediction')}</span>
+					<motion.strong
 						key={output}
 						initial="initial"
 						animate="animate"
 						variants={valueVariants}
+						className={`${styles.priceValue}${hasOutput ? '' : ` ${styles.priceValueAwaiting}`}`}
 					>
-						<Statistic
-							value={output}
-							precision={0}
-							prefix="$"
-							styles={{
-								content: {
-									color: theme.accent,
-									fontWeight: 800,
-									fontSize: isMobile ? 32 : 42
-								}
-							}}
-							title={t('prediction')}
-						/>
-					</motion.div>
-				</Card>
-			</Flex>
-
-			<Descriptions
-				className={styles.resultsMeta}
-				column={isMobile ? 1 : 3}
-				colon={false}
-				items={summaryItems}
-				layout="vertical"
-			/>
-
-			<Divider className={styles.resultsDivider} />
-
-			<Flex
-				className={styles.chartHeader}
-				justify="space-between"
-				align={isMobile ? 'stretch' : 'flex-start'}
-				gap="middle"
-				wrap
-			>
-				<Flex vertical gap={6}>
-					<Typography.Text className={styles.chartKicker}>
-						{t('predicted_trends')}
-					</Typography.Text>
-					<Typography.Title level={3} className={styles.chartTitle}>
-						{t('chart_story_title')}
-					</Typography.Title>
-				</Flex>
-				<div className={styles.chartSummaryGrid}>
-					{chartSummaryItems.map((item) => (
-						<Card
-							key={item.key}
-							className={styles.chartSummaryCard}
-							size="small"
-							variant="borderless"
-						>
-							<Statistic
-								title={item.label}
-								value={item.value}
-								formatter={(value) => (
-									<span className={styles.chartSummaryValue}>{String(value)}</span>
-								)}
-							/>
-							{item.caption ? (
-								<Typography.Text className={styles.chartSummaryCaption}>
-									{item.caption}
-								</Typography.Text>
-							) : null}
-						</Card>
-					))}
+						{hasOutput ? fmt(output) : t('awaiting')}
+					</motion.strong>
 				</div>
-			</Flex>
-			<div className={styles.chartFrame}>
-				<PriceTrendChart
-					data={trendData}
-					isMobile={isMobile}
-					theme={theme}
-				/>
 			</div>
+
+			{/* Metric grid */}
+			<div className={styles.metricGrid}>
+				<div className={styles.metricCard}>
+					<span className={styles.metricLabel}>{t('ml_model')}</span>
+					<strong className={styles.metricValue}>{summaryValues.ml_model}</strong>
+				</div>
+				<div className={styles.metricCard}>
+					<span className={styles.metricLabel}>{t('town')}</span>
+					<strong className={styles.metricValue}>{summaryValues.town}</strong>
+				</div>
+				<div className={styles.metricCard}>
+					<span className={styles.metricLabel}>{t('lease_commence_date')}</span>
+					<strong className={styles.metricValue}>
+						{summaryValues.lease_commence_date.format('YYYY')}
+					</strong>
+				</div>
+			</div>
+
+			{hasOutput ? (
+				<div className={styles.chartShell}>
+					<span className={styles.chartKicker}>{t('predicted_trends')}</span>
+					<h3 className={styles.chartTitle}>{t('chart_story_title')}</h3>
+
+					<div className={styles.chartSummaryGrid}>
+						<div className={styles.chartSummaryCard}>
+							<span className={styles.metricLabel}>{t('chart_latest')}</span>
+							<strong className={styles.chartSummaryVal}>
+								{fmt(chartStats.latestValue)}
+							</strong>
+						</div>
+						<div className={styles.chartSummaryCard}>
+							<span className={styles.metricLabel}>{t('chart_range')}</span>
+							<strong className={styles.chartSummaryVal}>
+								{fmt(chartStats.lowValue)} – {fmt(chartStats.peakValue)}
+							</strong>
+						</div>
+						<div className={styles.chartSummaryCard}>
+							<span className={styles.metricLabel}>{t('chart_delta')}</span>
+							<strong className={styles.chartSummaryVal}>
+								{chartStats.deltaValue >= 0 ? '+' : '-'}
+								{fmt(Math.abs(chartStats.deltaValue))}
+							</strong>
+							<span className={styles.chartSummarySub}>{t('vs_12m_ago')}</span>
+						</div>
+					</div>
+
+					<div className={styles.chartFrame}>
+						<PriceTrendChart data={trendData} isMobile={isMobile} theme={theme} />
+					</div>
+				</div>
+			) : (
+				<div className={styles.placeholder}>
+					<h3 className={styles.placeholderTitle}>{t('placeholder_title')}</h3>
+					<p className={styles.placeholderBody}>{t('placeholder_body')}</p>
+				</div>
+			)}
 		</Card>
 	);
 }

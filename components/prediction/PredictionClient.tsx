@@ -18,7 +18,6 @@ import {
 	Form,
 	Grid,
 	Segmented,
-	Tag,
 	theme as antTheme
 } from 'antd';
 import { BulbFilled, BulbOutlined } from '@ant-design/icons';
@@ -323,9 +322,9 @@ export default function PredictionClient({
 							gap="middle"
 							wrap
 						>
-							<Tag className={styles.pill} variant="filled">
+							<div className={styles.pill}>
 								{pillContent}
-							</Tag>
+							</div>
 						</Flex>
 
 						<div className={styles.layout}>
@@ -370,9 +369,9 @@ export default function PredictionClient({
 						gap="middle"
 						wrap
 					>
-						<Tag className={styles.pill} variant="filled">
+						<div className={styles.pill}>
 							{pillContent}
-						</Tag>
+						</div>
 
 						<Flex className={styles.actions} gap="small" wrap>
 							<Button

@@ -1,16 +1,11 @@
 :root {
 	color-scheme: light;
-	--font-body: 'Avenir Next', 'SF Pro Text', 'Helvetica Neue', 'Segoe UI', Arial, sans-serif;
-	--font-body-cjk:
-		'PingFang SC',
-		'Hiragino Sans GB',
-		'Noto Sans CJK SC',
-		'Noto Sans SC',
-		'Microsoft YaHei',
-		'Source Han Sans SC',
-		'Heiti SC',
-		sans-serif;
-	--font-display: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+	--font-body: var(--font-dm-sans, 'DM Sans'), 'Avenir Next', 'SF Pro Text', 'Helvetica Neue',
+		'Segoe UI', Arial, sans-serif;
+	--font-body-cjk: 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans CJK SC', 'Noto Sans SC',
+		'Microsoft YaHei', 'Source Han Sans SC', 'Heiti SC', sans-serif;
+	--font-display: var(--font-lora, 'Lora'), 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua',
+		Georgia, serif;
 }
 
 * {
@@ -25,9 +20,11 @@ body {
 }
 
 body {
-	background: var(--page-bg, #f6efe6);
+	background: var(--page-bg, #f5eee5);
 	color: var(--text-color, #1f2328);
 	font-family: var(--font-body);
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 	transition: background 0.35s ease, color 0.25s ease;
 }
 

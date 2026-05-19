@@ -1,5 +1,6 @@
 import './globals.css';
 import type { Metadata } from 'next';
+import { DM_Sans, Lora } from 'next/font/google';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import { App as AntdApp, ConfigProvider } from 'antd';
 import {
@@ -9,6 +10,20 @@ import {
 	SITE_OG_IMAGE,
 	SITE_URL
 } from '../lib/site';
+
+const dmSans = DM_Sans({
+	subsets: ['latin'],
+	weight: ['400', '500', '600', '700', '800'],
+	variable: '--font-dm-sans',
+	display: 'swap'
+});
+
+const lora = Lora({
+	subsets: ['latin'],
+	weight: ['400', '500', '600', '700'],
+	variable: '--font-lora',
+	display: 'swap'
+});
 
 export const metadata: Metadata = {
 	title: {
@@ -53,7 +68,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<html lang="en">
+		<html lang="en" className={`${dmSans.variable} ${lora.variable}`}>
 			<body>
 				<AntdRegistry>
 					<ConfigProvider
