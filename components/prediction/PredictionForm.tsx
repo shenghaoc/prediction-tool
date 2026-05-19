@@ -1,199 +1,146 @@
 'use client';
 
-import { Button, Card, DatePicker, Flex, Form, InputNumber, Select, Typography } from 'antd';
-import type { FormInstance } from 'antd';
 import type { TFunction } from 'i18next';
-
-import {
-	MAX_FLOOR_AREA_SQM,
-	MIN_FLOOR_AREA_SQM,
-} from '../../lib/prediction';
-import { FLAT_MODELS, ML_MODELS, STOREY_RANGES, TOWNS } from '../../lib/lists';
-import { initialFormValues } from './constants';
-import styles from './styles.module.css';
+import { MAX_FLOOR_AREA_SQM, MIN_FLOOR_AREA_SQM } from '../../lib/prediction';
+import { FLAT_MODELS, ML_MODELS, STOREY_RANGES, TOWNS, LEASE_COMMENCE_YEARS } from '../../lib/lists';
 import type { FieldType } from './types';
 
 type PredictionFormProps = {
-	form: FormInstance<FieldType>;
 	loading: boolean;
 	onFinish: (values: FieldType) => Promise<void>;
 	onReset: () => void;
 	onValuesChange: (_: unknown, allValues: Partial<FieldType>) => void;
-	disabledYear: (current: FieldType['lease_commence_date']) => boolean;
 	t: TFunction;
+	formValues: FieldType;
 };
 
-const { Option } = Select;
+function Field({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) {
+	return (
+		<div className={full ? 'field-full' : undefined}>
+			<label className="field-label">{label}</label>
+			{children}
+		</div>
+	);
+}
 
 export default function PredictionForm({
-	form,
 	loading,
 	onFinish,
 	onReset,
 	onValuesChange,
-	disabledYear,
-	t
+	t,
+	formValues,
 }: PredictionFormProps) {
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault();
+		onFinish(formValues);
+	};
+
+	const handleChange = (key: keyof FieldType, value: unknown) => {
+		const newValues = { ...formValues, [key]: value };
+		onValuesChange(null, newValues);
+	};
+
 	return (
-		<Card className={styles.formCard} variant="borderless">
-			<Flex vertical gap={18} className={styles.formShell}>
-				<Typography.Title level={3} className={styles.sectionTitle}>
-					{t('prediction_form')}
-				</Typography.Title>
-				<Form
-					form={form}
-					layout="vertical"
-					initialValues={initialFormValues}
-					onFinish={onFinish}
-					onValuesChange={onValuesChange}
-				>
-					<div className={styles.formGrid}>
-						<Form.Item<FieldType>
-							name="ml_model"
-							label={t('ml_model')}
-							rules={[{ required: true, message: t('choose_ml_model') }]}
+		<div className="form-shell">
+			<h2 className="section-title">{t('prediction_form')}</h2>
+			<form onSubmit={handleSubmit}>
+				<div className="form-grid">
+					<Field label={t('ml_model')}>
+						<select
+							className="field-select"
+							value={formValues.ml_model || ''}
+							onChange={(e) => handleChange('ml_model', e.target.value)}
+							required
 						>
-							<Select
-								placeholder={t('select_ml_model')}
-								autoFocus
-								aria-label={t('ml_model')}
-								size="large"
-							>
-								{ML_MODELS.map((mlModel) => (
-									<Option key={mlModel} value={mlModel}>
-										{t(`ml_models.${mlModel}`, mlModel)}
-									</Option>
-								))}
-							</Select>
-						</Form.Item>
-
-						<Form.Item<FieldType>
-							name="town"
-							label={t('town')}
-							rules={[{ required: true, message: t('missing_town') }]}
+							<option value="" disabled>{t('select_ml_model')}</option>
+							{ML_MODELS.map((m) => (
+								<option key={m} value={m}>{t(`ml_models.${m}`, m)}</option>
+							))}
+						</select>
+					</Field>
+					<Field label={t('town')}>
+						<select
+							className="field-select"
+							value={formValues.town || ''}
+							onChange={(e) => handleChange('town', e.target.value)}
+							required
 						>
-							<Select placeholder={t('select_town')} aria-label={t('town')} size="large">
-								{TOWNS.map((town) => (
-									<Option key={town} value={town}>
-										{t(`towns.${town}`, town)}
-									</Option>
-								))}
-							</Select>
-						</Form.Item>
-
-						<Form.Item<FieldType>
-							name="storey_range"
-							label={t('storey_range')}
-							rules={[{ required: true, message: t('missing_storey_range') }]}
+							<option value="" disabled>{t('select_town')}</option>
+							{TOWNS.map((m) => (
+								<option key={m} value={m}>{t(`towns.${m}`, m)}</option>
+							))}
+						</select>
+					</Field>
+					<Field label={t('storey_range')}>
+						<select
+							className="field-select"
+							value={formValues.storey_range || ''}
+							onChange={(e) => handleChange('storey_range', e.target.value)}
+							required
 						>
-							<Select
-								placeholder={t('select_storey_range')}
-								aria-label={t('storey_range')}
-								size="large"
-							>
-								{STOREY_RANGES.map((storeyRange) => (
-									<Option key={storeyRange} value={storeyRange}>
-										{t(`storey_ranges.${storeyRange}`, storeyRange)}
-									</Option>
-								))}
-							</Select>
-						</Form.Item>
-
-						<Form.Item<FieldType>
-							name="flat_model"
-							label={t('flat_model')}
-							rules={[{ required: true, message: t('missing_flat_model') }]}
+							<option value="" disabled>{t('select_storey_range')}</option>
+							{STOREY_RANGES.map((m) => (
+								<option key={m} value={m}>{t(`storey_ranges.${m}`, m)}</option>
+							))}
+						</select>
+					</Field>
+					<Field label={t('flat_model')}>
+						<select
+							className="field-select"
+							value={formValues.flat_model || ''}
+							onChange={(e) => handleChange('flat_model', e.target.value)}
+							required
 						>
-							<Select
-								placeholder={t('select_flat_model')}
-								aria-label={t('flat_model')}
-								size="large"
-							>
-								{FLAT_MODELS.map((flatModel) => (
-									<Option key={flatModel} value={flatModel}>
-										{t(`flat_models.${flatModel}`, flatModel)}
-									</Option>
-								))}
-							</Select>
-						</Form.Item>
-
-						<Form.Item<FieldType>
-							className={styles.fieldFull}
-							label={t('floor_area')}
-						>
-							<div className={styles.unitWrap}>
-								<Form.Item<FieldType>
-									name="floor_area_sqm"
-									noStyle
-									rules={[
-										{ required: true, message: t('missing_floor_area') },
-										{
-											type: 'number',
-											min: MIN_FLOOR_AREA_SQM,
-											max: MAX_FLOOR_AREA_SQM,
-											message: t('floor_area_range')
-										}
-									]}
-								>
-									<InputNumber
-										min={MIN_FLOOR_AREA_SQM}
-										max={MAX_FLOOR_AREA_SQM}
-										precision={0}
-										step={1}
-										changeOnWheel={false}
-										controls={false}
-										parser={(value) => Number((value ?? '').replace(/[^\d]/g, ''))}
-										style={{ width: '100%' }}
-										placeholder={t('enter_floor_area')}
-										aria-label={t('floor_area')}
-										size="large"
-									/>
-								</Form.Item>
-								<div className={styles.unitTag}>m²</div>
-							</div>
-						</Form.Item>
-
-						<Form.Item<FieldType>
-							className={styles.fieldFull}
-							name="lease_commence_date"
-							label={t('lease_commence_date')}
-							rules={[{ required: true, message: t('missing_lease_commence_date') }]}
-						>
-							<DatePicker
-								picker="year"
-								inputReadOnly
-								disabledDate={disabledYear}
-								style={{ width: '100%' }}
-								placeholder={t('select_year')}
-								aria-label={t('lease_commence_date')}
-								size="large"
+							<option value="" disabled>{t('select_flat_model')}</option>
+							{FLAT_MODELS.map((m) => (
+								<option key={m} value={m}>{t(`flat_models.${m}`, m)}</option>
+							))}
+						</select>
+					</Field>
+					<Field label={t('floor_area')} full>
+						<div className="unit-wrap">
+							<input
+								type="number"
+								className="field-input"
+								min={MIN_FLOOR_AREA_SQM}
+								max={MAX_FLOOR_AREA_SQM}
+								value={formValues.floor_area_sqm || ''}
+								placeholder={t('enter_floor_area')}
+								onChange={(e) => handleChange('floor_area_sqm', e.target.value ? Number(e.target.value) : undefined)}
+								required
 							/>
-						</Form.Item>
-
-						<Flex className={`${styles.buttonRow} ${styles.fieldFull}`} gap="small">
-							<Button
-								className={styles.primaryButton}
-								type="primary"
-								htmlType="submit"
-								loading={loading}
-								disabled={loading}
-								aria-label={t('get_prediction')}
-								block
-							>
-								{t('get_prediction')}
-							</Button>
-							<Button
-								className={styles.resetButton}
-								onClick={onReset}
-								disabled={loading}
-								aria-label={t('reset_form')}
-							>
-								{t('reset_form')}
-							</Button>
-						</Flex>
+							<span className="unit-tag">m²</span>
+						</div>
+					</Field>
+					<Field label={t('lease_commence_date')} full>
+						<select
+							className="field-select"
+							value={formValues.lease_commence_date ? formValues.lease_commence_date.year() : ''}
+							onChange={(e) => {
+								// Reconstruct a dayjs object for the selected year
+								import('../../lib/dayjs').then(({ default: dayjs }) => {
+									handleChange('lease_commence_date', dayjs(`${e.target.value}-01-01`));
+								});
+							}}
+							required
+						>
+							<option value="" disabled>{t('select_year')}</option>
+							{LEASE_COMMENCE_YEARS.map((y) => (
+								<option key={y} value={y}>{y}</option>
+							))}
+						</select>
+					</Field>
+					<div className="button-row">
+						<button type="submit" className={`btn-primary${loading ? ' loading-pulse' : ''}`} disabled={loading}>
+							{loading ? t('predicting') : t('get_prediction')}
+						</button>
+						<button type="button" className="btn-reset" onClick={onReset}>
+							{t('reset_form')}
+						</button>
 					</div>
-				</Form>
-			</Flex>
-		</Card>
+				</div>
+			</form>
+		</div>
 	);
 }

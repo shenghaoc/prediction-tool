@@ -85,3 +85,9 @@ export const FLAT_MODELS = [
 	'Type S2'
 ] as const;
 export type FlatModel = typeof FLAT_MODELS[number];
+
+// Generate years from 1960 to 2022
+export const LEASE_COMMENCE_YEARS = Array.from(
+	{ length: 2022 - 1960 + 1 },
+	(_, i) => 1960 + i
+);
