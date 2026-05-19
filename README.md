@@ -21,7 +21,7 @@ Because of the one-hot encoding constraints used in the original project data fl
 - Ant Design 6
 - Recharts
 - TypeScript
-- Bun test runner
+- Vitest test runner
 
 ## Chart Strategy
 
@@ -34,13 +34,13 @@ This is intentional because `recharts` is React-native, declarative, and integra
 Install dependencies:
 
 ```bash
-bun install
+npm install
 ```
 
 Run development server:
 
 ```bash
-bun dev
+npm run dev
 ```
 
 Open `http://localhost:3000`.
@@ -48,11 +48,11 @@ Open `http://localhost:3000`.
 ## Scripts
 
 ```bash
-bun dev      # Start dev server
-bun build    # Production build
-bun start    # Run production server
-bun lint     # ESLint
-bun test     # Unit tests
+npm run dev      # Start dev server
+npm run build    # Production build
+npm run start    # Run production server
+npm run lint     # ESLint
+npm test         # Unit tests
 ```
 
 ## Environment Variables

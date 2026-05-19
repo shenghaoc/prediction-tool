@@ -1,5 +1,3 @@
-import { describe, expect, test } from 'bun:test';
-
 import { normalizePrice, normalizeTrendData } from './utils';
 
 describe('prediction ui utilities', () => {
