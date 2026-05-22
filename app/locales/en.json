@@ -1,5 +1,10 @@
 {
   "title": "Price Prediction",
+  "brand": "Prediction Tool",
+  "badge": "HDB Resale Estimator",
+  "stat_models": "Models",
+  "stat_towns": "Towns",
+  "stat_types": "Flat Types",
   "form": {
     "section": "Prediction Form",
     "ml_model": "ML Model",

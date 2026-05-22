@@ -63,7 +63,7 @@ export default function PredictionClient() {
 			return;
 		}
 
-		document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+		document.documentElement.classList.toggle('dark', darkMode);
 		localStorage.setItem(STORAGE_KEYS.theme, darkMode ? 'dark' : 'light');
 	}, [darkMode, mounted]);
 
@@ -207,9 +207,9 @@ export default function PredictionClient() {
 	);
 
 	const figures = [
-		{ label: t('ml_model'), value: ML_MODELS.length.toString().padStart(2, '0') },
-		{ label: t('town'), value: TOWNS.length.toString().padStart(2, '0') },
-		{ label: t('flat_model'), value: FLAT_MODELS.length.toString().padStart(2, '0') }
+		{ label: t('stat_models'), value: ML_MODELS.length.toString().padStart(2, '0') },
+		{ label: t('stat_towns'), value: TOWNS.length.toString().padStart(2, '0') },
+		{ label: t('stat_types'), value: FLAT_MODELS.length.toString().padStart(2, '0') }
 	];
 
 	if (!mounted) {
@@ -219,19 +219,15 @@ export default function PredictionClient() {
 	return (
 		<main className="shell">
 			<div className="surface">
-				<div className="topbar">
-					<div className="pill">{t('intro_eyebrow')}</div>
+				<header className="topbar">
+					<div className="brand-badge">
+						<span className="brand-text">{t('brand')}</span>
+						<span className="badge">{t('badge')}</span>
+					</div>
 
 					<div className="actions">
 						<button
-							className="ghost-btn"
-							onClick={() => setDarkMode((value) => !value)}
-							aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-						>
-							{darkMode ? 'Light' : 'Dark'}
-						</button>
-						<button
-							className="ghost-btn"
+							className="btn-ghost"
 							onClick={() => {
 								startTransition(() => {
 									i18n.changeLanguage(i18n.language === 'en' ? 'zh' : 'en');
@@ -240,46 +236,50 @@ export default function PredictionClient() {
 						>
 							{t('switch_language')}
 						</button>
+						<button
+							className="btn-ghost btn-icon"
+							onClick={() => setDarkMode((value) => !value)}
+							aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+						>
+							{darkMode ? '☀' : '◑'}
+						</button>
 					</div>
-				</div>
+				</header>
 
 				<div className="layout">
-					<section>
+					<div className="left-col">
 						<div className="card">
-							<div className="card-inner">
-								<div style={{ display: 'grid', gap: 20 }}>
-									<h1 className={`headline${i18n.language === 'zh' ? ' headline-cjk' : ''}`}>
-										{t('price_prediction')}
-									</h1>
-									<p className="lead">{t('intro_blurb')}</p>
-									<div className="figure-row">
-										{figures.map(f => (
-											<div key={f.label} className="figure">
-												<span className="figure-label">{f.label}</span>
-												<strong className="figure-value">{f.value}</strong>
-											</div>
-										))}
-									</div>
-									<p className="caption">{t('intro_caption')}</p>
+							<div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+								<h1 className={`headline${i18n.language === 'zh' ? ' headline-cjk' : ''}`}>
+									{t('price_prediction')}
+								</h1>
+								<p className="lead">{t('intro_blurb')}</p>
+								<div className="stat-row">
+									{figures.map(f => (
+										<div key={f.label} className="stat-card">
+											<span className="stat-label">{f.label}</span>
+											<strong className="stat-value">{f.value}</strong>
+										</div>
+									))}
 								</div>
-
-								{error && (
-									<div style={{ padding: '16px', background: 'var(--accent)', color: 'white', borderRadius: '8px', marginTop: '16px' }}>
-										{error}
-									</div>
-								)}
-
-								<PredictionForm
-									formValues={formValues}
-									loading={loading}
-									onFinish={handleFinish}
-									onReset={handleReset}
-									onValuesChange={handleFormChange}
-									t={t}
-								/>
 							</div>
 						</div>
-					</section>
+
+						<div className="card">
+							{error && (
+								<div className="error-banner" style={{ marginBottom: 16 }}>{error}</div>
+							)}
+
+							<PredictionForm
+								formValues={formValues}
+								loading={loading}
+								onFinish={handleFinish}
+								onReset={handleReset}
+								onValuesChange={handleFormChange}
+								t={t}
+							/>
+						</div>
+					</div>
 
 					<section>
 						<PredictionResults

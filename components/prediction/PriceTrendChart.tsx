@@ -12,8 +12,8 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [tooltip, setTooltip] = useState<{ idx: number; x: number; y: number; label: string; value: number } | null>(null);
 
-	const W = 600, H = 300;
-	const padL = 56, padR = 18, padT = 24, padB = 36;
+	const W = 600, H = 260;
+	const padL = 56, padR = 18, padT = 20, padB = 36;
 	const cW = W - padL - padR, cH = H - padT - padB;
 
 	if (!data || data.length === 0) return null;
@@ -29,7 +29,6 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
 		...d,
 	}));
 
-	// Smooth curve via cardinal spline
 	const catmullRom = (p: typeof pts, t = 0.35) => {
 		if (p.length < 2) return '';
 		let d = `M${p[0].x},${p[0].y}`;
@@ -60,7 +59,6 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
 	const peakIdx = values.indexOf(Math.max(...values));
 	const lastIdx = values.length - 1;
 
-
 	const formatter = new Intl.NumberFormat(locale === 'zh' ? 'zh-SG' : 'en-SG', {
 		style: 'currency',
 		currency: 'SGD',
@@ -69,20 +67,10 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
 	const fmtFull = (v: number) => formatter.format(Math.round(v));
 	const fmtK = (v: number) => {
 		if (v >= 1e6) {
-			const formatterM = new Intl.NumberFormat(locale === 'zh' ? 'zh-SG' : 'en-SG', {
-				style: 'currency',
-				currency: 'SGD',
-				maximumFractionDigits: 1
-			});
-			return formatterM.format(v / 1e6).replace('SGD', '').trim() + 'M';
+			return `${(v / 1e6).toFixed(1)}M`;
 		}
 		if (v >= 1e3) {
-			const formatterK = new Intl.NumberFormat(locale === 'zh' ? 'zh-SG' : 'en-SG', {
-				style: 'currency',
-				currency: 'SGD',
-				maximumFractionDigits: 0
-			});
-			return formatterK.format(v / 1e3).replace('SGD', '').trim() + 'k';
+			return `${Math.round(v / 1e3)}k`;
 		}
 		return fmtFull(v);
 	};
@@ -107,41 +95,41 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
 			onMouseMove={handleMove}
 			onMouseLeave={() => setTooltip(null)}
 			style={{ cursor: 'crosshair', position: 'relative' }}>
-			<svg 
-				viewBox={`0 0 ${W} ${H}`} 
+			<svg
+				viewBox={`0 0 ${W} ${H}`}
 				style={{ width: '100%', height: 'auto', overflow: 'visible', display: 'block' }}
 				role="img"
 				aria-label="Price trend chart"
 			>
 				<defs>
-					<linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
-						<stop offset="0%" stopColor="var(--chart-line)" stopOpacity="0.42" />
-						<stop offset="55%" stopColor="var(--chart-line)" stopOpacity="0.14" />
-						<stop offset="100%" stopColor="var(--chart-line)" stopOpacity="0" />
+					<linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+						<stop offset="0%" stopColor="var(--c-chart)" stopOpacity="0.28" />
+						<stop offset="60%" stopColor="var(--c-chart)" stopOpacity="0.06" />
+						<stop offset="100%" stopColor="var(--c-chart)" stopOpacity="0" />
 					</linearGradient>
 				</defs>
 				{yTicks.map((t, i) => (
 					<g key={i}>
-						<line x1={padL} x2={W - padR} y1={t.y} y2={t.y} stroke="var(--chart-grid)" strokeDasharray="3 10" />
-						<text x={padL - 10} y={t.y + 4} textAnchor="end" fill="var(--text-muted)" fontSize="11" fontFamily="'DM Sans', sans-serif" fontWeight="600">{fmtK(t.val)}</text>
+						<line x1={padL} x2={W - padR} y1={t.y} y2={t.y} stroke="var(--border-1)" strokeWidth="1" />
+						<text x={padL - 10} y={t.y + 4} textAnchor="end" fill="var(--text-3)" fontSize="10" fontFamily="'DM Sans', sans-serif" fontWeight="600">{fmtK(t.val)}</text>
 					</g>
 				))}
 				{pts.filter((_, i) => i % 3 === 0 || i === lastIdx).map((p, i) => (
-					<text key={i} x={p.x} y={padT + cH + 22} textAnchor="middle" fill="var(--text-muted)" fontSize="11" fontFamily="'DM Sans', sans-serif" fontWeight="600">{p.label}</text>
+					<text key={i} x={p.x} y={padT + cH + 22} textAnchor="middle" fill="var(--text-3)" fontSize="10" fontFamily="'DM Sans', sans-serif" fontWeight="600">{p.label.slice(5)}</text>
 				))}
-				<path d={areaPath} fill="url(#cg)" />
-				<path d={linePath} fill="none" stroke="var(--chart-line)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+				<path d={areaPath} fill="url(#chartGrad)" />
+				<path d={linePath} fill="none" stroke="var(--c-chart)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
 				{/* Peak dot */}
-				<circle cx={pts[peakIdx].x} cy={pts[peakIdx].y} r="5" fill="var(--primary)" stroke="var(--panel-strong)" strokeWidth="2" />
+				<circle cx={pts[peakIdx].x} cy={pts[peakIdx].y} r="4" fill="var(--c-primary)" stroke="var(--bg-card)" strokeWidth="2" />
 				{/* Latest dot */}
-				<circle cx={pts[lastIdx].x} cy={pts[lastIdx].y} r="6" fill="var(--accent)" stroke="var(--panel-strong)" strokeWidth="2.5" />
+				<circle cx={pts[lastIdx].x} cy={pts[lastIdx].y} r="5" fill="var(--c-primary)" stroke="var(--bg-card)" strokeWidth="2.5" />
 				{/* Hover line + dot */}
 				{tooltip && (
 					<g>
 						<line x1={pts[tooltip.idx].x} x2={pts[tooltip.idx].x} y1={padT} y2={padT + cH}
-							stroke="var(--chart-line)" strokeOpacity="0.22" strokeDasharray="4 8" />
+							stroke="var(--c-chart)" strokeOpacity="0.18" strokeDasharray="3 6" />
 						<circle cx={pts[tooltip.idx].x} cy={pts[tooltip.idx].y} r="5"
-							fill="var(--panel-strong)" stroke="var(--chart-line)" strokeWidth="2" />
+							fill="var(--bg-card)" stroke="var(--c-chart)" strokeWidth="2" />
 					</g>
 				)}
 			</svg>

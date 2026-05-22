@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef, useCallback } from 'react';
 import type { TFunction } from 'i18next';
 import dayjs from '../../lib/dayjs';
 import { MAX_FLOOR_AREA_SQM, MIN_FLOOR_AREA_SQM } from '../../lib/prediction';
@@ -24,6 +25,34 @@ function Field({ label, children, full, htmlFor }: { label: string; children: Re
 	);
 }
 
+function BtnPrimary({ children, loading }: { children: React.ReactNode; loading: boolean }) {
+	const ref = useRef<HTMLButtonElement>(null);
+
+	const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+		const el = ref.current;
+		if (!el || loading) return;
+		const rect = el.getBoundingClientRect();
+		const sz = Math.max(rect.width, rect.height) * 2;
+		const span = document.createElement('span');
+		span.className = 'ripple-circle';
+		span.style.cssText = `width:${sz}px;height:${sz}px;left:${e.clientX - rect.left - sz / 2}px;top:${e.clientY - rect.top - sz / 2}px`;
+		el.appendChild(span);
+		setTimeout(() => span.remove(), 600);
+	}, [loading]);
+
+	return (
+		<button
+			ref={ref}
+			type="submit"
+			onClick={handleClick}
+			disabled={loading}
+			className={`btn-primary ripple-container${loading ? ' animate-pulse-subtle' : ''}`}
+		>
+			{children}
+		</button>
+	);
+}
+
 export default function PredictionForm({
 	loading,
 	onFinish,
@@ -43,7 +72,7 @@ export default function PredictionForm({
 	};
 
 	return (
-		<div className="form-shell">
+		<>
 			<h2 className="section-title">{t('prediction_form')}</h2>
 			<form onSubmit={handleSubmit}>
 				<div className="form-grid">
@@ -136,15 +165,15 @@ export default function PredictionForm({
 						</select>
 					</Field>
 					<div className="button-row">
-						<button type="submit" className={`btn-primary${loading ? ' loading-pulse' : ''}`} disabled={loading}>
+						<BtnPrimary loading={loading}>
 							{loading ? t('predicting') : t('get_prediction')}
-						</button>
-						<button type="button" className="btn-reset" onClick={onReset}>
+						</BtnPrimary>
+						<button type="button" className="btn-ghost-form" onClick={onReset}>
 							{t('reset_form')}
 						</button>
 					</div>
 				</div>
 			</form>
-		</div>
+		</>
 	);
 }

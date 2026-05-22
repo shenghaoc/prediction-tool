@@ -1,5 +1,10 @@
 {
   "title": "价格预测",
+  "brand": "预测工具",
+  "badge": "组屋转售估算器",
+  "stat_models": "模型",
+  "stat_towns": "城镇",
+  "stat_types": "房型",
   "form": {
     "section": "预测表单",
     "ml_model": "机器学习模型",
