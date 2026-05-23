@@ -48,11 +48,11 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: normalizedRequest.error }, { status: 400 });
 	}
 
-	const { env } = getCloudflareContext();
 	const { mlModel, town, flatModel, storeyRange, floorAreaSqm, leaseCommenceYear } =
 		normalizedRequest.value;
 
 	try {
+		const { env } = getCloudflareContext();
 		const { results } = await env.DB.prepare(
 			`SELECT
 				ml_models.intercept_map,
@@ -85,23 +85,27 @@ export async function POST(request: Request) {
 			)
 			.all<PriceQueryRow>();
 
+		const [first] = results;
+		if (!first) {
+			return NextResponse.json(
+				{ error: 'No prediction data found for the given parameters.' },
+				{ status: 500 }
+			);
+		}
+
 		// All terms except month_multiplier are constant across rows (ml_models, towns_onehot,
 		// flat_models_onehot, storey_ranges_ordinal join to exactly one row each).
 		// Compute them once from the first result to avoid redundant work per month.
-		const [first] = results;
-		const baseValue = first
-			? readNumericField(first.intercept_map, 'intercept_map') +
-				readNumericField(first.town_map, 'town_map') +
-				readNumericField(first.storey_range_multiplier, 'storey_range_multiplier') *
-					readNumericField(first.storey_range_map, 'storey_range_map') +
-				floorAreaSqm * readNumericField(first.floor_area_sqm_map, 'floor_area_sqm_map') +
-				readNumericField(first.flat_model_map, 'flat_model_map') +
-				leaseCommenceYear *
-					readNumericField(first.lease_commence_date_map, 'lease_commence_date_map')
-			: 0;
-		const monthCoefficient = first
-			? readNumericField(first.month_map, 'month_map')
-			: 0;
+		const baseValue =
+			readNumericField(first.intercept_map, 'intercept_map') +
+			readNumericField(first.town_map, 'town_map') +
+			readNumericField(first.storey_range_multiplier, 'storey_range_multiplier') *
+				readNumericField(first.storey_range_map, 'storey_range_map') +
+			floorAreaSqm * readNumericField(first.floor_area_sqm_map, 'floor_area_sqm_map') +
+			readNumericField(first.flat_model_map, 'flat_model_map') +
+			leaseCommenceYear *
+				readNumericField(first.lease_commence_date_map, 'lease_commence_date_map');
+		const monthCoefficient = readNumericField(first.month_map, 'month_map');
 
 		const predictions = results.map((row) => {
 			const predictedRaw =

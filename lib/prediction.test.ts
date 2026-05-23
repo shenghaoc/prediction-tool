@@ -1,6 +1,5 @@
 import {
 	clampFloorAreaSqm,
-	isPredictionApiResponse,
 	normalizePredictionRequest
 } from './prediction';
 
@@ -46,25 +45,4 @@ describe('prediction request helpers', () => {
 		});
 	});
 
-});
-
-describe('prediction api response guard', () => {
-	test('accepts valid response payloads', () => {
-		expect(
-			isPredictionApiResponse({
-				predictions: [
-					{ month: '2022-01', predictedPrice: 512345 },
-					{ month: '2022-02', predictedPrice: 518999 }
-				]
-			})
-		).toBe(true);
-	});
-
-	test('rejects malformed payloads', () => {
-		expect(
-			isPredictionApiResponse({
-				predictions: [{ month: '2022-01', predictedPrice: '512345' }]
-			})
-		).toBe(false);
-	});
 });

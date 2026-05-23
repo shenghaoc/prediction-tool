@@ -130,20 +130,3 @@ export function normalizePredictionRequest(
 		};
 }
 
-export function isPredictionApiResponse(value: unknown): value is PredictionApiResponse {
-	if (!isRecord(value) || !Array.isArray(value.predictions)) {
-		return false;
-	}
-
-	return value.predictions.every((entry) => {
-			if (!isRecord(entry)) {
-				return false;
-			}
-
-			return (
-				typeof entry.month === 'string' &&
-				typeof entry.predictedPrice === 'number' &&
-				Number.isFinite(entry.predictedPrice)
-			);
-		});
-}
