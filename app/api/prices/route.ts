@@ -68,21 +68,21 @@ export async function POST(request: Request) {
 			FROM ml_models
 			JOIN towns_onehot ON ml_models.name = towns_onehot.ml_model
 			JOIN flat_models_onehot ON ml_models.name = flat_models_onehot.ml_model
-			JOIN storey_ranges_ordinal ON storey_ranges_ordinal.name = ?6
-			JOIN months_ordinal ON months_ordinal.name BETWEEN ?4 AND ?5
-			WHERE ml_models.name = ?1
-				AND towns_onehot.name = ?2
-				AND flat_models_onehot.name = ?3
+			JOIN storey_ranges_ordinal ON storey_ranges_ordinal.name = :storeyRange
+			JOIN months_ordinal ON months_ordinal.name BETWEEN :monthStart AND :monthEnd
+			WHERE ml_models.name = :mlModel
+				AND towns_onehot.name = :town
+				AND flat_models_onehot.name = :flatModel
 			ORDER BY months_ordinal.value ASC;`
 		)
-			.bind(
+			.bind({
 				mlModel,
 				town,
 				flatModel,
-				DEFAULT_PREDICTION_MONTH_START,
-				DEFAULT_PREDICTION_MONTH_END,
+				monthStart: DEFAULT_PREDICTION_MONTH_START,
+				monthEnd: DEFAULT_PREDICTION_MONTH_END,
 				storeyRange
-			)
+			})
 			.all<PriceQueryRow>();
 
 		const [first] = results;
