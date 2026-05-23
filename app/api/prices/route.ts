@@ -85,18 +85,28 @@ export async function POST(request: Request) {
 			)
 			.all<PriceQueryRow>();
 
+		// All terms except month_multiplier are constant across rows (ml_models, towns_onehot,
+		// flat_models_onehot, storey_ranges_ordinal join to exactly one row each).
+		// Compute them once from the first result to avoid redundant work per month.
+		const [first] = results;
+		const baseValue = first
+			? readNumericField(first.intercept_map, 'intercept_map') +
+				readNumericField(first.town_map, 'town_map') +
+				readNumericField(first.storey_range_multiplier, 'storey_range_multiplier') *
+					readNumericField(first.storey_range_map, 'storey_range_map') +
+				floorAreaSqm * readNumericField(first.floor_area_sqm_map, 'floor_area_sqm_map') +
+				readNumericField(first.flat_model_map, 'flat_model_map') +
+				leaseCommenceYear *
+					readNumericField(first.lease_commence_date_map, 'lease_commence_date_map')
+			: 0;
+		const monthCoefficient = first
+			? readNumericField(first.month_map, 'month_map')
+			: 0;
+
 		const predictions = results.map((row) => {
 			const predictedRaw =
-				readNumericField(row.intercept_map, 'intercept_map') +
-				readNumericField(row.month_multiplier, 'month_multiplier') *
-					readNumericField(row.month_map, 'month_map') +
-				readNumericField(row.town_map, 'town_map') +
-				readNumericField(row.storey_range_multiplier, 'storey_range_multiplier') *
-					readNumericField(row.storey_range_map, 'storey_range_map') +
-				floorAreaSqm * readNumericField(row.floor_area_sqm_map, 'floor_area_sqm_map') +
-				readNumericField(row.flat_model_map, 'flat_model_map') +
-				leaseCommenceYear *
-					readNumericField(row.lease_commence_date_map, 'lease_commence_date_map');
+				baseValue +
+				readNumericField(row.month_multiplier, 'month_multiplier') * monthCoefficient;
 
 			if (!Number.isFinite(predictedRaw)) {
 				throw new Error(
