@@ -49,6 +49,12 @@
   --shadow-button: 0 1px 3px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
 }
 
+/* ── color-scheme: required for light-dark() to resolve ─────────────
+   light-dark() is a no-op without color-scheme; the JS toggles .dark
+   on <html>, so we mirror that into color-scheme here.                  */
+:root { color-scheme: light; }
+html.dark { color-scheme: dark; }
+
 /* ── Dark-mode custom property overrides ────────────────────────────
    Only needed for multi-value shadows (light-dark() can't handle them
    because commas inside var() substitution collide with the function's
