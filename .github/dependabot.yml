@@ -56,7 +56,6 @@ updates:
       testing:
         patterns:
           - "vitest"
-          - "@vitest/*"
           - "jsdom"
         update-types:
           - "minor"
