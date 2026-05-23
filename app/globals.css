@@ -1,2 +1,61 @@
 @import "tailwindcss";
+
+/* ── Tailwind v4 Theme Tokens ──────────────────────────────────────────
+   All design tokens live here. Colors use light-dark() so dark mode
+   is automatic — no separate .dark block needed for colors.
+   Shadows use per-element overrides in .dark (multi-value shadows
+   can't use light-dark() — commas in substituted var() collide
+   with the function's argument separator).                             */
+@theme {
+  /* Typography */
+  --font-sans: var(--font-dm-sans), 'Avenir Next', 'SF Pro Text', 'Helvetica Neue', 'Segoe UI', Arial, sans-serif;
+  --font-display: var(--font-lora), 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  --font-cjk: 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif;
+
+  /* Surface */
+  --color-page: light-dark(#f0f2f8, #0c0f1d);
+  --color-surface: light-dark(#ffffff, #171a2e);
+  --color-input-bg: light-dark(#f4f6fa, #111427);
+
+  /* Content */
+  --color-text: light-dark(#0f172a, #f1f5f9);
+  --color-text-secondary: light-dark(#475569, #94a3b8);
+  --color-text-muted: light-dark(#94a3b8, #64748b);
+
+  /* Border */
+  --color-border: light-dark(#e2e8f0, #272b42);
+  --color-border-strong: light-dark(#cbd5e1, #353a55);
+
+  /* Primary — indigo */
+  --color-primary: light-dark(#4f46e5, #818cf8);
+  --color-primary-hover: light-dark(#4338ca, #a5b4fc);
+  --color-primary-subtle: light-dark(#eef2ff, rgba(129, 140, 248, 0.10));
+  --color-primary-muted: light-dark(#e0e7ff, rgba(129, 140, 248, 0.05));
+  --color-primary-bg: light-dark(rgba(79, 70, 229, 0.06), rgba(129, 140, 248, 0.05));
+  --color-primary-ring: light-dark(rgba(79, 70, 229, 0.18), rgba(129, 140, 248, 0.25));
+  --color-on-primary: light-dark(#ffffff, #0f172a);
+
+  /* Chart — separate from primary so SVG can reference directly */
+  --color-chart: light-dark(#4f46e5, #818cf8);
+  --color-chart-fill: light-dark(rgba(79, 70, 229, 0.10), rgba(129, 140, 248, 0.12));
+
+  /* Radii */
+  --radius-card: 12px;
+  --radius-input: 8px;
+  --radius-btn: 8px;
+
+  /* Shadows — light defaults; .dark overrides the multi-value ones below */
+  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.06);
+  --shadow-button: 0 1px 3px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+/* ── Dark-mode custom property overrides ────────────────────────────
+   Only needed for multi-value shadows (light-dark() can't handle them
+   because commas inside var() substitution collide with the function's
+   comma-separated argument list).                                        */
+.dark {
+  --shadow-card: 0 0 0 1px color-mix(in oklab, var(--color-primary) 6%, transparent), 0 4px 16px rgba(0, 0, 0, 0.24);
+  --shadow-button: 0 1px 3px rgba(0, 0, 0, 0.24), 0 2px 8px rgba(0, 0, 0, 0.16);
+}
+
 @import "./styles.css";
