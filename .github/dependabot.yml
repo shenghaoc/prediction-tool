@@ -21,23 +21,6 @@ updates:
         update-types:
           - "minor"
           - "patch"
-      ui-components:
-        patterns:
-          - "antd"
-          - "@ant-design/*"
-          - "lucide-react"
-          - "class-variance-authority"
-          - "clsx"
-          - "tailwind-merge"
-        update-types:
-          - "minor"
-          - "patch"
-      visualization:
-        patterns:
-          - "recharts"
-        update-types:
-          - "minor"
-          - "patch"
       nextjs:
         patterns:
           - "next"
@@ -52,8 +35,6 @@ updates:
       typescript:
         patterns:
           - "typescript"
-          - "typescript-eslint"
-          - "@typescript-eslint/*"
         update-types:
           - "minor"
           - "patch"
@@ -76,8 +57,6 @@ updates:
         patterns:
           - "vitest"
           - "@vitest/*"
-          - "@playwright/test"
-          - "@testing-library/*"
           - "jsdom"
         update-types:
           - "minor"

@@ -3,8 +3,8 @@
 HDB resale price estimator built with Next.js App Router.
 
 This project started as an EE4802 mini-project and was later refactored into a modern web app with:
-- Ant Design UI for form and results surfaces
-- Recharts for trend visualization
+- Plain HTML form with Tailwind CSS
+- Custom SVG chart (`components/prediction/PriceTrendChart.tsx`)
 - `/api/prices` as a typed server proxy to the upstream prediction service
 - English/Chinese UI support with i18next
 
@@ -18,16 +18,13 @@ Because of the one-hot encoding constraints used in the original project data fl
 
 - Next.js 16 (App Router)
 - React 19
-- Ant Design 6
-- Recharts
+- Tailwind CSS v4
 - TypeScript
 - Vitest test runner
 
 ## Chart Strategy
 
-For the React variant, charts are implemented with `recharts` (`components/prediction/PriceTrendChart.tsx`).
-
-This is intentional because `recharts` is React-native, declarative, and integrates cleanly with component-driven theming.
+Charts are implemented as a hand-rolled SVG in `components/prediction/PriceTrendChart.tsx`. This avoids a heavy chart library dependency while giving full control over the rendering and interactive tooltip.
 
 ## Local Development
 
