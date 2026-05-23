@@ -1,7 +1,7 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"main": ".open-next/worker.js",
-	"name": "prediction-tool",
+	"name": "ee4802-g20-tool",
 	"compatibility_date": "2026-05-23",
 	"compatibility_flags": [
 		"nodejs_compat",
