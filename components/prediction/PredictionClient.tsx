@@ -205,7 +205,7 @@ function PredictionClientInner() {
         <header className="mb-6 flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
           <div className="flex items-center gap-2.5">
             <span className="font-heading text-base font-bold tracking-tight">{t("brand")}</span>
-            <Badge variant="secondary" className="uppercase">
+            <Badge variant="secondary" className="rounded-full uppercase">
               {t("badge")}
             </Badge>
           </div>
@@ -245,7 +245,7 @@ function PredictionClientInner() {
               <CardHeader className="px-6 pb-0">
                 <CardTitle
                   className={cn(
-                    "font-heading text-[clamp(2rem,5vw,3rem)] font-bold normal-case tracking-tight",
+                    "font-heading whitespace-pre-line text-[clamp(2rem,5vw,3rem)] font-bold normal-case tracking-tight",
                     isZh && "font-cjk font-extrabold",
                   )}
                 >
