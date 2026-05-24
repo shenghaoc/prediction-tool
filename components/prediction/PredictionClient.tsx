@@ -17,6 +17,9 @@ import {
 } from "../../lib/prediction";
 import PredictionForm from "./PredictionForm";
 import PredictionResults from "./PredictionResults";
+import LayersIcon from "../icons/LayersIcon";
+import MapPinIcon from "../icons/MapPinIcon";
+import HomeIcon from "../icons/HomeIcon";
 import { defaultTrendData, initialFormValues } from "./constants";
 import { FLAT_MODELS, ML_MODELS, TOWNS } from "../../lib/lists";
 import type {
@@ -193,7 +196,6 @@ function PredictionClientInner() {
   return (
     <main
       className="min-h-screen px-6 pb-12 pt-5 text-text transition-[background,color] duration-300 max-sm:px-3 max-sm:pb-8"
-      style={{ background: darkMode ? 'linear-gradient(180deg, #0c0f1d 0%, #0e1128 100%)' : 'linear-gradient(180deg, #f2f3f8 0%, #eceef5 100%)' }}
     >
       <div className="mx-auto max-w-7xl">
         {/* ── Topbar ── */}
@@ -233,7 +235,7 @@ function PredictionClientInner() {
           {/* ── Left column ── */}
           <div className="flex flex-col gap-5">
             {/* Intro card */}
-            <div className="rounded-card border border-border bg-surface p-6 shadow-card transition-[background,border-color,box-shadow] duration-200 max-sm:p-4">
+            <div className="rounded-card border border-border bg-surface p-6 shadow-card transition-[background,border-color,box-shadow] duration-200 max-sm:p-4 relative overflow-hidden before:absolute before:inset-y-0 before:left-0 before:w-1.5 before:bg-gradient-to-b before:from-primary/70 before:to-primary/30">
               <div className="flex flex-col gap-4">
                 <h1
                   className={`font-display text-[clamp(2.4rem,5vw,3.6rem)] font-bold leading-[0.92] tracking-[-0.04em] whitespace-pre-line text-text${
@@ -248,25 +250,31 @@ function PredictionClientInner() {
                   {t("intro_blurb")}
                 </p>
                 <div className="grid grid-cols-3 gap-2.5 max-sm:grid-cols-1">
-                  {figures.map((f) => (
-                    <div
-                      key={f.label}
-                      className="flex flex-col gap-1 rounded-input border border-border bg-input-bg p-6"
-                    >
-                      <span className="text-[10px] font-bold uppercase tracking-[0.8px] text-text-muted">
-                        {f.label}
-                      </span>
-                      <strong className="font-display text-xl font-extrabold tracking-[-0.03em] tabular-nums text-primary">
-                        {f.value}
-                      </strong>
-                    </div>
-                  ))}
+                  {figures.map((f, i) => {
+                    const Icon = i === 0 ? LayersIcon : i === 1 ? MapPinIcon : HomeIcon;
+                    return (
+                      <div
+                        key={f.label}
+                        className="flex items-center gap-3 rounded-input border border-border bg-input-bg p-6"
+                      >
+                        <Icon className="w-6 h-6 text-primary/80 shrink-0" />
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[10px] font-bold uppercase tracking-[0.8px] text-text-muted">
+                            {f.label}
+                          </span>
+                          <strong className="font-display text-xl font-extrabold tracking-[-0.03em] tabular-nums text-primary">
+                            {f.value}
+                          </strong>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
 
             {/* Form card */}
-            <div className="rounded-card border border-border bg-surface p-6 shadow-card transition-[background,border-color,box-shadow] duration-200 max-sm:p-4">
+            <div className="rounded-card border border-border bg-surface p-6 shadow-card transition-[background,border-color,box-shadow] duration-200 max-sm:p-4 relative overflow-hidden before:absolute before:inset-y-0 before:left-0 before:w-1.5 before:bg-gradient-to-b before:from-primary/70 before:to-primary/30">
               {error && (
                 <div className="mb-4 rounded-input border border-primary-muted bg-primary-bg px-3.5 py-3 text-sm leading-[1.5] text-text">
                   {error}

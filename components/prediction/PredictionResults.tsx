@@ -3,6 +3,10 @@
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
 import type { TFunction } from "../../lib/i18n";
+
+import LayersIcon from "../icons/LayersIcon";
+import MapPinIcon from "../icons/MapPinIcon";
+import HomeIcon from "../icons/HomeIcon";
 import type { SummaryValues, TrendPoint } from "./types";
 
 const PriceTrendChart = dynamic(() => import("./PriceTrendChart"), {
@@ -56,10 +60,10 @@ export default function PredictionResults({
   const labelClass =
     "block text-[10px] font-bold uppercase tracking-[1px] text-text-muted";
   const chipClass =
-    "rounded-input border px-3.5 py-3 bg-input-bg border-border";
+    "rounded-input border px-3.5 py-3 bg-input-bg border-border flex items-center gap-2.5";
 
   return (
-    <div className="flex flex-col gap-5 rounded-card border border-border bg-surface p-6 shadow-card transition-[background,border-color,box-shadow] duration-200 max-sm:p-4">
+    <div className="flex flex-col gap-5 rounded-card border border-border bg-surface p-6 shadow-card transition-[background,border-color,box-shadow] duration-200 max-sm:p-4 relative overflow-hidden before:absolute before:inset-y-0 before:left-0 before:w-1.5 before:bg-gradient-to-b before:from-primary/70 before:to-primary/30">
       {/* ── Header ── */}
       <div className="flex items-start justify-between gap-4 flex-wrap max-sm:flex-col">
         <div>
@@ -89,23 +93,32 @@ export default function PredictionResults({
 
       {/* ── Metric pills ── */}
       <div className="grid grid-cols-3 gap-2.5 max-sm:grid-cols-1">
-        <div className="rounded-input border border-primary-muted bg-primary-bg px-3.5 py-3">
-          <span className={labelClass}>{t("ml_model")}</span>
-          <strong className="mt-1 block text-sm font-bold leading-[1.3] text-text">
-            {summaryValues.ml_model}
-          </strong>
+        <div className={chipClass}>
+          <LayersIcon className="w-5 h-5 text-primary/80 shrink-0" />
+          <div>
+            <span className={labelClass}>{t("ml_model")}</span>
+            <strong className="mt-1 block text-sm font-bold leading-[1.3] text-text">
+              {summaryValues.ml_model}
+            </strong>
+          </div>
         </div>
-        <div className="rounded-input border border-primary-muted bg-primary-bg px-3.5 py-3">
-          <span className={labelClass}>{t("town")}</span>
-          <strong className="mt-1 block text-sm font-bold leading-[1.3] text-text">
-            {summaryValues.town}
-          </strong>
+        <div className={chipClass}>
+          <MapPinIcon className="w-5 h-5 text-primary/80 shrink-0" />
+          <div>
+            <span className={labelClass}>{t("town")}</span>
+            <strong className="mt-1 block text-sm font-bold leading-[1.3] text-text">
+              {summaryValues.town}
+            </strong>
+          </div>
         </div>
-        <div className="rounded-input border border-primary-muted bg-primary-bg px-3.5 py-3">
-          <span className={labelClass}>{t("lease_commence_date")}</span>
-          <strong className="mt-1 block text-sm font-bold leading-[1.3] text-text">
-            {summaryValues.lease_commence_date.year}
-          </strong>
+        <div className={chipClass}>
+          <HomeIcon className="w-5 h-5 text-primary/80 shrink-0" />
+          <div>
+            <span className={labelClass}>{t("lease_commence_date")}</span>
+            <strong className="mt-1 block text-sm font-bold leading-[1.3] text-text">
+              {summaryValues.lease_commence_date.year}
+            </strong>
+          </div>
         </div>
       </div>
 
