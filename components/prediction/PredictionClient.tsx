@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { Home, Layers, MapPin, Moon, Sun } from "lucide-react";
 
 import { I18nProvider, useI18n } from "../../lib/i18n";
 import { Temporal } from "../../lib/temporal";
@@ -17,9 +18,6 @@ import {
 } from "../../lib/prediction";
 import PredictionForm from "./PredictionForm";
 import PredictionResults from "./PredictionResults";
-import LayersIcon from "../icons/LayersIcon";
-import MapPinIcon from "../icons/MapPinIcon";
-import HomeIcon from "../icons/HomeIcon";
 import { defaultTrendData, initialFormValues } from "./constants";
 import { FLAT_MODELS, ML_MODELS, TOWNS } from "../../lib/lists";
 import type {
@@ -35,6 +33,17 @@ import {
   normalizePrice,
   normalizeTrendData,
 } from "./utils";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export default function PredictionClient() {
   return (
@@ -104,26 +113,23 @@ function PredictionClientInner() {
     };
   }, []);
 
-  const handleFormChange = useCallback(
-    (_: unknown, allValues: Partial<FieldType>) => {
-      setError(null);
-      setFormValues((prev) => ({ ...prev, ...allValues }));
-      const persist: PersistedFieldValues = {
-        ...allValues,
-        lease_commence_date: allValues.lease_commence_date
-          ? serializeLeaseCommenceDate(allValues.lease_commence_date)
-          : undefined,
-      };
-      localStorage.setItem(STORAGE_KEYS.form, JSON.stringify(persist));
-      setSummaryValues({
-        ml_model: allValues.ml_model ?? initialFormValues.ml_model,
-        town: allValues.town ?? initialFormValues.town,
-        lease_commence_date:
-          allValues.lease_commence_date ?? initialFormValues.lease_commence_date,
-      });
-    },
-    [],
-  );
+  const handleFormChange = useCallback((_: unknown, allValues: Partial<FieldType>) => {
+    setError(null);
+    setFormValues((prev) => ({ ...prev, ...allValues }));
+    const persist: PersistedFieldValues = {
+      ...allValues,
+      lease_commence_date: allValues.lease_commence_date
+        ? serializeLeaseCommenceDate(allValues.lease_commence_date)
+        : undefined,
+    };
+    localStorage.setItem(STORAGE_KEYS.form, JSON.stringify(persist));
+    setSummaryValues({
+      ml_model: allValues.ml_model ?? initialFormValues.ml_model,
+      town: allValues.town ?? initialFormValues.town,
+      lease_commence_date:
+        allValues.lease_commence_date ?? initialFormValues.lease_commence_date,
+    });
+  }, []);
 
   const handleReset = useCallback(() => {
     requestControllerRef.current?.abort();
@@ -184,9 +190,9 @@ function PredictionClientInner() {
   );
 
   const figures = [
-    { label: t("stat_models"), value: ML_MODELS.length.toString().padStart(2, "0") },
-    { label: t("stat_towns"), value: TOWNS.length.toString().padStart(2, "0") },
-    { label: t("stat_types"), value: FLAT_MODELS.length.toString().padStart(2, "0") },
+    { label: t("stat_models"), value: ML_MODELS.length.toString().padStart(2, "0"), icon: Layers },
+    { label: t("stat_towns"), value: TOWNS.length.toString().padStart(2, "0"), icon: MapPin },
+    { label: t("stat_types"), value: FLAT_MODELS.length.toString().padStart(2, "0"), icon: Home },
   ];
 
   if (!mounted) return null;
@@ -194,24 +200,22 @@ function PredictionClientInner() {
   const isZh = lang === "zh";
 
   return (
-    <main
-      className="min-h-screen px-6 pb-12 pt-5 text-text transition-[background,color] duration-300 max-sm:px-3 max-sm:pb-8"
-    >
+    <main className="min-h-screen px-6 pb-12 pt-5 max-sm:px-3 max-sm:pb-8">
       <div className="mx-auto max-w-7xl">
-        {/* ── Topbar ── */}
         <header className="mb-6 flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
           <div className="flex items-center gap-2.5">
-            <span className="font-display text-base font-bold tracking-[-0.02em] text-text">
-              {t("brand")}
-            </span>
-            <span className="inline-flex items-center rounded-btn bg-primary-subtle px-2.5 py-[5px] text-[10px] font-bold uppercase tracking-[0.6px] text-primary">
+            <span className="font-heading text-base font-bold tracking-tight">{t("brand")}</span>
+            <Badge variant="secondary" className="uppercase">
               {t("badge")}
-            </span>
+            </Badge>
           </div>
 
-          <div className="flex gap-2 items-center max-sm:w-full max-sm:[&>*]:flex-1">
-            <button
-              className="rounded-btn flex min-h-[34px] cursor-pointer items-center border border-border bg-input-bg px-3.5 py-1.5 text-[13px] font-semibold text-text-secondary transition hover:-translate-y-px active:translate-y-0"
+          <div className="flex items-center gap-2 max-sm:w-full max-sm:[&>*]:flex-1">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="normal-case tracking-normal max-sm:flex-1"
               onClick={() => {
                 startTransition(() => {
                   changeLang(lang === "en" ? "zh" : "en");
@@ -219,79 +223,85 @@ function PredictionClientInner() {
               }}
             >
               {t("switch_language")}
-            </button>
-            <button
-              className="rounded-btn flex min-h-[34px] w-[34px] cursor-pointer items-center justify-center border border-border bg-input-bg p-0 text-[15px] font-semibold text-text-secondary transition hover:-translate-y-px active:translate-y-0"
-              onClick={() => setDarkMode((value) => !value)}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-sm"
               aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+              onClick={() => setDarkMode((value) => !value)}
             >
-              {darkMode ? "☀" : "◑"}
-            </button>
+              {darkMode ? <Sun className="size-4" /> : <Moon className="size-4" />}
+            </Button>
           </div>
         </header>
 
-        {/* ── Layout grid ── */}
-        <div className="grid grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] gap-5 items-start max-[860px]:grid-cols-1">
-          {/* ── Left column ── */}
+        <div className="grid grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] items-start gap-5 max-[860px]:grid-cols-1">
           <div className="flex flex-col gap-5">
-            {/* Intro card */}
-            <div className="rounded-card border border-border bg-surface p-6 shadow-card transition-[background,border-color,box-shadow] duration-200 max-sm:p-4 relative overflow-hidden before:absolute before:inset-y-0 before:left-0 before:w-1.5 before:bg-gradient-to-b before:from-primary/70 before:to-primary/30">
-              <div className="flex flex-col gap-4">
-                <h1
-                  className={`font-display text-[clamp(2.4rem,5vw,3.6rem)] font-bold leading-[0.92] tracking-[-0.04em] whitespace-pre-line text-text${
-                    isZh
-                      ? " font-cjk font-extrabold tracking-[-0.02em] leading-[1.02]"
-                      : ""
-                  }`}
+            <Card
+              size="sm"
+              className="border-l-4 border-l-primary/70 py-6 shadow-sm ring-1 ring-foreground/5"
+            >
+              <CardHeader className="px-6 pb-0">
+                <CardTitle
+                  className={cn(
+                    "font-heading text-[clamp(2rem,5vw,3rem)] font-bold normal-case tracking-tight",
+                    isZh && "font-cjk font-extrabold",
+                  )}
                 >
                   {t("price_prediction")}
-                </h1>
-                <p className="max-w-[34ch] text-sm leading-[1.7] text-text-secondary">
+                </CardTitle>
+                <CardDescription className="max-w-prose text-base">
                   {t("intro_blurb")}
-                </p>
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-6 pt-4">
                 <div className="grid grid-cols-3 gap-2.5 max-sm:grid-cols-1">
-                  {figures.map((f, i) => {
-                    const Icon = i === 0 ? LayersIcon : i === 1 ? MapPinIcon : HomeIcon;
+                  {figures.map((figure) => {
+                    const Icon = figure.icon;
                     return (
                       <div
-                        key={f.label}
-                        className="flex items-center gap-3 rounded-input border border-border bg-input-bg p-6"
+                        key={figure.label}
+                        className="flex items-center gap-3 rounded-lg border border-border/60 bg-secondary/50 p-4"
                       >
-                        <Icon className="w-6 h-6 text-primary/80 shrink-0" />
+                        <Icon className="size-5 shrink-0 text-primary" aria-hidden />
                         <div className="flex flex-col gap-0.5">
-                          <span className="text-[10px] font-bold uppercase tracking-[0.8px] text-text-muted">
-                            {f.label}
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            {figure.label}
                           </span>
-                          <strong className="font-display text-xl font-extrabold tracking-[-0.03em] tabular-nums text-primary">
-                            {f.value}
+                          <strong className="font-heading text-xl font-extrabold tabular-nums text-primary">
+                            {figure.value}
                           </strong>
                         </div>
                       </div>
                     );
                   })}
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
-            {/* Form card */}
-            <div className="rounded-card border border-border bg-surface p-6 shadow-card transition-[background,border-color,box-shadow] duration-200 max-sm:p-4 relative overflow-hidden before:absolute before:inset-y-0 before:left-0 before:w-1.5 before:bg-gradient-to-b before:from-primary/70 before:to-primary/30">
-              {error && (
-                <div className="mb-4 rounded-input border border-primary-muted bg-primary-bg px-3.5 py-3 text-sm leading-[1.5] text-text">
-                  {error}
-                </div>
-              )}
-              <PredictionForm
-                formValues={formValues}
-                loading={loading}
-                onFinish={handleFinish}
-                onReset={handleReset}
-                onValuesChange={handleFormChange}
-                t={t}
-              />
-            </div>
+            <Card size="sm" className="border-l-4 border-l-primary/70 py-6 shadow-sm ring-1 ring-foreground/5">
+              <CardHeader className="px-6 pb-2">
+                <CardTitle className="text-primary normal-case">{t("prediction_form")}</CardTitle>
+              </CardHeader>
+              <CardContent className="px-6">
+                {error && (
+                  <Alert variant="destructive" className="mb-4">
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+                <PredictionForm
+                  formValues={formValues}
+                  loading={loading}
+                  onFinish={handleFinish}
+                  onReset={handleReset}
+                  onValuesChange={handleFormChange}
+                  t={t}
+                />
+              </CardContent>
+            </Card>
           </div>
 
-          {/* ── Results ── */}
           <section>
             <PredictionResults
               output={output}

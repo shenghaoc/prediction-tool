@@ -121,22 +121,6 @@ html {
   }
 }
 
-/* ── Ripple (DOM-manipulated by PredictionForm button) ────────────────── */
-.ripple-container {
-  position: relative;
-  overflow: hidden;
-}
-
-.ripple-circle {
-  position: absolute;
-  border-radius: 50%;
-  background: currentColor;
-  opacity: 0.15;
-  transform: scale(0);
-  animation: ripple 0.6s ease-out forwards;
-  pointer-events: none;
-}
-
 /* ── Custom animation utilities ──────────────────────────────────────── */
 .animate-fade-in {
   animation: fade-up 0.35s ease-out both;
@@ -155,10 +139,11 @@ html {
   position: absolute;
   z-index: 10;
   padding: 10px 14px;
-  border-radius: var(--radius-input);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--popover);
+  color: var(--popover-foreground);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
   pointer-events: none;
   white-space: nowrap;
   transform: translate(-50%, calc(-100% - 10px));
@@ -178,32 +163,6 @@ html {
 .chart-axis-label {
   fill: var(--color-text-muted);
   font-size: 10px;
-  font-weight: 600;
-}
-
-/* ── Field select (chevron handled via CSS so dark mode works) ───────── */
-.field-select {
-  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%2394a3b8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  background-size: 10px 6px;
-}
-html.dark .field-select {
-  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%2364748b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-}
-
-/* ── Unit tag (paired with input) ─────────────────────────────────────── */
-.unit-tag {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 14px;
-  border: 1px solid var(--color-border);
-  border-left: none;
-  border-radius: 0 var(--radius-input) var(--radius-input) 0;
-  background: var(--color-input-bg);
-  color: var(--color-text-muted);
-  font-size: 12px;
   font-weight: 600;
 }
 

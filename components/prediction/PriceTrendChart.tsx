@@ -140,10 +140,10 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
       </svg>
       {tooltip && (
         <div className="chart-tooltip visible" style={{ left: tooltip.x, top: tooltip.y }}>
-          <div className="text-[10px] font-bold uppercase tracking-[0.8px] text-text-muted">
+          <div className="text-[10px] font-bold uppercase tracking-[0.8px] text-muted-foreground">
             {tooltip.label}
           </div>
-          <div className="mt-0.5 text-sm font-bold tracking-[-0.02em] tabular-nums text-text">
+          <div className="mt-0.5 text-sm font-bold tracking-tight tabular-nums text-foreground">
             {fmtFull(tooltip.value)}
           </div>
         </div>
