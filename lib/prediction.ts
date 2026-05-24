@@ -1,4 +1,4 @@
-import dayjs from './dayjs';
+import { Temporal } from './temporal';
 import {
 	FLAT_MODELS,
 	ML_MODELS,
@@ -16,12 +16,10 @@ export const STORAGE_KEYS = {
 	form: 'prediction-tool:form'
 } as const;
 
-export const LEASE_COMMENCE_DATE_FORMAT = 'YYYY-MM-DD';
 export const DEFAULT_PREDICTION_MONTH_END = '2022-02';
-export const DEFAULT_PREDICTION_MONTH_START = dayjs
-	.utc(DEFAULT_PREDICTION_MONTH_END, 'YYYY-MM', true)
-	.subtract(12, 'month')
-	.format('YYYY-MM');
+export const DEFAULT_PREDICTION_MONTH_START = Temporal.PlainYearMonth.from(DEFAULT_PREDICTION_MONTH_END)
+	.subtract({ months: 12 })
+	.toString();
 export const DEFAULT_LEASE_COMMENCE_DATE = '2022-01-01';
 export const MIN_FLOOR_AREA_SQM = 20;
 export const MAX_FLOOR_AREA_SQM = 300;
@@ -65,8 +63,8 @@ export function clampFloorAreaSqm(value: number) {
 	return Math.max(MIN_FLOOR_AREA_SQM, Math.min(MAX_FLOOR_AREA_SQM, Math.round(value)));
 }
 
-export function serializeLeaseCommenceDate(value: { format: (format: string) => string }) {
-	return value.format(LEASE_COMMENCE_DATE_FORMAT);
+export function serializeLeaseCommenceDate(value: Temporal.PlainDate) {
+	return value.toString();
 }
 
 export function normalizePredictionRequest(

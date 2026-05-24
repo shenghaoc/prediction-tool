@@ -1,5 +1,5 @@
-import type { Dayjs } from '../../lib/dayjs';
 import type { PredictionApiResponse } from '../../lib/prediction';
+import { Temporal } from '../../lib/temporal';
 
 import type { MLModel, Town, StoreyRange, FlatModel } from '../../lib/lists';
 
@@ -9,7 +9,7 @@ export type FieldType = {
 	storey_range: StoreyRange;
 	flat_model: FlatModel;
 	floor_area_sqm: number;
-	lease_commence_date: Dayjs;
+	lease_commence_date: Temporal.PlainDate;
 };
 
 export type SummaryValues = Pick<FieldType, 'ml_model' | 'town' | 'lease_commence_date'>;

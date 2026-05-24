@@ -1,8 +1,8 @@
 "use client";
 
 import { useRef, useCallback } from "react";
-import type { TFunction } from "i18next";
-import dayjs from "../../lib/dayjs";
+import type { TFunction } from "../../lib/i18n";
+import { Temporal } from "../../lib/temporal";
 import { MAX_FLOOR_AREA_SQM, MIN_FLOOR_AREA_SQM } from "../../lib/prediction";
 import { FLAT_MODELS, ML_MODELS, STOREY_RANGES, TOWNS, LEASE_COMMENCE_YEARS } from "../../lib/lists";
 import type { FieldType } from "./types";
@@ -159,9 +159,9 @@ export default function PredictionForm({
             <select
               id="input-lease_commence_date"
               className={selectClass}
-              value={formValues.lease_commence_date ? formValues.lease_commence_date.year() : ""}
+              value={formValues.lease_commence_date ? formValues.lease_commence_date.year : ""}
               onChange={(e) => {
-                handleChange("lease_commence_date", dayjs(`${e.target.value}-01-01`));
+                handleChange("lease_commence_date", Temporal.PlainDate.from(`${e.target.value}-01-01`));
               }}
               required
             >
