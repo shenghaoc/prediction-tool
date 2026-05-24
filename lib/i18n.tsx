@@ -6,8 +6,10 @@ import en from '../app/locales/en.json';
 import zh from '../app/locales/zh.json';
 import { STORAGE_KEYS } from './prediction';
 
+type Lang = 'en' | 'zh';
+
 type Translations = Record<string, string | Record<string, string>>;
-const RESOURCES: Record<string, Translations> = { en, zh };
+const RESOURCES: Record<Lang, Translations> = { en, zh };
 
 function lookup(translations: Translations, key: string): string {
 	const parts = key.split('.');
@@ -23,21 +25,23 @@ export type TFunction = (key: string, fallback?: string) => string;
 
 type I18nContextValue = {
 	t: TFunction;
-	lang: string;
-	changeLang: (lang: string) => void;
+	lang: Lang;
+	changeLang: (lang: Lang) => void;
 };
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-	const [lang, setLang] = useState(() => {
-		if (typeof window !== 'undefined') {
-			return localStorage.getItem(STORAGE_KEYS.language) ?? 'en';
-		}
-		return 'en';
-	});
+	const [lang, setLang] = useState<Lang>('en');
 
-	const changeLang = useCallback((l: string) => {
+	useEffect(() => {
+		const saved = localStorage.getItem(STORAGE_KEYS.language);
+		if (saved === 'en' || saved === 'zh') {
+			setLang(saved);
+		}
+	}, []);
+
+	const changeLang = useCallback((l: Lang) => {
 		setLang(l);
 		try {
 			localStorage.setItem(STORAGE_KEYS.language, l);

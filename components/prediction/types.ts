@@ -1,5 +1,5 @@
 import type { PredictionApiResponse } from '../../lib/prediction';
-import { Temporal } from '../../lib/temporal';
+import type { Temporal } from '../../lib/temporal';
 
 import type { MLModel, Town, StoreyRange, FlatModel } from '../../lib/lists';
 
