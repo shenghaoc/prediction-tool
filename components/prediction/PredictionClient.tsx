@@ -181,9 +181,36 @@ function PredictionClientInner() {
   );
 
   const figures = [
-    { label: t("stat_models"), value: ML_MODELS.length.toString().padStart(2, "0") },
-    { label: t("stat_towns"), value: TOWNS.length.toString().padStart(2, "0") },
-    { label: t("stat_types"), value: FLAT_MODELS.length.toString().padStart(2, "0") },
+    {
+      label: t("stat_models"),
+      value: ML_MODELS.length.toString().padStart(2, "0"),
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+          <rect x="2" y="2.5" width="18" height="5" rx="1.5" fill="currentColor" opacity="0.25" />
+          <rect x="2" y="8.5" width="18" height="5" rx="1.5" fill="currentColor" opacity="0.55" />
+          <rect x="2" y="14.5" width="18" height="5" rx="1.5" fill="currentColor" />
+        </svg>
+      ),
+    },
+    {
+      label: t("stat_towns"),
+      value: TOWNS.length.toString().padStart(2, "0"),
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+          <path d="M11 2C7.13 2 4 5.13 4 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="currentColor" />
+          <circle cx="11" cy="9" r="2.75" fill="var(--color-surface)" />
+        </svg>
+      ),
+    },
+    {
+      label: t("stat_types"),
+      value: FLAT_MODELS.length.toString().padStart(2, "0"),
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+          <path d="M2.5 19.5V8l8.5-6.5L19.5 8v11.5h-5.5v-6.5H8v6.5H2.5z" fill="currentColor" />
+        </svg>
+      ),
+    },
   ];
 
   if (!mounted) return null;
@@ -230,8 +257,9 @@ function PredictionClientInner() {
           {/* ── Left column ── */}
           <div className="flex flex-col gap-5">
             {/* Intro card */}
-            <div className="rounded-card border border-border bg-surface p-6 shadow-card transition-[background,border-color,box-shadow] duration-200 max-sm:p-4">
-              <div className="flex flex-col gap-4">
+            <div className="rounded-card border border-border bg-surface shadow-card transition-[background,border-color,box-shadow] duration-200 relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-primary/60 via-primary to-primary/30" />
+              <div className="flex flex-col gap-4 p-6 max-sm:p-4">
                 <h1
                   className={`font-display text-[clamp(2.4rem,5vw,3.6rem)] font-bold leading-[0.92] tracking-[-0.04em] whitespace-pre-line text-text${
                     isZh
@@ -248,14 +276,15 @@ function PredictionClientInner() {
                   {figures.map((f) => (
                     <div
                       key={f.label}
-                      className="flex flex-col gap-1 rounded-input border border-border bg-input-bg p-6"
+                      className="flex flex-col gap-1.5 rounded-input border border-border bg-input-bg p-5 transition hover:-translate-y-0.5 hover:border-border-strong"
                     >
+                      <span className="text-primary/35">{f.icon}</span>
+                      <strong className="font-display text-2xl font-extrabold tracking-[-0.03em] tabular-nums text-primary">
+                        {f.value}
+                      </strong>
                       <span className="text-[10px] font-bold uppercase tracking-[0.8px] text-text-muted">
                         {f.label}
                       </span>
-                      <strong className="font-display text-xl font-extrabold tracking-[-0.03em] tabular-nums text-primary">
-                        {f.value}
-                      </strong>
                     </div>
                   ))}
                 </div>

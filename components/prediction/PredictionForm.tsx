@@ -78,7 +78,10 @@ export default function PredictionForm({
 
   return (
     <>
-      <h2 className="mb-4 text-lg font-bold tracking-[-0.02em] text-primary">{t("prediction_form")}</h2>
+      <h2 className="mb-4 flex items-center gap-2.5 text-lg font-bold tracking-[-0.02em] text-primary">
+        <span className="block w-[3px] h-5 rounded-full bg-primary" />
+        {t("prediction_form")}
+      </h2>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-2 gap-x-4 gap-y-3.5 max-sm:grid-cols-1">
           <Field label={t("ml_model")} htmlFor="input-ml_model">
