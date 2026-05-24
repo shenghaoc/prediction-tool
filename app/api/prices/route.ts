@@ -1,16 +1,36 @@
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { NextResponse } from 'next/server';
 
 import {
-	buildPredictionUpstreamFormData,
-	isPredictionApiResponse,
+	DEFAULT_PREDICTION_MONTH_END,
+	DEFAULT_PREDICTION_MONTH_START,
 	normalizePredictionRequest
 } from '../../../lib/prediction';
 
-const PRICES_API_URL =
-	process.env.PRICES_API_URL ??
-	'https://ee4802-g20-tool.shenghaoc.workers.dev/api/prices';
+type PriceQueryRow = {
+	intercept_map: number;
+	month_map: number;
+	storey_range_map: number;
+	floor_area_sqm_map: number;
+	lease_commence_date_map: number;
+	month_name: string;
+	month_multiplier: number;
+	town_map: number;
+	flat_model_map: number;
+	storey_range_multiplier: number;
+};
 
-export const runtime = 'edge';
+function readNumericField(value: unknown, fieldName: string): number {
+	const numericValue = Number(value);
+	if (!Number.isFinite(numericValue)) {
+		throw new Error(`Database field ${fieldName} is not a finite number`);
+	}
+	return numericValue;
+}
+
+function roundToTwo(value: number): number {
+	return Math.round((value + Number.EPSILON) * 100) / 100;
+}
 
 export async function POST(request: Request) {
 	let requestBody: unknown;
@@ -26,33 +46,85 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: normalizedRequest.error }, { status: 400 });
 	}
 
+	const { mlModel, town, flatModel, storeyRange, floorAreaSqm, leaseCommenceYear } =
+		normalizedRequest.value;
+
 	try {
-		const response = await fetch(PRICES_API_URL, {
-			method: 'POST',
-			body: buildPredictionUpstreamFormData(normalizedRequest.value),
-			cache: 'no-store'
+		const { env } = getCloudflareContext();
+		const { results } = await env.DB.prepare(
+			`SELECT
+				ml_models.intercept_map,
+				ml_models.month_map,
+				ml_models.storey_range_map,
+				ml_models.floor_area_sqm_map,
+				ml_models.lease_commence_date_map,
+				months_ordinal.name AS month_name,
+				months_ordinal.value AS month_multiplier,
+				towns_onehot.value AS town_map,
+				flat_models_onehot.value AS flat_model_map,
+				storey_ranges_ordinal.value AS storey_range_multiplier
+			FROM ml_models
+			JOIN towns_onehot ON ml_models.name = towns_onehot.ml_model
+			JOIN flat_models_onehot ON ml_models.name = flat_models_onehot.ml_model
+			JOIN storey_ranges_ordinal ON storey_ranges_ordinal.name = ?6
+			JOIN months_ordinal ON months_ordinal.name BETWEEN ?4 AND ?5
+			WHERE ml_models.name = ?1
+				AND towns_onehot.name = ?2
+				AND flat_models_onehot.name = ?3
+			ORDER BY months_ordinal.value ASC;`
+		)
+			.bind(
+				mlModel,
+				town,
+				flatModel,
+				DEFAULT_PREDICTION_MONTH_START,
+				DEFAULT_PREDICTION_MONTH_END,
+				storeyRange
+			)
+			.all<PriceQueryRow>();
+
+		const [first] = results;
+		if (!first) {
+			return NextResponse.json(
+				{ error: 'No prediction data found for the given parameters.' },
+				{ status: 500 }
+			);
+		}
+
+		// All terms except month_multiplier are constant across rows (ml_models, towns_onehot,
+		// flat_models_onehot, storey_ranges_ordinal join to exactly one row each).
+		// Compute them once from the first result to avoid redundant work per month.
+		const baseValue =
+			readNumericField(first.intercept_map, 'intercept_map') +
+			readNumericField(first.town_map, 'town_map') +
+			readNumericField(first.storey_range_multiplier, 'storey_range_multiplier') *
+				readNumericField(first.storey_range_map, 'storey_range_map') +
+			floorAreaSqm * readNumericField(first.floor_area_sqm_map, 'floor_area_sqm_map') +
+			readNumericField(first.flat_model_map, 'flat_model_map') +
+			leaseCommenceYear *
+				readNumericField(first.lease_commence_date_map, 'lease_commence_date_map');
+		const monthCoefficient = readNumericField(first.month_map, 'month_map');
+
+		const predictions = results.map((row) => {
+			const predictedRaw =
+				baseValue +
+				readNumericField(row.month_multiplier, 'month_multiplier') * monthCoefficient;
+
+			if (!Number.isFinite(predictedRaw)) {
+				throw new Error(
+					`Prediction calculation produced non-finite value for month ${row.month_name}`
+				);
+			}
+
+			return {
+				month: row.month_name,
+				predictedPrice: roundToTwo(Math.max(0, predictedRaw))
+			};
 		});
 
-		if (!response.ok) {
-			const errorText = await response.text();
-			return NextResponse.json(
-				{
-					error: errorText || 'Prediction service request failed.'
-				},
-				{ status: 502 }
-			);
-		}
-
-		const responseBody: unknown = await response.json();
-		if (!isPredictionApiResponse(responseBody)) {
-			return NextResponse.json(
-				{ error: 'Prediction service returned an invalid response.' },
-				{ status: 502 }
-			);
-		}
-
-		return NextResponse.json(responseBody);
+		return NextResponse.json({ predictions });
 	} catch (error: unknown) {
+		console.error(error);
 		return NextResponse.json(
 			{
 				error:
@@ -60,7 +132,7 @@ export async function POST(request: Request) {
 						? error.message
 						: 'Prediction service unavailable.'
 			},
-			{ status: 502 }
+			{ status: 500 }
 		);
 	}
 }

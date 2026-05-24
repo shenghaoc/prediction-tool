@@ -130,35 +130,3 @@ export function normalizePredictionRequest(
 		};
 }
 
-export function buildPredictionUpstreamFormData(input: NormalizedPredictionRequest) {
-	const formData = new FormData();
-
-	formData.append('model', input.mlModel);
-	formData.append('town', input.town);
-	formData.append('storeyRange', input.storeyRange);
-	formData.append('flatModel', input.flatModel);
-	formData.append('floorAreaSqm', input.floorAreaSqm.toString());
-	formData.append('leaseCommenceYear', input.leaseCommenceYear.toString());
-	formData.append('monthStart', DEFAULT_PREDICTION_MONTH_START);
-	formData.append('monthEnd', DEFAULT_PREDICTION_MONTH_END);
-
-	return formData;
-}
-
-export function isPredictionApiResponse(value: unknown): value is PredictionApiResponse {
-	if (!isRecord(value) || !Array.isArray(value.predictions)) {
-		return false;
-	}
-
-	return value.predictions.every((entry) => {
-			if (!isRecord(entry)) {
-				return false;
-			}
-
-			return (
-				typeof entry.month === 'string' &&
-				typeof entry.predictedPrice === 'number' &&
-				Number.isFinite(entry.predictedPrice)
-			);
-		});
-}

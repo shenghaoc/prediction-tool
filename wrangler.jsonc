@@ -16,12 +16,19 @@
 			// Self-reference service binding, the service name must match the worker name
 			// see https://opennext.js.org/cloudflare/caching
 			"binding": "WORKER_SELF_REFERENCE",
-			"service": "prediction-tool"
+			"service": "ee4802-g20-tool"
 		}
 	],
 	"images": {
 		// Enable image optimization
 		// see https://opennext.js.org/cloudflare/howtos/image
 		"binding": "IMAGES"
-	}
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "ee4802-g20-tool-db",
+			"database_id": "4e17ff7b-2af8-40fe-bb1c-2a6bc5b4199f"
+		}
+	]
 }

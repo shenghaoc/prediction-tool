@@ -28,7 +28,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.2",
-    "eslint": "^10.4.0",
+    "eslint": "^9.39.1",
     "eslint-config-next": "^16.2.6",
     "eslint-config-prettier": "^10.1.8",
     "jsdom": "^29.1.1",
@@ -39,6 +39,11 @@
     "typescript": "^6.0.3",
     "vitest": "^4.1.6",
     "wrangler": "^4.94.0"
+  },
+  "overrides": {
+    "@opennextjs/aws": {
+      "esbuild": "0.27.3"
+    }
   },
   "type": "module"
 }
