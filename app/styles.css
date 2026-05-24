@@ -1,7 +1,6 @@
 /* ==========================================================
    Minimal custom CSS — only what Tailwind v4 cannot express.
-   @keyframes, scrollbar, ::selection, @property, ripple,
-   and interaction-tied animations.
+   @keyframes, scrollbar, ::selection, and @property.
    ========================================================== */
 
 /* ── Typed custom properties ─────────────────────────────────────────── */
@@ -76,10 +75,6 @@ html {
   50%      { opacity: 0.55; }
 }
 
-@keyframes ripple {
-  to { transform: scale(4); opacity: 0; }
-}
-
 /* ── Starting-style — CSS-only entrance animations ───────────────────── */
 @starting-style {
   .animate-enter {
@@ -92,7 +87,8 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in,
   .animate-enter,
-  .animate-pulse {
+  .animate-pulse,
+  .animate-settle {
     animation: none;
     transition: none;
     opacity: 1;
@@ -112,6 +108,7 @@ html {
 @media (prefers-contrast: more) {
   :root {
     --color-border: light-dark(rgba(15, 23, 42, 0.18), rgba(129, 140, 248, 0.22));
+    --border: light-dark(rgba(15, 23, 42, 0.18), rgba(129, 140, 248, 0.22));
   }
 }
 
@@ -143,7 +140,7 @@ html {
   border: 1px solid var(--border);
   background: var(--popover);
   color: var(--popover-foreground);
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 4px 16px color-mix(in oklab, var(--foreground) 8%, transparent);
   pointer-events: none;
   white-space: nowrap;
   transform: translate(-50%, calc(-100% - 10px));

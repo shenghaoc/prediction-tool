@@ -47,3 +47,7 @@ export function normalizeTrendData(data: ApiResponse): TrendPoint[] {
 		value: normalizePrice(entry.predictedPrice)
 	}));
 }
+
+export function trendDataHasValidPrices(points: TrendPoint[]): boolean {
+	return points.some((point) => point.value > 0);
+}

@@ -39,6 +39,8 @@
   --radius-2xl: calc(var(--radius) * 1.8);
 }
 
+/* color-scheme follows html.dark so light-dark() tokens resolve correctly.
+   Tailwind dark: variants use the same .dark class via @custom-variant above. */
 :root {
   color-scheme: light;
 
@@ -68,7 +70,7 @@
   --chart-5: light-dark(#f59e0b, #fbbf24);
   --radius: 0.625rem;
 
-  /* Legacy aliases used by chart SVG + styles.css */
+  /* Pre-shadcn names kept for PriceTrendChart SVG + styles.css */
   --color-page: var(--background);
   --color-surface: var(--card);
   --color-input-bg: var(--secondary);

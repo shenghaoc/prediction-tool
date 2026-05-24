@@ -4,6 +4,7 @@ import {
   startTransition,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -32,6 +33,7 @@ import {
   isAbortError,
   normalizePrice,
   normalizeTrendData,
+  trendDataHasValidPrices,
 } from "./utils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -70,17 +72,21 @@ function PredictionClientInner() {
   const hasRestoredRef = useRef(false);
   const requestControllerRef = useRef<AbortController | null>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    const isDark = localStorage.getItem(STORAGE_KEYS.theme) === "dark";
+    setDarkMode(isDark);
+    document.documentElement.classList.toggle("dark", isDark);
     setMounted(true);
-    if (localStorage.getItem(STORAGE_KEYS.theme) === "dark") {
-      setDarkMode(true);
-    }
   }, []);
 
   useEffect(() => {
     if (!mounted) return;
     document.documentElement.classList.toggle("dark", darkMode);
-    localStorage.setItem(STORAGE_KEYS.theme, darkMode ? "dark" : "light");
+    try {
+      localStorage.setItem(STORAGE_KEYS.theme, darkMode ? "dark" : "light");
+    } catch {
+      /* storage full or disabled */
+    }
   }, [darkMode, mounted]);
 
   useEffect(() => {
@@ -92,20 +98,22 @@ function PredictionClientInner() {
       const parsed = JSON.parse(savedForm) as PersistedFieldValues;
       const { lease_commence_date: savedDate, ...rest } = parsed;
       const leaseDate = savedDate ? Temporal.PlainDate.from(savedDate) : undefined;
-      setFormValues((prev) => ({
-        ...prev,
+      const restored: FieldType = {
+        ...initialFormValues,
         ...rest,
         ...(leaseDate ? { lease_commence_date: leaseDate } : {}),
-      }));
+      };
+      setFormValues(restored);
       setSummaryValues({
-        ml_model: rest.ml_model ?? initialFormValues.ml_model,
-        town: rest.town ?? initialFormValues.town,
-        lease_commence_date: leaseDate ?? initialFormValues.lease_commence_date,
+        ml_model: restored.ml_model,
+        town: restored.town,
+        lease_commence_date: restored.lease_commence_date,
       });
     } catch {
       localStorage.removeItem(STORAGE_KEYS.form);
+      setError(t("error_form_restore_failed"));
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     return () => {
@@ -113,22 +121,28 @@ function PredictionClientInner() {
     };
   }, []);
 
-  const handleFormChange = useCallback((_: unknown, allValues: Partial<FieldType>) => {
+  const handleFormChange = useCallback((allValues: Partial<FieldType>) => {
     setError(null);
-    setFormValues((prev) => ({ ...prev, ...allValues }));
-    const persist: PersistedFieldValues = {
-      ...allValues,
-      lease_commence_date: allValues.lease_commence_date
-        ? serializeLeaseCommenceDate(allValues.lease_commence_date)
-        : undefined,
-    };
-    localStorage.setItem(STORAGE_KEYS.form, JSON.stringify(persist));
-    setSummaryValues({
-      ml_model: allValues.ml_model ?? initialFormValues.ml_model,
-      town: allValues.town ?? initialFormValues.town,
-      lease_commence_date:
-        allValues.lease_commence_date ?? initialFormValues.lease_commence_date,
+    setFormValues((prev) => {
+      const next = { ...prev, ...allValues };
+      try {
+        localStorage.setItem(
+          STORAGE_KEYS.form,
+          JSON.stringify({
+            ...next,
+            lease_commence_date: serializeLeaseCommenceDate(next.lease_commence_date),
+          } satisfies PersistedFieldValues),
+        );
+      } catch {
+        /* storage full or disabled */
+      }
+      return next;
     });
+    setSummaryValues((prev) => ({
+      ml_model: allValues.ml_model ?? prev.ml_model,
+      town: allValues.town ?? prev.town,
+      lease_commence_date: allValues.lease_commence_date ?? prev.lease_commence_date,
+    }));
   }, []);
 
   const handleReset = useCallback(() => {
@@ -154,6 +168,8 @@ function PredictionClientInner() {
       requestControllerRef.current = controller;
       setLoading(true);
       setError(null);
+      setOutput(0);
+      setTrendData(defaultTrendData);
       const requestBody: PredictionRequestBody = {
         mlModel: values.ml_model,
         town: values.town,
@@ -174,10 +190,20 @@ function PredictionClientInner() {
         }
         const serverData: ApiResponse = await response.json();
         const normalizedData = normalizeTrendData(serverData);
+        if (!trendDataHasValidPrices(normalizedData)) {
+          throw new Error(t("error_invalid_prediction"));
+        }
         setTrendData(normalizedData);
         setOutput(normalizePrice(normalizedData[normalizedData.length - 1]?.value ?? 0));
+        setSummaryValues({
+          ml_model: values.ml_model,
+          town: values.town,
+          lease_commence_date: values.lease_commence_date,
+        });
       } catch (err: unknown) {
         if (isAbortError(err)) return;
+        setOutput(0);
+        setTrendData(defaultTrendData);
         setError(getErrorMessage(err, t("error_fetch")));
       } finally {
         if (requestControllerRef.current === controller) {
@@ -195,7 +221,9 @@ function PredictionClientInner() {
     { label: t("stat_types"), value: FLAT_MODELS.length.toString().padStart(2, "0"), icon: Home },
   ];
 
-  if (!mounted) return null;
+  if (!mounted) {
+    return <main className="min-h-screen" aria-busy="true" />;
+  }
 
   const isZh = lang === "zh";
 
@@ -228,7 +256,7 @@ function PredictionClientInner() {
               type="button"
               variant="outline"
               size="icon-sm"
-              aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+              aria-label={darkMode ? t("switch_to_light_mode") : t("switch_to_dark_mode")}
               onClick={() => setDarkMode((value) => !value)}
             >
               {darkMode ? <Sun className="size-4" /> : <Moon className="size-4" />}
@@ -244,12 +272,13 @@ function PredictionClientInner() {
             >
               <CardHeader className="px-6 pb-0">
                 <CardTitle
+                  asChild
                   className={cn(
                     "font-heading whitespace-pre-line text-[clamp(2rem,5vw,3rem)] font-bold normal-case tracking-tight",
                     isZh && "font-cjk font-extrabold",
                   )}
                 >
-                  {t("price_prediction")}
+                  <h1>{t("price_prediction")}</h1>
                 </CardTitle>
                 <CardDescription className="max-w-prose text-base">
                   {t("intro_blurb")}
@@ -282,7 +311,9 @@ function PredictionClientInner() {
 
             <Card size="sm" className="border-l-4 border-l-primary/70 py-6 shadow-sm ring-1 ring-foreground/5">
               <CardHeader className="px-6 pb-2">
-                <CardTitle className="text-primary normal-case">{t("prediction_form")}</CardTitle>
+                <CardTitle asChild className="text-primary normal-case">
+                  <h2>{t("prediction_form")}</h2>
+                </CardTitle>
               </CardHeader>
               <CardContent className="px-6">
                 {error && (
@@ -302,15 +333,13 @@ function PredictionClientInner() {
             </Card>
           </div>
 
-          <section>
-            <PredictionResults
-              output={output}
-              summaryValues={summaryValues}
-              t={t}
-              trendData={trendData}
-              locale={lang}
-            />
-          </section>
+          <PredictionResults
+            output={output}
+            summaryValues={summaryValues}
+            t={t}
+            trendData={trendData}
+            locale={lang}
+          />
         </div>
       </div>
     </main>

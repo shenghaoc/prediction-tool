@@ -9,18 +9,22 @@ import { FormSelect, type FormSelectOption } from "@/components/ui/form-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldContent, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { cn } from "@/lib/utils";
 import type { FieldType } from "./types";
 
 type PredictionFormProps = {
   loading: boolean;
   onFinish: (values: FieldType) => Promise<void>;
   onReset: () => void;
-  onValuesChange: (_: unknown, allValues: Partial<FieldType>) => void;
+  onValuesChange: (allValues: Partial<FieldType>) => void;
   t: TFunction;
   formValues: FieldType;
 };
 
-function labeledOptions(values: readonly string[], labelFor: (value: string) => string): FormSelectOption[] {
+function labeledOptions<T extends string>(
+  values: readonly T[],
+  labelFor: (value: T) => string,
+): FormSelectOption<T>[] {
   return values.map((value) => ({ value, label: labelFor(value) }));
 }
 
@@ -34,17 +38,26 @@ export default function PredictionForm({
 }: PredictionFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onFinish(formValues);
+    void onFinish(formValues);
   };
 
-  const handleChange = (key: keyof FieldType, value: unknown) => {
-    onValuesChange(null, { ...formValues, [key]: value });
+  const handleChange = <K extends keyof FieldType>(key: K, value: FieldType[K]) => {
+    onValuesChange({ ...formValues, [key]: value });
   };
 
-  const mlModelOptions = useMemo(() => labeledOptions(ML_MODELS, (m) => t(`ml_models.${m}`, m)), [t]);
+  const mlModelOptions = useMemo(
+    () => labeledOptions(ML_MODELS, (m) => t(`ml_models.${m}`, m)),
+    [t],
+  );
   const townOptions = useMemo(() => labeledOptions(TOWNS, (m) => t(`towns.${m}`, m)), [t]);
-  const storeyOptions = useMemo(() => labeledOptions(STOREY_RANGES, (m) => t(`storey_ranges.${m}`, m)), [t]);
-  const flatModelOptions = useMemo(() => labeledOptions(FLAT_MODELS, (m) => t(`flat_models.${m}`, m)), [t]);
+  const storeyOptions = useMemo(
+    () => labeledOptions(STOREY_RANGES, (m) => t(`storey_ranges.${m}`, m)),
+    [t],
+  );
+  const flatModelOptions = useMemo(
+    () => labeledOptions(FLAT_MODELS, (m) => t(`flat_models.${m}`, m)),
+    [t],
+  );
   const leaseYearOptions = useMemo(
     () => LEASE_COMMENCE_YEARS.map((y) => ({ value: String(y), label: String(y) })),
     [],
@@ -112,18 +125,23 @@ export default function PredictionForm({
                   type="number"
                   inputMode="numeric"
                   enterKeyHint="done"
+                  aria-describedby="floor-area-unit"
                   className="h-10 rounded-r-none border border-border/60 bg-card px-3 shadow-none"
                   min={MIN_FLOOR_AREA_SQM}
                   max={MAX_FLOOR_AREA_SQM}
                   value={formValues.floor_area_sqm || ""}
                   placeholder={t("enter_floor_area")}
                   onChange={(e) =>
-                    handleChange("floor_area_sqm", e.target.value ? Number(e.target.value) : undefined)
+                    handleChange("floor_area_sqm", e.target.value ? Number(e.target.value) : 0)
                   }
                   required
                 />
-                <span className="inline-flex h-10 items-center rounded-r-lg border border-l-0 border-border/60 bg-muted px-3 text-xs font-semibold text-muted-foreground">
-                  m²
+                <span
+                  id="floor-area-unit"
+                  className="inline-flex h-10 items-center rounded-r-lg border border-l-0 border-border/60 bg-muted px-3 text-xs font-semibold text-muted-foreground"
+                >
+                  <span className="sr-only">{t("floor_area_unit")}</span>
+                  <span aria-hidden>m²</span>
                 </span>
               </div>
             </FieldContent>
@@ -146,7 +164,15 @@ export default function PredictionForm({
         </Field>
 
         <div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
-          <Button type="submit" size="lg" className="w-full normal-case tracking-normal" disabled={loading}>
+          <Button
+            type="submit"
+            size="lg"
+            className={cn(
+              "w-full normal-case tracking-normal",
+              loading && "animate-pulse",
+            )}
+            disabled={loading}
+          >
             {loading ? t("predicting") : t("get_prediction")}
           </Button>
           <Button
