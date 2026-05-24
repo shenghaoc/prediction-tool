@@ -119,14 +119,14 @@ export default function PredictionForm({
           <Field>
             <FieldLabel htmlFor="input-floor_area">{t("floor_area")}</FieldLabel>
             <FieldContent>
-              <div className="flex">
+              <div className="flex rounded-lg shadow-sm transition-shadow duration-200 focus-within:shadow-md focus-within:shadow-primary/10">
                 <Input
                   id="input-floor_area"
                   type="number"
                   inputMode="numeric"
                   enterKeyHint="done"
                   aria-describedby="floor-area-unit"
-                  className="h-10 rounded-r-none border border-border/60 bg-card px-3 shadow-none"
+                  className="h-10 rounded-r-none rounded-l-lg border border-border/60 bg-card px-3 shadow-none transition-colors duration-200 focus-visible:border-primary/40"
                   min={MIN_FLOOR_AREA_SQM}
                   max={MAX_FLOOR_AREA_SQM}
                   value={formValues.floor_area_sqm || ""}
@@ -138,7 +138,7 @@ export default function PredictionForm({
                 />
                 <span
                   id="floor-area-unit"
-                  className="inline-flex h-10 items-center rounded-r-lg border border-l-0 border-border/60 bg-muted px-3 text-xs font-semibold text-muted-foreground"
+                  className="inline-flex h-10 items-center rounded-r-lg border border-l-0 border-border/60 bg-muted px-3 text-xs font-semibold text-muted-foreground transition-colors duration-200"
                 >
                   <span className="sr-only">{t("floor_area_unit")}</span>
                   <span aria-hidden>m²</span>
@@ -167,7 +167,7 @@ export default function PredictionForm({
           <Button
             type="submit"
             size="lg"
-            className="w-full normal-case tracking-normal"
+            className="w-full normal-case tracking-normal shadow-md shadow-primary/20 transition-all duration-200 hover:shadow-lg hover:shadow-primary/25 hover:brightness-110"
             disabled={loading}
           >
             {loading ? (
@@ -183,7 +183,7 @@ export default function PredictionForm({
             type="button"
             variant="outline"
             size="lg"
-            className="w-full normal-case tracking-normal"
+            className="w-full normal-case tracking-normal transition-all duration-200 hover:bg-muted/80"
             onClick={onReset}
           >
             {t("reset_form")}

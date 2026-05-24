@@ -10,6 +10,12 @@
   initial-value: 0.5rem;
 }
 
+@property --progress {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
 /* ── Reset ───────────────────────────────────────────────────────────── */
 *,
 *::before,
@@ -19,6 +25,17 @@
 }
 html, body {
   min-height: 100%;
+}
+
+/* ── Theme transition (only when .theme-ready is set) ────────────────── */
+.theme-ready,
+.theme-ready *,
+.theme-ready *::before,
+.theme-ready *::after {
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease;
 }
 
 /* ── Themed scrollbars ───────────────────────────────────────────────── */
@@ -64,6 +81,11 @@ html {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes fade-up-deep {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes settle {
   0%   { transform: scale(0.96); opacity: 0.72; }
   65%  { transform: scale(1.05); opacity: 1; }
@@ -73,6 +95,33 @@ html {
 @keyframes subtle-pulse {
   0%, 100% { opacity: 1; }
   50%      { opacity: 0.55; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes progress-indeterminate {
+  0%   { transform: translateX(-100%); }
+  50%  { transform: translateX(0%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 12px color-mix(in oklab, var(--primary) 20%, transparent); }
+  50%      { box-shadow: 0 0 28px color-mix(in oklab, var(--primary) 35%, transparent); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%      { transform: translateY(-6px); }
+}
+
+@keyframes empty-float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  25%      { transform: translateY(-3px) rotate(0.5deg); }
+  75%      { transform: translateY(2px) rotate(-0.5deg); }
 }
 
 /* ── Starting-style — CSS-only entrance animations ───────────────────── */
@@ -86,13 +135,18 @@ html {
 /* ── Reduced motion ──────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in,
+  .animate-fade-in-deep,
   .animate-enter,
   .animate-pulse,
-  .animate-settle {
+  .animate-settle,
+  .animate-stagger {
     animation: none;
     transition: none;
     opacity: 1;
     transform: none;
+  }
+  .animate-glow {
+    animation: none;
   }
 }
 
@@ -123,6 +177,10 @@ html {
   animation: fade-up 0.35s ease-out both;
 }
 
+.animate-fade-in-deep {
+  animation: fade-up-deep 0.5s ease-out both;
+}
+
 .animate-settle {
   animation: settle 0.55s ease;
 }
@@ -131,7 +189,54 @@ html {
   animation: subtle-pulse 1.2s ease-in-out infinite;
 }
 
-/* ── Chart tooltip (positioned by JS so needs custom style) ──────────── */
+.animate-glow {
+  animation: glow-pulse 2.4s ease-in-out infinite;
+}
+
+/* Staggered entrance — add .animate-stagger to each child */
+.animate-stagger > * {
+  opacity: 0;
+  animation: fade-up 0.4s ease-out forwards;
+}
+.animate-stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.animate-stagger > *:nth-child(2) { animation-delay: 0.12s; }
+.animate-stagger > *:nth-child(3) { animation-delay: 0.19s; }
+.animate-stagger > *:nth-child(4) { animation-delay: 0.26s; }
+.animate-stagger > *:nth-child(5) { animation-delay: 0.33s; }
+.animate-stagger > *:nth-child(6) { animation-delay: 0.40s; }
+
+/* Shimmer skeleton */
+.animate-shimmer {
+  background: linear-gradient(
+    110deg,
+    var(--secondary) 8%,
+    color-mix(in oklab, var(--secondary) 60%, var(--primary)) 18%,
+    var(--secondary) 33%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+/* Progress bar */
+.progress-track {
+  position: relative;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: var(--secondary);
+  height: 4px;
+}
+.progress-bar {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(
+    90deg,
+    var(--primary),
+    color-mix(in oklab, var(--primary) 70%, var(--chart-2))
+  );
+  animation: progress-indeterminate 1.8s ease-in-out infinite;
+}
+
+/* ── Chart tooltip ───────────────────────────────────────────────────── */
 .chart-tooltip {
   position: absolute;
   z-index: 10;
@@ -154,8 +259,6 @@ html {
 }
 .chart-tooltip.visible {
   transform: translate(-50%, calc(-100% - 14px));
-}
-.chart-tooltip.visible {
   opacity: 1;
 }
 
@@ -169,6 +272,22 @@ html {
   fill: var(--color-text-muted);
   font-size: 10px;
   font-weight: 600;
+}
+
+/* ── Empty state float ───────────────────────────────────────────────── */
+.empty-float {
+  animation: empty-float 4s ease-in-out infinite;
+}
+
+/* ── Sonner toast styles ─────────────────────────────────────────────── */
+.cn-toast {
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+  box-shadow:
+    0 4px 6px color-mix(in oklab, var(--foreground) 4%, transparent),
+    0 12px 28px color-mix(in oklab, var(--foreground) 10%, transparent);
 }
 
 /* ── No-spinner inputs ────────────────────────────────────────────────── */

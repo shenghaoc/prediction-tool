@@ -19,7 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 function ChartAreaSkeleton() {
-  return <Skeleton className="min-h-[260px] w-full rounded-xl" />;
+  return <Skeleton className="animate-shimmer min-h-[260px] w-full rounded-xl" />;
 }
 
 const PriceTrendChart = dynamic(() => import("./PriceTrendChart"), {
@@ -28,7 +28,7 @@ const PriceTrendChart = dynamic(() => import("./PriceTrendChart"), {
 });
 
 const panelCard =
-  "relative overflow-hidden border-border/60 shadow-sm ring-1 ring-foreground/5 transition-shadow duration-300 hover:shadow-md hover:shadow-primary/5";
+  "relative overflow-hidden border-border/60 shadow-sm ring-1 ring-foreground/5 transition-all duration-300 hover:shadow-md hover:shadow-primary/5";
 
 type PredictionResultsProps = {
   output: number;
@@ -97,7 +97,7 @@ export default function PredictionResults({
 
   return (
     <section aria-labelledby="prediction-results-heading" aria-busy={loading}>
-      <Card size="sm" className={cn(panelCard, "border-l-4 border-l-primary/70 py-6")}>
+      <Card size="sm" className={cn(panelCard, "animate-fade-in-deep border-l-4 border-l-primary/70 py-6")}>
         <div
           className="pointer-events-none absolute -right-24 -top-24 size-64 rounded-full bg-primary/10 blur-3xl"
           aria-hidden
@@ -116,8 +116,10 @@ export default function PredictionResults({
           </div>
           <div
             className={cn(
-              "relative min-w-[200px] overflow-hidden rounded-xl border px-5 py-4 max-sm:w-full",
-              "border-primary/25 bg-gradient-to-br from-primary/12 via-accent/60 to-card",
+              "relative min-w-[200px] overflow-hidden rounded-xl border px-5 py-4 max-sm:w-full transition-all duration-500",
+              hasOutput
+                ? "border-primary/25 bg-gradient-to-br from-primary/12 via-accent/60 to-card animate-glow"
+                : "border-border/60 bg-gradient-to-br from-secondary/40 to-card",
               "shadow-[inset_0_1px_0_0_color-mix(in_oklab,var(--primary-foreground)_12%,transparent)]",
             )}
           >
@@ -129,12 +131,12 @@ export default function PredictionResults({
               {t("prediction")}
             </p>
             {showSkeleton ? (
-              <Skeleton className="relative mt-2 h-9 w-36" />
+              <Skeleton className="animate-shimmer relative mt-2 h-9 w-36 rounded-lg" />
             ) : (
               <p
                 key={output}
                 className={cn(
-                  "relative mt-1 font-heading text-3xl font-extrabold tabular-nums tracking-tight",
+                  "relative mt-1 font-heading text-3xl font-extrabold tabular-nums tracking-tight transition-all duration-500",
                   !hasOutput && "text-base font-semibold text-muted-foreground",
                   hasOutput && "text-primary animate-settle",
                 )}
@@ -151,12 +153,13 @@ export default function PredictionResults({
           ) : (
             <>
               <div className="grid grid-cols-3 gap-2.5 max-sm:grid-cols-1">
-                {summaryItems.map((item) => {
+                {summaryItems.map((item, i) => {
                   const Icon = item.icon;
                   return (
                     <div
                       key={item.label}
-                      className="flex items-center gap-3 rounded-xl border border-border/60 bg-secondary/40 p-3 backdrop-blur-sm"
+                      className="animate-fade-in flex items-center gap-3 rounded-xl border border-border/60 bg-secondary/40 p-3 backdrop-blur-sm transition-all duration-300 hover:border-primary/20 hover:bg-secondary/60 hover:shadow-sm"
+                      style={{ animationDelay: `${i * 0.08}s`, animationFillMode: "both" }}
                     >
                       <div
                         className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-primary/15"
@@ -178,7 +181,7 @@ export default function PredictionResults({
               {hasOutput ? (
                 <>
                   <Separator />
-                  <div>
+                  <div className="animate-fade-in">
                     <CardDescription className="mb-1 uppercase tracking-wider">
                       {t("predicted_trends")}
                     </CardDescription>
@@ -198,7 +201,7 @@ export default function PredictionResults({
                         trend={deltaPositive ? "up" : "down"}
                       />
                     </div>
-                    <div className="relative min-h-[260px] rounded-xl border border-border/40 bg-secondary/20 p-2">
+                    <div className="relative min-h-[260px] overflow-hidden rounded-xl border border-border/40 bg-gradient-to-br from-secondary/20 to-secondary/5 p-2 transition-all duration-300">
                       {loading ? (
                         <ChartAreaSkeleton />
                       ) : (
@@ -208,20 +211,20 @@ export default function PredictionResults({
                   </div>
                 </>
               ) : (
-                <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-border/70 bg-muted/30 px-4 py-12 text-center">
-                  <div className="flex items-end gap-1.5 opacity-50" aria-hidden>
-                    {[0.35, 0.55, 0.85, 0.45].map((h, i) => (
+                <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-border/70 bg-gradient-to-b from-muted/30 to-transparent px-4 py-12 text-center">
+                  <div className="empty-float flex items-end gap-1.5 opacity-40" aria-hidden>
+                    {[0.35, 0.55, 0.85, 0.45, 0.7, 0.3].map((h, i) => (
                       <div
                         key={i}
                         className="w-2.5 rounded-sm bg-primary"
-                        style={{ height: `${h * 48}px` }}
+                        style={{ height: `${h * 48}px`, opacity: 1 - i * 0.08 }}
                       />
                     ))}
                   </div>
-                  <h3 className="font-heading text-base font-semibold text-foreground">
+                  <h3 className="animate-fade-in font-heading text-base font-semibold text-foreground">
                     {t("placeholder_title")}
                   </h3>
-                  <p className="mx-auto max-w-[32ch] text-sm leading-relaxed text-muted-foreground">
+                  <p className="animate-fade-in mx-auto max-w-[32ch] text-sm leading-relaxed text-muted-foreground" style={{ animationDelay: "0.08s", animationFillMode: "both" }}>
                     {t("placeholder_body")}
                   </p>
                 </div>
@@ -248,7 +251,7 @@ function StatChip({
   const TrendIcon = trend === "down" ? TrendingDown : trend === "up" ? TrendingUp : null;
 
   return (
-    <div className="rounded-xl border border-border/60 bg-secondary/40 px-3 py-2.5 backdrop-blur-sm">
+    <div className="rounded-xl border border-border/60 bg-secondary/40 px-3 py-2.5 backdrop-blur-sm transition-all duration-300 hover:border-primary/20 hover:shadow-sm">
       <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
       <p
         className={cn(

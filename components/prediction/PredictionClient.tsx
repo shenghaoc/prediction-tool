@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import { Home, Layers, MapPin, Moon, Sparkles, Sun } from "lucide-react";
+import { toast } from "sonner";
 
 import { I18nProvider, useI18n } from "../../lib/i18n";
 import { Temporal } from "../../lib/temporal";
@@ -36,7 +37,6 @@ import {
   normalizeTrendData,
   trendDataHasValidPrices,
 } from "./utils";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -50,7 +50,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 const panelCard =
-  "relative overflow-hidden border-border/60 shadow-sm ring-1 ring-foreground/5 transition-shadow duration-300 hover:shadow-md hover:shadow-primary/5";
+  "relative overflow-hidden border-border/60 shadow-sm ring-1 ring-foreground/5 transition-all duration-300 hover:shadow-md hover:shadow-primary/5";
 
 export default function PredictionClient() {
   return (
@@ -75,6 +75,7 @@ function PredictionClientInner() {
     lease_commence_date: initialFormValues.lease_commence_date,
   });
   const hasRestoredRef = useRef(false);
+  const resultsRef = useRef<HTMLDivElement>(null);
   const requestControllerRef = useRef<AbortController | null>(null);
 
   useLayoutEffect(() => {
@@ -93,6 +94,11 @@ function PredictionClientInner() {
       /* storage full or disabled */
     }
   }, [darkMode, mounted]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    document.documentElement.classList.add("theme-ready");
+  }, [mounted]);
 
   useEffect(() => {
     if (hasRestoredRef.current) return;
@@ -116,7 +122,7 @@ function PredictionClientInner() {
       });
     } catch {
       localStorage.removeItem(STORAGE_KEYS.form);
-      setError(t("error_form_restore_failed"));
+      toast.error(t("error_form_restore_failed"));
     }
   }, [t]);
 
@@ -199,17 +205,24 @@ function PredictionClientInner() {
           throw new Error(t("error_invalid_prediction"));
         }
         setTrendData(normalizedData);
-        setOutput(normalizePrice(normalizedData[normalizedData.length - 1]?.value ?? 0));
+        const predictedPrice = normalizePrice(normalizedData[normalizedData.length - 1]?.value ?? 0);
+        setOutput(predictedPrice);
         setSummaryValues({
           ml_model: values.ml_model,
           town: values.town,
           lease_commence_date: values.lease_commence_date,
         });
+        toast.success(t("prediction_success"), { id: "prediction" });
+        setTimeout(() => {
+          resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }, 150);
       } catch (err: unknown) {
         if (isAbortError(err)) return;
         setOutput(0);
         setTrendData(defaultTrendData);
-        setError(getErrorMessage(err, t("error_fetch")));
+        const msg = getErrorMessage(err, t("error_fetch"));
+        setError(msg);
+        toast.error(msg);
       } finally {
         if (requestControllerRef.current === controller) {
           requestControllerRef.current = null;
@@ -245,10 +258,10 @@ function PredictionClientInner() {
     return (
       <main className="min-h-screen px-6 pb-12 pt-5" aria-busy="true">
         <div className="mx-auto max-w-7xl space-y-5">
-          <Skeleton className="h-10 w-full max-w-md" />
+          <Skeleton className="animate-shimmer h-10 w-full max-w-md rounded-xl" />
           <div className="grid grid-cols-2 gap-5 max-[860px]:grid-cols-1">
-            <Skeleton className="h-64 rounded-xl" />
-            <Skeleton className="h-96 rounded-xl" />
+            <Skeleton className="animate-shimmer h-64 rounded-xl" />
+            <Skeleton className="animate-shimmer h-96 rounded-xl" />
           </div>
         </div>
       </main>
@@ -260,7 +273,7 @@ function PredictionClientInner() {
   return (
     <main className="min-h-screen px-6 pb-12 pt-5 max-sm:px-3 max-sm:pb-8">
       <div className="mx-auto max-w-7xl">
-        <header className="sticky top-0 z-20 -mx-6 mb-6 flex items-center justify-between gap-4 border-b border-border/50 bg-background/85 px-6 py-4 backdrop-blur-md max-sm:relative max-sm:mx-0 max-sm:flex-col max-sm:items-start max-sm:px-0">
+        <header className="animate-fade-in-deep sticky top-0 z-20 -mx-6 mb-6 flex items-center justify-between gap-4 border-b border-border/50 bg-background/85 px-6 py-4 backdrop-blur-md max-sm:relative max-sm:mx-0 max-sm:flex-col max-sm:items-start max-sm:px-0">
           <div className="flex items-center gap-2.5">
             <span className="font-heading text-base font-bold tracking-tight">{t("brand")}</span>
             <Badge variant="secondary" className="gap-1">
@@ -299,7 +312,7 @@ function PredictionClientInner() {
           <div className="flex flex-col gap-5">
             <Card
               size="sm"
-              className={cn(panelCard, "border-l-4 border-l-primary/70 py-6")}
+              className={cn(panelCard, "animate-fade-in-deep border-l-4 border-l-primary/70 py-6")}
             >
               <div
                 className="pointer-events-none absolute -right-20 -top-16 size-56 rounded-full bg-primary/15 blur-3xl"
@@ -324,7 +337,7 @@ function PredictionClientInner() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="relative px-6 pt-4">
-                <div className="grid grid-cols-3 gap-2.5 max-sm:grid-cols-1">
+                <div className="animate-stagger grid grid-cols-3 gap-2.5 max-sm:grid-cols-1">
                   {figures.map((figure) => (
                     <StatTile
                       key={figure.label}
@@ -338,17 +351,22 @@ function PredictionClientInner() {
               </CardContent>
             </Card>
 
-            <Card size="sm" className={cn(panelCard, "border-l-4 border-l-primary/70 py-6")}>
+            <Card size="sm" className={cn(panelCard, "animate-fade-in-deep border-l-4 border-l-primary/70 py-6")}>
               <CardHeader className="px-6 pb-2">
                 <CardTitle asChild className="text-primary normal-case">
                   <h2>{t("prediction_form")}</h2>
                 </CardTitle>
               </CardHeader>
               <CardContent className="px-6">
-                {error && (
-                  <Alert variant="destructive" className="mb-4">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
+                {loading && (
+                  <div className="progress-track mb-4" role="progressbar" aria-label={t("predicting")}>
+                    <div className="progress-bar" style={{ width: "60%" }} />
+                  </div>
+                )}
+                {error && !loading && (
+                  <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                    {error}
+                  </div>
                 )}
                 <PredictionForm
                   formValues={formValues}
@@ -362,14 +380,16 @@ function PredictionClientInner() {
             </Card>
           </div>
 
-          <PredictionResults
-            output={output}
-            summaryValues={summaryValues}
-            t={t}
-            trendData={trendData}
-            locale={lang}
-            loading={loading}
-          />
+          <div ref={resultsRef}>
+            <PredictionResults
+              output={output}
+              summaryValues={summaryValues}
+              t={t}
+              trendData={trendData}
+              locale={lang}
+              loading={loading}
+            />
+          </div>
         </div>
       </div>
     </main>

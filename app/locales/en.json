@@ -41,6 +41,7 @@
   "chart_delta": "12M Change",
   "vs_12m_ago": "vs 12 months ago",
   "prediction": "Prediction",
+  "prediction_success": "Prediction complete! Scroll down to view results.",
   "placeholder_title": "Run a scenario to generate a forecast",
   "placeholder_body": "Choose a model, adjust the flat details, and submit the form to see the projected resale price and 12-month trend.",
   "ml_models": {
