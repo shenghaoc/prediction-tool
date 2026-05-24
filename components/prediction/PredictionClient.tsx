@@ -178,7 +178,6 @@ function PredictionClientInner() {
       town: initialFormValues.town,
       lease_commence_date: initialFormValues.lease_commence_date,
     });
-    localStorage.removeItem(STORAGE_KEYS.form);
   }, []);
 
   const handleFinish = useCallback(

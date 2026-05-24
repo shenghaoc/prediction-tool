@@ -68,12 +68,14 @@ export default function PredictionResults({
     };
   }, [trendData]);
 
-  const formatter = new Intl.NumberFormat(locale === "zh" ? "zh-SG" : "en-SG", {
-    style: "currency",
-    currency: "SGD",
-    maximumFractionDigits: 0,
-  });
-  const fmt = (v: number) => formatter.format(Math.round(v));
+  const fmt = useMemo(() => {
+    const f = new Intl.NumberFormat(locale === "zh" ? "zh-SG" : "en-SG", {
+      style: "currency",
+      currency: "SGD",
+      maximumFractionDigits: 0,
+    });
+    return (v: number) => f.format(Math.round(v));
+  }, [locale]);
 
   const summaryItems = [
     {
