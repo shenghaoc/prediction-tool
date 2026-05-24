@@ -8,16 +8,16 @@ import {
 } from '../../../lib/prediction';
 
 type PriceQueryRow = {
-	intercept_map: number;
-	month_map: number;
-	storey_range_map: number;
-	floor_area_sqm_map: number;
-	lease_commence_date_map: number;
-	month_name: string;
-	month_multiplier: number;
-	town_map: number;
-	flat_model_map: number;
-	storey_range_multiplier: number;
+	intercept_map: number | null;
+	month_map: number | null;
+	storey_range_map: number | null;
+	floor_area_sqm_map: number | null;
+	lease_commence_date_map: number | null;
+	month_name: string | null;
+	month_multiplier: number | null;
+	town_map: number | null;
+	flat_model_map: number | null;
+	storey_range_multiplier: number | null;
 };
 
 function readNumericField(value: unknown, fieldName: string): number {
