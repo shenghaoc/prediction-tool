@@ -59,7 +59,7 @@ export default function PredictionResults({
     "rounded-input border px-3.5 py-3 bg-input-bg border-border";
 
   return (
-    <div className="flex flex-col gap-5 rounded-card border border-border bg-surface shadow-card transition-[background,border-color,box-shadow] duration-200 relative overflow-hidden">
+    <div className="rounded-card border border-border bg-surface shadow-card transition-[background,border-color,box-shadow] duration-200 relative overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-primary/30 via-primary to-primary/60" />
       <div className="flex flex-col gap-5 p-6 max-sm:p-4">
       {/* ── Header ── */}

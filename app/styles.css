@@ -22,11 +22,9 @@ html, body {
   min-height: 100%;
 }
 
-/* ── Page background texture ─────────────────────────────────────────── */
+/* ── Page background ─────────────────────────────────────────────────── */
 body {
-  background-image: radial-gradient(circle, var(--color-border) 1px, transparent 1px);
-  background-size: 22px 22px;
-  background-position: center center;
+  background: linear-gradient(to bottom, var(--color-page), color-mix(in oklab, var(--color-page) 96%, var(--color-primary)));
 }
 
 /* ── Themed scrollbars ───────────────────────────────────────────────── */

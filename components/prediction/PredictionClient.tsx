@@ -218,7 +218,7 @@ function PredictionClientInner() {
   const isZh = lang === "zh";
 
   return (
-    <main className="min-h-screen bg-page px-6 pb-12 pt-5 text-text transition-[background,color] duration-300 max-sm:px-3 max-sm:pb-8">
+    <main className="min-h-screen bg-page px-6 pb-16 pt-8 text-text transition-[background,color] duration-300 max-sm:px-3 max-sm:pb-10">
       <div className="mx-auto max-w-7xl">
         {/* ── Topbar ── */}
         <header className="mb-6 flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
@@ -243,17 +243,26 @@ function PredictionClientInner() {
               {t("switch_language")}
             </button>
             <button
-              className="rounded-btn flex min-h-[34px] w-[34px] cursor-pointer items-center justify-center border border-border bg-input-bg p-0 text-[15px] font-semibold text-text-secondary transition hover:-translate-y-px active:translate-y-0"
+              className="rounded-btn flex min-h-[34px] w-[34px] cursor-pointer items-center justify-center border border-border bg-input-bg p-0 text-text-secondary transition hover:-translate-y-px active:translate-y-0"
               onClick={() => setDarkMode((value) => !value)}
               aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
             >
-              {darkMode ? "☀" : "◑"}
+              {darkMode ? (
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <circle cx="8" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.5" />
+                  <path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M3.05 12.95l1.06-1.06M11.89 4.11l1.06-1.06" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                </svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M13.5 10.2a5.5 5.5 0 0 1-7.7-7.7 6 6 0 1 0 7.7 7.7Z" fill="currentColor" />
+                </svg>
+              )}
             </button>
           </div>
         </header>
 
         {/* ── Layout grid ── */}
-        <div className="grid grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] gap-5 items-start max-[860px]:grid-cols-1">
+        <div className="grid grid-cols-1 gap-5 items-start lg:grid-cols-2">
           {/* ── Left column ── */}
           <div className="flex flex-col gap-5">
             {/* Intro card */}
@@ -276,9 +285,9 @@ function PredictionClientInner() {
                   {figures.map((f) => (
                     <div
                       key={f.label}
-                      className="flex flex-col gap-1.5 rounded-input border border-border bg-input-bg p-5 transition hover:-translate-y-0.5 hover:border-border-strong"
+                      className="flex flex-col gap-1.5 rounded-input border border-border bg-input-bg p-5 transition hover:-translate-y-0.5 hover:border-border-strong relative overflow-hidden"
                     >
-                      <span className="text-primary/35">{f.icon}</span>
+                      <span className="absolute right-3 top-3 text-primary/10">{f.icon}</span>
                       <strong className="font-display text-2xl font-extrabold tracking-[-0.03em] tabular-nums text-primary">
                         {f.value}
                       </strong>
