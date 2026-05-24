@@ -1,4 +1,4 @@
-import dayjs from '../../lib/dayjs';
+import { Temporal } from '../../lib/temporal';
 import { FLAT_MODELS, ML_MODELS, STOREY_RANGES, TOWNS } from '../../lib/lists';
 import {
 	DEFAULT_LEASE_COMMENCE_DATE,
@@ -12,15 +12,14 @@ export const initialFormValues: FieldType = {
 	storey_range: STOREY_RANGES[0],
 	flat_model: FLAT_MODELS[0],
 	floor_area_sqm: 20,
-	lease_commence_date: dayjs.utc(DEFAULT_LEASE_COMMENCE_DATE, 'YYYY-MM-DD')
+	lease_commence_date: Temporal.PlainDate.from(DEFAULT_LEASE_COMMENCE_DATE)
 };
 
 export const defaultTrendData: TrendPoint[] = [...Array(13).keys()]
 	.reverse()
 	.map((monthOffset) => ({
-		label: dayjs
-			.utc(DEFAULT_PREDICTION_MONTH_END, 'YYYY-MM', true)
-			.subtract(monthOffset, 'month')
-			.format('YYYY-MM'),
+		label: Temporal.PlainYearMonth.from(DEFAULT_PREDICTION_MONTH_END)
+			.subtract({ months: monthOffset })
+			.toString(),
 		value: 0
 	}));

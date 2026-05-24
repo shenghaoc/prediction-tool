@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
-import type { TFunction } from "i18next";
+import type { TFunction } from "../../lib/i18n";
 import type { SummaryValues, TrendPoint } from "./types";
 
 const PriceTrendChart = dynamic(() => import("./PriceTrendChart"), {
@@ -104,7 +104,7 @@ export default function PredictionResults({
         <div className="rounded-input border border-primary-muted bg-primary-bg px-3.5 py-3">
           <span className={labelClass}>{t("lease_commence_date")}</span>
           <strong className="mt-1 block text-sm font-bold leading-[1.3] text-text">
-            {summaryValues.lease_commence_date.format("YYYY")}
+            {summaryValues.lease_commence_date.year}
           </strong>
         </div>
       </div>

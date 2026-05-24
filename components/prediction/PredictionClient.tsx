@@ -7,10 +7,9 @@ import {
   useRef,
   useState,
 } from "react";
-import { useTranslation } from "react-i18next";
 
-import dayjs from "../../lib/dayjs";
-import "../../app/i18n";
+import { I18nProvider, useI18n } from "../../lib/i18n";
+import { Temporal } from "../../lib/temporal";
 import {
   STORAGE_KEYS,
   type PredictionRequestBody,
@@ -35,7 +34,15 @@ import {
 } from "./utils";
 
 export default function PredictionClient() {
-  const { t, i18n } = useTranslation();
+  return (
+    <I18nProvider>
+      <PredictionClientInner />
+    </I18nProvider>
+  );
+}
+
+function PredictionClientInner() {
+  const { t, lang, changeLang } = useI18n();
   const [mounted, setMounted] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [output, setOutput] = useState(0);
@@ -67,38 +74,26 @@ export default function PredictionClient() {
   useEffect(() => {
     if (hasRestoredRef.current) return;
     hasRestoredRef.current = true;
-    const savedLang = localStorage.getItem(STORAGE_KEYS.language);
-    if (savedLang && savedLang !== i18n.language) {
-      i18n.changeLanguage(savedLang);
-    }
     const savedForm = localStorage.getItem(STORAGE_KEYS.form);
     if (!savedForm) return;
     try {
       const parsed = JSON.parse(savedForm) as PersistedFieldValues;
-      const restoredValues: Partial<FieldType> = {
-        ...parsed,
-        lease_commence_date: parsed.lease_commence_date
-          ? dayjs(parsed.lease_commence_date)
-          : undefined,
-      };
-      setFormValues((prev) => ({ ...prev, ...restoredValues }));
+      const { lease_commence_date: savedDate, ...rest } = parsed;
+      const leaseDate = savedDate ? Temporal.PlainDate.from(savedDate) : undefined;
+      setFormValues((prev) => ({
+        ...prev,
+        ...rest,
+        ...(leaseDate ? { lease_commence_date: leaseDate } : {}),
+      }));
       setSummaryValues({
-        ml_model: restoredValues.ml_model ?? initialFormValues.ml_model,
-        town: restoredValues.town ?? initialFormValues.town,
-        lease_commence_date:
-          restoredValues.lease_commence_date ?? initialFormValues.lease_commence_date,
+        ml_model: rest.ml_model ?? initialFormValues.ml_model,
+        town: rest.town ?? initialFormValues.town,
+        lease_commence_date: leaseDate ?? initialFormValues.lease_commence_date,
       });
     } catch {
       localStorage.removeItem(STORAGE_KEYS.form);
     }
-  }, [i18n]);
-
-  useEffect(() => {
-    if (!mounted) return;
-    document.documentElement.lang = i18n.language;
-    document.documentElement.setAttribute("data-lang", i18n.language);
-    localStorage.setItem(STORAGE_KEYS.language, i18n.language);
-  }, [i18n.language, mounted]);
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -156,7 +151,7 @@ export default function PredictionClient() {
         storeyRange: values.storey_range,
         flatModel: values.flat_model,
         floorAreaSqm: values.floor_area_sqm,
-        leaseCommenceYear: values.lease_commence_date.year(),
+        leaseCommenceYear: values.lease_commence_date.year,
       };
       try {
         const response = await fetch("/api/prices", {
@@ -193,7 +188,7 @@ export default function PredictionClient() {
 
   if (!mounted) return null;
 
-  const isZh = i18n.language === "zh";
+  const isZh = lang === "zh";
 
   return (
     <main className="min-h-screen bg-page px-6 pb-12 pt-5 text-text transition-[background,color] duration-300 max-sm:px-3 max-sm:pb-8">
@@ -214,7 +209,7 @@ export default function PredictionClient() {
               className="rounded-btn flex min-h-[34px] cursor-pointer items-center border border-border bg-input-bg px-3.5 py-1.5 text-[13px] font-semibold text-text-secondary transition hover:-translate-y-px active:translate-y-0"
               onClick={() => {
                 startTransition(() => {
-                  i18n.changeLanguage(i18n.language === "en" ? "zh" : "en");
+                  changeLang(lang === "en" ? "zh" : "en");
                 });
               }}
             >
@@ -292,7 +287,7 @@ export default function PredictionClient() {
               summaryValues={summaryValues}
               t={t}
               trendData={trendData}
-              locale={i18n.language}
+              locale={lang}
             />
           </section>
         </div>
