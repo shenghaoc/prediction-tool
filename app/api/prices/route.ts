@@ -124,13 +124,12 @@ export async function POST(request: Request) {
 
 		return NextResponse.json({ predictions });
 	} catch (error: unknown) {
-		console.error(error);
+		console.error('[API Error]', error);
+		// Sentinel Security Fix: Do not expose internal error messages (like database fields or queries)
+		// to the client in the response. Log it internally and return a generic error.
 		return NextResponse.json(
 			{
-				error:
-					error instanceof Error && error.message
-						? error.message
-						: 'Prediction service unavailable.'
+				error: 'Prediction service unavailable.'
 			},
 			{ status: 500 }
 		);
