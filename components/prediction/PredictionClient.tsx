@@ -78,18 +78,17 @@ function PredictionClientInner() {
     if (!savedForm) return;
     try {
       const parsed = JSON.parse(savedForm) as PersistedFieldValues;
-      const restoredValues: Partial<FieldType> = {
-        ...parsed,
-        lease_commence_date: parsed.lease_commence_date
-          ? Temporal.PlainDate.from(parsed.lease_commence_date)
-          : undefined,
-      };
-      setFormValues((prev) => ({ ...prev, ...restoredValues }));
+      const { lease_commence_date: savedDate, ...rest } = parsed;
+      const leaseDate = savedDate ? Temporal.PlainDate.from(savedDate) : undefined;
+      setFormValues((prev) => ({
+        ...prev,
+        ...rest,
+        ...(leaseDate ? { lease_commence_date: leaseDate } : {}),
+      }));
       setSummaryValues({
-        ml_model: restoredValues.ml_model ?? initialFormValues.ml_model,
-        town: restoredValues.town ?? initialFormValues.town,
-        lease_commence_date:
-          restoredValues.lease_commence_date ?? initialFormValues.lease_commence_date,
+        ml_model: rest.ml_model ?? initialFormValues.ml_model,
+        town: rest.town ?? initialFormValues.town,
+        lease_commence_date: leaseDate ?? initialFormValues.lease_commence_date,
       });
     } catch {
       localStorage.removeItem(STORAGE_KEYS.form);
