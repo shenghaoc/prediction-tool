@@ -1,6 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { DM_Sans, Lora } from 'next/font/google';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import {
 	SITE_DESCRIPTION,
 	SITE_KEYWORDS,
@@ -68,7 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 	return (
 		<html lang="en" className={`${dmSans.variable} ${lora.variable}`}>
 			<body>
-				{children}
+				<TooltipProvider delayDuration={300}>{children}</TooltipProvider>
 			</body>
 		</html>
 	);

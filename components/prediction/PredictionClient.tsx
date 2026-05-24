@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Home, Layers, MapPin, Moon, Sun } from "lucide-react";
+import { Home, Layers, MapPin, Moon, Sparkles, Sun } from "lucide-react";
 
 import { I18nProvider, useI18n } from "../../lib/i18n";
 import { Temporal } from "../../lib/temporal";
@@ -19,6 +19,7 @@ import {
 } from "../../lib/prediction";
 import PredictionForm from "./PredictionForm";
 import PredictionResults from "./PredictionResults";
+import { StatTile } from "./stat-tile";
 import { defaultTrendData, initialFormValues } from "./constants";
 import { FLAT_MODELS, ML_MODELS, TOWNS } from "../../lib/lists";
 import type {
@@ -45,7 +46,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+
+const panelCard =
+  "relative overflow-hidden border-border/60 shadow-sm ring-1 ring-foreground/5 transition-shadow duration-300 hover:shadow-md hover:shadow-primary/5";
 
 export default function PredictionClient() {
   return (
@@ -216,13 +221,38 @@ function PredictionClientInner() {
   );
 
   const figures = [
-    { label: t("stat_models"), value: ML_MODELS.length.toString().padStart(2, "0"), icon: Layers },
-    { label: t("stat_towns"), value: TOWNS.length.toString().padStart(2, "0"), icon: MapPin },
-    { label: t("stat_types"), value: FLAT_MODELS.length.toString().padStart(2, "0"), icon: Home },
+    {
+      label: t("stat_models"),
+      value: ML_MODELS.length.toString().padStart(2, "0"),
+      icon: Layers,
+      hint: t("stat_models_hint"),
+    },
+    {
+      label: t("stat_towns"),
+      value: TOWNS.length.toString().padStart(2, "0"),
+      icon: MapPin,
+      hint: t("stat_towns_hint"),
+    },
+    {
+      label: t("stat_types"),
+      value: FLAT_MODELS.length.toString().padStart(2, "0"),
+      icon: Home,
+      hint: t("stat_types_hint"),
+    },
   ];
 
   if (!mounted) {
-    return <main className="min-h-screen" aria-busy="true" />;
+    return (
+      <main className="min-h-screen px-6 pb-12 pt-5" aria-busy="true">
+        <div className="mx-auto max-w-7xl space-y-5">
+          <Skeleton className="h-10 w-full max-w-md" />
+          <div className="grid grid-cols-2 gap-5 max-[860px]:grid-cols-1">
+            <Skeleton className="h-64 rounded-xl" />
+            <Skeleton className="h-96 rounded-xl" />
+          </div>
+        </div>
+      </main>
+    );
   }
 
   const isZh = lang === "zh";
@@ -230,10 +260,11 @@ function PredictionClientInner() {
   return (
     <main className="min-h-screen px-6 pb-12 pt-5 max-sm:px-3 max-sm:pb-8">
       <div className="mx-auto max-w-7xl">
-        <header className="mb-6 flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
+        <header className="sticky top-0 z-20 -mx-6 mb-6 flex items-center justify-between gap-4 border-b border-border/50 bg-background/85 px-6 py-4 backdrop-blur-md max-sm:relative max-sm:mx-0 max-sm:flex-col max-sm:items-start max-sm:px-0">
           <div className="flex items-center gap-2.5">
             <span className="font-heading text-base font-bold tracking-tight">{t("brand")}</span>
-            <Badge variant="secondary">
+            <Badge variant="secondary" className="gap-1">
+              <Sparkles className="size-3" aria-hidden />
               {t("badge")}
             </Badge>
           </div>
@@ -268,9 +299,17 @@ function PredictionClientInner() {
           <div className="flex flex-col gap-5">
             <Card
               size="sm"
-              className="border-l-4 border-l-primary/70 py-6 shadow-sm ring-1 ring-foreground/5"
+              className={cn(panelCard, "border-l-4 border-l-primary/70 py-6")}
             >
-              <CardHeader className="px-6 pb-0">
+              <div
+                className="pointer-events-none absolute -right-20 -top-16 size-56 rounded-full bg-primary/15 blur-3xl"
+                aria-hidden
+              />
+              <div
+                className="pointer-events-none absolute -bottom-20 -left-16 size-48 rounded-full bg-chart-2/15 blur-3xl"
+                aria-hidden
+              />
+              <CardHeader className="relative px-6 pb-0">
                 <CardTitle
                   asChild
                   className={cn(
@@ -280,36 +319,26 @@ function PredictionClientInner() {
                 >
                   <h1>{t("price_prediction")}</h1>
                 </CardTitle>
-                <CardDescription className="max-w-prose text-base">
+                <CardDescription className="max-w-prose text-base leading-relaxed">
                   {t("intro_blurb")}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="px-6 pt-4">
+              <CardContent className="relative px-6 pt-4">
                 <div className="grid grid-cols-3 gap-2.5 max-sm:grid-cols-1">
-                  {figures.map((figure) => {
-                    const Icon = figure.icon;
-                    return (
-                      <div
-                        key={figure.label}
-                        className="flex items-center gap-3 rounded-lg border border-border/60 bg-secondary/50 p-4"
-                      >
-                        <Icon className="size-5 shrink-0 text-primary" aria-hidden />
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                            {figure.label}
-                          </span>
-                          <strong className="font-heading text-xl font-extrabold tabular-nums text-primary">
-                            {figure.value}
-                          </strong>
-                        </div>
-                      </div>
-                    );
-                  })}
+                  {figures.map((figure) => (
+                    <StatTile
+                      key={figure.label}
+                      icon={figure.icon}
+                      label={figure.label}
+                      value={figure.value}
+                      hint={figure.hint}
+                    />
+                  ))}
                 </div>
               </CardContent>
             </Card>
 
-            <Card size="sm" className="border-l-4 border-l-primary/70 py-6 shadow-sm ring-1 ring-foreground/5">
+            <Card size="sm" className={cn(panelCard, "border-l-4 border-l-primary/70 py-6")}>
               <CardHeader className="px-6 pb-2">
                 <CardTitle asChild className="text-primary normal-case">
                   <h2>{t("prediction_form")}</h2>
@@ -339,6 +368,7 @@ function PredictionClientInner() {
             t={t}
             trendData={trendData}
             locale={lang}
+            loading={loading}
           />
         </div>
       </div>

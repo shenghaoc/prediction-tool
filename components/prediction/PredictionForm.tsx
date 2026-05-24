@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { Loader2 } from "lucide-react";
 import type { TFunction } from "../../lib/i18n";
 import { Temporal } from "../../lib/temporal";
 import { MAX_FLOOR_AREA_SQM, MIN_FLOOR_AREA_SQM } from "../../lib/prediction";
@@ -9,7 +10,6 @@ import { FormSelect, type FormSelectOption } from "@/components/ui/form-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldContent, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { cn } from "@/lib/utils";
 import type { FieldType } from "./types";
 
 type PredictionFormProps = {
@@ -167,13 +167,17 @@ export default function PredictionForm({
           <Button
             type="submit"
             size="lg"
-            className={cn(
-              "w-full normal-case tracking-normal",
-              loading && "animate-pulse",
-            )}
+            className="w-full normal-case tracking-normal"
             disabled={loading}
           >
-            {loading ? t("predicting") : t("get_prediction")}
+            {loading ? (
+              <>
+                <Loader2 className="size-4 animate-spin" aria-hidden />
+                {t("predicting")}
+              </>
+            ) : (
+              t("get_prediction")
+            )}
           </Button>
           <Button
             type="button"

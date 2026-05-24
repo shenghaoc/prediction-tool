@@ -94,13 +94,24 @@
   html,
   body {
     @apply min-h-screen bg-background font-sans text-foreground antialiased;
-    background-image: radial-gradient(
-      circle,
-      color-mix(in oklab, var(--primary) 14%, transparent) 1px,
-      transparent 1px
-    );
-    background-size: 22px 22px;
-    background-position: center center;
+    background-image:
+      radial-gradient(
+        ellipse 80% 50% at 50% -20%,
+        color-mix(in oklab, var(--primary) 12%, transparent),
+        transparent
+      ),
+      radial-gradient(
+        circle,
+        color-mix(in oklab, var(--primary) 10%, transparent) 1px,
+        transparent 1px
+      );
+    background-size:
+      100% 480px,
+      22px 22px;
+    background-position:
+      center top,
+      center center;
+    background-repeat: no-repeat, repeat;
   }
 
   button,
