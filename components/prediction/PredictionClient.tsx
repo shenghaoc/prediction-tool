@@ -205,7 +205,7 @@ function PredictionClientInner() {
         <header className="mb-6 flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
           <div className="flex items-center gap-2.5">
             <span className="font-heading text-base font-bold tracking-tight">{t("brand")}</span>
-            <Badge variant="secondary" className="rounded-full uppercase">
+            <Badge variant="secondary">
               {t("badge")}
             </Badge>
           </div>

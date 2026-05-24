@@ -80,7 +80,7 @@ export default function PredictionResults({
     >
       <CardHeader className="flex flex-row items-start justify-between gap-4 px-6 pb-2 max-sm:flex-col">
         <div>
-          <Badge variant="secondary" className="mb-2 rounded-full uppercase">
+          <Badge variant="secondary" className="mb-2">
             {t("predicted_trends")}
           </Badge>
           <CardTitle className="font-heading text-2xl normal-case tracking-tight">
