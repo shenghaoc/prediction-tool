@@ -6,7 +6,7 @@
   "stat_types": "房型",
   "error_fetch": "获取预测失败，请重试。",
   "switch_language": "中文/English",
-  "price_prediction": "价格预测",
+  "price_prediction": "价格\n预测",
   "intro_blurb": "比较房屋属性，提交一个情境，并快速查看估算转售价与过去12个月趋势。",
   "prediction_form": "预测表单",
   "ml_model": "机器学习模型",

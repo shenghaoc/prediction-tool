@@ -181,36 +181,9 @@ function PredictionClientInner() {
   );
 
   const figures = [
-    {
-      label: t("stat_models"),
-      value: ML_MODELS.length.toString().padStart(2, "0"),
-      icon: (
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-          <rect x="2" y="2.5" width="18" height="5" rx="1.5" fill="currentColor" opacity="0.25" />
-          <rect x="2" y="8.5" width="18" height="5" rx="1.5" fill="currentColor" opacity="0.55" />
-          <rect x="2" y="14.5" width="18" height="5" rx="1.5" fill="currentColor" />
-        </svg>
-      ),
-    },
-    {
-      label: t("stat_towns"),
-      value: TOWNS.length.toString().padStart(2, "0"),
-      icon: (
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-          <path d="M11 2C7.13 2 4 5.13 4 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="currentColor" />
-          <circle cx="11" cy="9" r="2.75" fill="var(--color-surface)" />
-        </svg>
-      ),
-    },
-    {
-      label: t("stat_types"),
-      value: FLAT_MODELS.length.toString().padStart(2, "0"),
-      icon: (
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-          <path d="M2.5 19.5V8l8.5-6.5L19.5 8v11.5h-5.5v-6.5H8v6.5H2.5z" fill="currentColor" />
-        </svg>
-      ),
-    },
+    { label: t("stat_models"), value: ML_MODELS.length.toString().padStart(2, "0") },
+    { label: t("stat_towns"), value: TOWNS.length.toString().padStart(2, "0") },
+    { label: t("stat_types"), value: FLAT_MODELS.length.toString().padStart(2, "0") },
   ];
 
   if (!mounted) return null;
@@ -218,10 +191,13 @@ function PredictionClientInner() {
   const isZh = lang === "zh";
 
   return (
-    <main className="min-h-screen bg-page text-text transition-[background,color] duration-300">
-      <div className="mx-auto max-w-4xl px-5 pb-20 pt-8 max-sm:px-4 max-sm:pb-12">
+    <main
+      className="min-h-screen px-6 pb-12 pt-5 text-text transition-[background,color] duration-300 max-sm:px-3 max-sm:pb-8"
+      style={{ background: darkMode ? 'linear-gradient(180deg, #0c0f1d 0%, #0e1128 100%)' : 'linear-gradient(180deg, #f2f3f8 0%, #eceef5 100%)' }}
+    >
+      <div className="mx-auto max-w-7xl">
         {/* ── Topbar ── */}
-        <header className="mb-10 flex items-center justify-between gap-4 max-sm:mb-8 max-sm:flex-col max-sm:items-start">
+        <header className="mb-6 flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
           <div className="flex items-center gap-2.5">
             <span className="font-display text-base font-bold tracking-[-0.02em] text-text">
               {t("brand")}
@@ -233,7 +209,7 @@ function PredictionClientInner() {
 
           <div className="flex gap-2 items-center max-sm:w-full max-sm:[&>*]:flex-1">
             <button
-              className="rounded-btn flex min-h-[34px] cursor-pointer items-center border border-border bg-surface px-3.5 py-1.5 text-[13px] font-semibold text-text-secondary transition hover:-translate-y-px active:translate-y-0"
+              className="rounded-btn flex min-h-[34px] cursor-pointer items-center border border-border bg-input-bg px-3.5 py-1.5 text-[13px] font-semibold text-text-secondary transition hover:-translate-y-px active:translate-y-0"
               onClick={() => {
                 startTransition(() => {
                   changeLang(lang === "en" ? "zh" : "en");
@@ -243,89 +219,81 @@ function PredictionClientInner() {
               {t("switch_language")}
             </button>
             <button
-              className="rounded-btn flex min-h-[34px] w-[34px] cursor-pointer items-center justify-center border border-border bg-surface p-0 text-text-secondary transition hover:-translate-y-px active:translate-y-0"
+              className="rounded-btn flex min-h-[34px] w-[34px] cursor-pointer items-center justify-center border border-border bg-input-bg p-0 text-[15px] font-semibold text-text-secondary transition hover:-translate-y-px active:translate-y-0"
               onClick={() => setDarkMode((value) => !value)}
               aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
             >
-              {darkMode ? (
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <circle cx="8" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.5" />
-                  <path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M3.05 12.95l1.06-1.06M11.89 4.11l1.06-1.06" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-                </svg>
-              ) : (
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <path d="M13.5 10.2a5.5 5.5 0 0 1-7.7-7.7 6 6 0 1 0 7.7 7.7Z" fill="currentColor" />
-                </svg>
-              )}
+              {darkMode ? "☀" : "◑"}
             </button>
           </div>
         </header>
 
-        {/* ── Hero ── */}
-        <section className="mb-9">
-          <h1
-            className={`font-display text-[clamp(2.6rem,6vw,4rem)] font-bold leading-[1.05] tracking-[-0.04em] text-text${
-              isZh
-                ? " font-cjk font-extrabold tracking-[-0.02em] leading-[1.1]"
-                : ""
-            }`}
-          >
-            {t("price_prediction")}
-          </h1>
-          <p className="mt-3 max-w-[44ch] text-[15px] leading-[1.7] text-text-secondary">
-            {t("intro_blurb")}
-          </p>
-
-          {/* Stats row */}
-          <div className="mt-6 grid grid-cols-3 gap-3 max-sm:grid-cols-1">
-            {figures.map((f) => (
-              <div
-                key={f.label}
-                className="flex items-center gap-3.5 rounded-xl border border-border/60 bg-surface/60 px-5 py-4 transition hover:-translate-y-0.5 hover:border-border"
-              >
-                <span className="flex-shrink-0 text-primary/30">{f.icon}</span>
-                <div>
-                  <strong className="block font-display text-xl font-extrabold tracking-[-0.03em] tabular-nums text-primary">
-                    {f.value}
-                  </strong>
-                  <span className="text-[10px] font-bold uppercase tracking-[0.8px] text-text-muted">
-                    {f.label}
-                  </span>
+        {/* ── Layout grid ── */}
+        <div className="grid grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] gap-5 items-start max-[860px]:grid-cols-1">
+          {/* ── Left column ── */}
+          <div className="flex flex-col gap-5">
+            {/* Intro card */}
+            <div className="rounded-card border border-border bg-surface p-6 shadow-card transition-[background,border-color,box-shadow] duration-200 max-sm:p-4">
+              <div className="flex flex-col gap-4">
+                <h1
+                  className={`font-display text-[clamp(2.4rem,5vw,3.6rem)] font-bold leading-[0.92] tracking-[-0.04em] whitespace-pre-line text-text${
+                    isZh
+                      ? " font-cjk font-extrabold tracking-[-0.02em] leading-[1.02]"
+                      : ""
+                  }`}
+                >
+                  {t("price_prediction")}
+                </h1>
+                <p className="max-w-[34ch] text-sm leading-[1.7] text-text-secondary">
+                  {t("intro_blurb")}
+                </p>
+                <div className="grid grid-cols-3 gap-2.5 max-sm:grid-cols-1">
+                  {figures.map((f) => (
+                    <div
+                      key={f.label}
+                      className="flex flex-col gap-1 rounded-input border border-border bg-input-bg p-6"
+                    >
+                      <span className="text-[10px] font-bold uppercase tracking-[0.8px] text-text-muted">
+                        {f.label}
+                      </span>
+                      <strong className="font-display text-xl font-extrabold tracking-[-0.03em] tabular-nums text-primary">
+                        {f.value}
+                      </strong>
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
-        </section>
+            </div>
 
-        {/* ── Form ── */}
-        <section className="mb-6 rounded-2xl border border-border/50 bg-surface shadow-sm">
-          <div className="px-6 py-5 max-sm:px-4">
-            {error && (
-              <div className="mb-4 rounded-lg border border-primary/15 bg-primary-bg px-4 py-3 text-sm leading-[1.5] text-text">
-                {error}
-              </div>
-            )}
-            <PredictionForm
-              formValues={formValues}
-              loading={loading}
-              onFinish={handleFinish}
-              onReset={handleReset}
-              onValuesChange={handleFormChange}
+            {/* Form card */}
+            <div className="rounded-card border border-border bg-surface p-6 shadow-card transition-[background,border-color,box-shadow] duration-200 max-sm:p-4">
+              {error && (
+                <div className="mb-4 rounded-input border border-primary-muted bg-primary-bg px-3.5 py-3 text-sm leading-[1.5] text-text">
+                  {error}
+                </div>
+              )}
+              <PredictionForm
+                formValues={formValues}
+                loading={loading}
+                onFinish={handleFinish}
+                onReset={handleReset}
+                onValuesChange={handleFormChange}
+                t={t}
+              />
+            </div>
+          </div>
+
+          {/* ── Results ── */}
+          <section>
+            <PredictionResults
+              output={output}
+              summaryValues={summaryValues}
               t={t}
+              trendData={trendData}
+              locale={lang}
             />
-          </div>
-        </section>
-
-        {/* ── Results ── */}
-        <section>
-          <PredictionResults
-            output={output}
-            summaryValues={summaryValues}
-            t={t}
-            trendData={trendData}
-            locale={lang}
-          />
-        </section>
+          </section>
+        </div>
       </div>
     </main>
   );

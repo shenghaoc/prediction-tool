@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 /* ── Tailwind v4 Theme Tokens ──────────────────────────────────────────
-   All design tokens live here. Colors use light-dark() so dark mode
-   is automatic — no separate .dark block needed for colors.
+   v3 design refresh — same indigo palette, refined radii/shadows.
+   Colors use light-dark() so dark mode is automatic.
    Shadows use per-element overrides in .dark (multi-value shadows
    can't use light-dark() — commas in substituted var() collide
    with the function's argument separator).                             */
@@ -13,9 +13,9 @@
   --font-cjk: 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif;
 
   /* Surface */
-  --color-page: light-dark(#f0f2f8, #0c0f1d);
-  --color-surface: light-dark(#ffffff, #171a2e);
-  --color-input-bg: light-dark(#f4f6fa, #111427);
+  --color-page: light-dark(#f2f3f8, #0c0f1d);
+  --color-surface: light-dark(#ffffff, #161929);
+  --color-input-bg: light-dark(#f4f5fa, #111427);
 
   /* Content */
   --color-text: light-dark(#0f172a, #f1f5f9);
@@ -40,28 +40,23 @@
   --color-chart-fill: light-dark(rgba(79, 70, 229, 0.10), rgba(129, 140, 248, 0.12));
 
   /* Radii */
-  --radius-card: 12px;
-  --radius-input: 8px;
-  --radius-btn: 8px;
+  --radius-card: 16px;
+  --radius-input: 10px;
+  --radius-btn: 10px;
 
   /* Shadows — light defaults; .dark overrides the multi-value ones below */
-  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.06);
-  --shadow-button: 0 1px 3px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
+  --shadow-card: 0 0 0 1px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.03), 0 4px 16px rgba(15, 23, 42, 0.05);
+  --shadow-button: 0 1px 2px rgba(79, 70, 229, 0.10), 0 2px 6px rgba(15, 23, 42, 0.06);
 }
 
-/* ── color-scheme: required for light-dark() to resolve ─────────────
-   light-dark() is a no-op without color-scheme; the JS toggles .dark
-   on <html>, so we mirror that into color-scheme here.                  */
+/* ── color-scheme: required for light-dark() to resolve ───────────── */
 :root { color-scheme: light; }
 html.dark { color-scheme: dark; }
 
-/* ── Dark-mode custom property overrides ────────────────────────────
-   Only needed for multi-value shadows (light-dark() can't handle them
-   because commas inside var() substitution collide with the function's
-   comma-separated argument list).                                        */
+/* ── Dark-mode shadow overrides ──────────────────────────────────── */
 .dark {
   --shadow-card: 0 0 0 1px color-mix(in oklab, var(--color-primary) 6%, transparent), 0 4px 16px rgba(0, 0, 0, 0.24);
-  --shadow-button: 0 1px 3px rgba(0, 0, 0, 0.24), 0 2px 8px rgba(0, 0, 0, 0.16);
+  --shadow-button: 0 1px 3px rgba(0, 0, 0, 0.30), 0 2px 8px rgba(0, 0, 0, 0.16);
 }
 
 @import "./styles.css";
