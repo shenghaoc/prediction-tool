@@ -4,7 +4,6 @@ import {
   startTransition,
   useCallback,
   useEffect,
-  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -78,7 +77,7 @@ function PredictionClientInner() {
   const resultsRef = useRef<HTMLDivElement>(null);
   const requestControllerRef = useRef<AbortController | null>(null);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const isDark = localStorage.getItem(STORAGE_KEYS.theme) === "dark";
     setDarkMode(isDark);
     document.documentElement.classList.toggle("dark", isDark);
@@ -132,21 +131,16 @@ function PredictionClientInner() {
     };
   }, []);
 
+  useEffect(() => {
+    if (output > 0) {
+      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [output]);
+
   const handleFormChange = useCallback((allValues: Partial<FieldType>) => {
     setError(null);
     setFormValues((prev) => {
       const next = { ...prev, ...allValues };
-      try {
-        localStorage.setItem(
-          STORAGE_KEYS.form,
-          JSON.stringify({
-            ...next,
-            lease_commence_date: serializeLeaseCommenceDate(next.lease_commence_date),
-          } satisfies PersistedFieldValues),
-        );
-      } catch {
-        /* storage full or disabled */
-      }
       return next;
     });
     setSummaryValues((prev) => ({
@@ -155,6 +149,21 @@ function PredictionClientInner() {
       lease_commence_date: allValues.lease_commence_date ?? prev.lease_commence_date,
     }));
   }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    try {
+      localStorage.setItem(
+        STORAGE_KEYS.form,
+        JSON.stringify({
+          ...formValues,
+          lease_commence_date: serializeLeaseCommenceDate(formValues.lease_commence_date),
+        } satisfies PersistedFieldValues),
+      );
+    } catch {
+      /* storage full or disabled */
+    }
+  }, [formValues, mounted]);
 
   const handleReset = useCallback(() => {
     requestControllerRef.current?.abort();
@@ -213,9 +222,6 @@ function PredictionClientInner() {
           lease_commence_date: values.lease_commence_date,
         });
         toast.success(t("prediction_success"), { id: "prediction" });
-        setTimeout(() => {
-          resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-        }, 150);
       } catch (err: unknown) {
         if (isAbortError(err)) return;
         setOutput(0);
