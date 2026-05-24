@@ -218,10 +218,10 @@ function PredictionClientInner() {
   const isZh = lang === "zh";
 
   return (
-    <main className="min-h-screen bg-page px-6 pb-16 pt-8 text-text transition-[background,color] duration-300 max-sm:px-3 max-sm:pb-10">
-      <div className="mx-auto max-w-7xl">
+    <main className="min-h-screen bg-page text-text transition-[background,color] duration-300">
+      <div className="mx-auto max-w-4xl px-5 pb-20 pt-8 max-sm:px-4 max-sm:pb-12">
         {/* ── Topbar ── */}
-        <header className="mb-6 flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
+        <header className="mb-10 flex items-center justify-between gap-4 max-sm:mb-8 max-sm:flex-col max-sm:items-start">
           <div className="flex items-center gap-2.5">
             <span className="font-display text-base font-bold tracking-[-0.02em] text-text">
               {t("brand")}
@@ -233,7 +233,7 @@ function PredictionClientInner() {
 
           <div className="flex gap-2 items-center max-sm:w-full max-sm:[&>*]:flex-1">
             <button
-              className="rounded-btn flex min-h-[34px] cursor-pointer items-center border border-border bg-input-bg px-3.5 py-1.5 text-[13px] font-semibold text-text-secondary transition hover:-translate-y-px active:translate-y-0"
+              className="rounded-btn flex min-h-[34px] cursor-pointer items-center border border-border bg-surface px-3.5 py-1.5 text-[13px] font-semibold text-text-secondary transition hover:-translate-y-px active:translate-y-0"
               onClick={() => {
                 startTransition(() => {
                   changeLang(lang === "en" ? "zh" : "en");
@@ -243,7 +243,7 @@ function PredictionClientInner() {
               {t("switch_language")}
             </button>
             <button
-              className="rounded-btn flex min-h-[34px] w-[34px] cursor-pointer items-center justify-center border border-border bg-input-bg p-0 text-text-secondary transition hover:-translate-y-px active:translate-y-0"
+              className="rounded-btn flex min-h-[34px] w-[34px] cursor-pointer items-center justify-center border border-border bg-surface p-0 text-text-secondary transition hover:-translate-y-px active:translate-y-0"
               onClick={() => setDarkMode((value) => !value)}
               aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
             >
@@ -261,74 +261,71 @@ function PredictionClientInner() {
           </div>
         </header>
 
-        {/* ── Layout grid ── */}
-        <div className="grid grid-cols-1 gap-5 items-start lg:grid-cols-2">
-          {/* ── Left column ── */}
-          <div className="flex flex-col gap-5">
-            {/* Intro card */}
-            <div className="rounded-card border border-border bg-surface shadow-card transition-[background,border-color,box-shadow] duration-200 relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-primary/60 via-primary to-primary/30" />
-              <div className="flex flex-col gap-4 p-6 max-sm:p-4">
-                <h1
-                  className={`font-display text-[clamp(2.4rem,5vw,3.6rem)] font-bold leading-[0.92] tracking-[-0.04em] whitespace-pre-line text-text${
-                    isZh
-                      ? " font-cjk font-extrabold tracking-[-0.02em] leading-[1.02]"
-                      : ""
-                  }`}
-                >
-                  {t("price_prediction")}
-                </h1>
-                <p className="max-w-[34ch] text-sm leading-[1.7] text-text-secondary">
-                  {t("intro_blurb")}
-                </p>
-                <div className="grid grid-cols-3 gap-2.5 max-sm:grid-cols-1">
-                  {figures.map((f) => (
-                    <div
-                      key={f.label}
-                      className="flex flex-col gap-1.5 rounded-input border border-border bg-input-bg p-5 transition hover:-translate-y-0.5 hover:border-border-strong relative overflow-hidden"
-                    >
-                      <span className="absolute right-3 top-3 text-primary/10">{f.icon}</span>
-                      <strong className="font-display text-2xl font-extrabold tracking-[-0.03em] tabular-nums text-primary">
-                        {f.value}
-                      </strong>
-                      <span className="text-[10px] font-bold uppercase tracking-[0.8px] text-text-muted">
-                        {f.label}
-                      </span>
-                    </div>
-                  ))}
+        {/* ── Hero ── */}
+        <section className="mb-9">
+          <h1
+            className={`font-display text-[clamp(2.6rem,6vw,4rem)] font-bold leading-[1.05] tracking-[-0.04em] text-text${
+              isZh
+                ? " font-cjk font-extrabold tracking-[-0.02em] leading-[1.1]"
+                : ""
+            }`}
+          >
+            {t("price_prediction")}
+          </h1>
+          <p className="mt-3 max-w-[44ch] text-[15px] leading-[1.7] text-text-secondary">
+            {t("intro_blurb")}
+          </p>
+
+          {/* Stats row */}
+          <div className="mt-6 grid grid-cols-3 gap-3 max-sm:grid-cols-1">
+            {figures.map((f) => (
+              <div
+                key={f.label}
+                className="flex items-center gap-3.5 rounded-xl border border-border/60 bg-surface/60 px-5 py-4 transition hover:-translate-y-0.5 hover:border-border"
+              >
+                <span className="flex-shrink-0 text-primary/30">{f.icon}</span>
+                <div>
+                  <strong className="block font-display text-xl font-extrabold tracking-[-0.03em] tabular-nums text-primary">
+                    {f.value}
+                  </strong>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.8px] text-text-muted">
+                    {f.label}
+                  </span>
                 </div>
               </div>
-            </div>
-
-            {/* Form card */}
-            <div className="rounded-card border border-border bg-surface p-6 shadow-card transition-[background,border-color,box-shadow] duration-200 max-sm:p-4">
-              {error && (
-                <div className="mb-4 rounded-input border border-primary-muted bg-primary-bg px-3.5 py-3 text-sm leading-[1.5] text-text">
-                  {error}
-                </div>
-              )}
-              <PredictionForm
-                formValues={formValues}
-                loading={loading}
-                onFinish={handleFinish}
-                onReset={handleReset}
-                onValuesChange={handleFormChange}
-                t={t}
-              />
-            </div>
+            ))}
           </div>
+        </section>
 
-          {/* ── Results ── */}
-          <section>
-            <PredictionResults
-              output={output}
-              summaryValues={summaryValues}
+        {/* ── Form ── */}
+        <section className="mb-6 rounded-2xl border border-border/50 bg-surface shadow-sm">
+          <div className="px-6 py-5 max-sm:px-4">
+            {error && (
+              <div className="mb-4 rounded-lg border border-primary/15 bg-primary-bg px-4 py-3 text-sm leading-[1.5] text-text">
+                {error}
+              </div>
+            )}
+            <PredictionForm
+              formValues={formValues}
+              loading={loading}
+              onFinish={handleFinish}
+              onReset={handleReset}
+              onValuesChange={handleFormChange}
               t={t}
-              trendData={trendData}
-              locale={lang}
             />
-          </section>
-        </div>
+          </div>
+        </section>
+
+        {/* ── Results ── */}
+        <section>
+          <PredictionResults
+            output={output}
+            summaryValues={summaryValues}
+            t={t}
+            trendData={trendData}
+            locale={lang}
+          />
+        </section>
       </div>
     </main>
   );

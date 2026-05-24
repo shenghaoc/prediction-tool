@@ -18,7 +18,7 @@ type PredictionFormProps = {
 
 function Field({ label, children, full, htmlFor }: { label: string; children: React.ReactNode; full?: boolean; htmlFor?: string }) {
   return (
-    <div className={full ? "col-span-2 max-sm:col-span-1" : undefined}>
+    <div className={full ? "col-span-2 md:col-span-3 max-sm:col-span-1" : undefined}>
       <label className="mb-1.5 block text-[10.5px] font-bold uppercase tracking-[1px] text-text-secondary" htmlFor={htmlFor}>
         {label}
       </label>
@@ -48,7 +48,7 @@ function BtnPrimary({ children, loading }: { children: React.ReactNode; loading:
       type="submit"
       onClick={handleClick}
       disabled={loading}
-      className={`ripple-container rounded-btn bg-primary text-on-primary shadow-button flex min-h-10 cursor-pointer items-center justify-center border-none px-6 text-sm font-semibold transition hover:-translate-y-px active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:pointer-events-none${loading ? " animate-pulse" : ""}`}
+      className={`ripple-container rounded-xl bg-primary text-on-primary shadow-button flex min-h-10 cursor-pointer items-center justify-center border-none px-6 text-sm font-semibold transition hover:-translate-y-px active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:pointer-events-none${loading ? " animate-pulse" : ""}`}
     >
       {children}
     </button>
@@ -74,16 +74,15 @@ export default function PredictionForm({
   };
 
   const selectClass =
-    "field-select w-full cursor-pointer appearance-none rounded-input border border-border bg-input-bg pl-3.5 pr-9 text-sm font-medium text-text outline-none transition hover:border-border-strong focus:border-primary focus:ring-[3px] focus:ring-primary-ring min-h-10";
+    "field-select w-full cursor-pointer appearance-none rounded-xl border border-border/70 bg-surface px-4 pr-10 text-sm font-medium text-text outline-none transition hover:border-border focus:border-primary focus:ring-[3px] focus:ring-primary-ring min-h-10";
 
   return (
     <>
-      <h2 className="mb-4 flex items-center gap-2.5 text-lg font-bold tracking-[-0.02em] text-primary">
-        <span className="block w-[3px] h-5 rounded-full bg-primary" />
+      <h2 className="mb-5 flex items-center gap-2.5 text-sm font-bold uppercase tracking-[1.5px] text-text-muted">
         {t("prediction_form")}
       </h2>
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-3.5 max-sm:grid-cols-1">
+        <div className="grid grid-cols-2 gap-x-5 gap-y-4 md:grid-cols-3 max-sm:grid-cols-1">
           <Field label={t("ml_model")} htmlFor="input-ml_model">
             <select
               id="input-ml_model"
@@ -147,7 +146,7 @@ export default function PredictionForm({
                 type="number"
                 inputMode="numeric"
                 enterKeyHint="done"
-                className="rounded-input rounded-r-none border border-border bg-input-bg px-3.5 text-sm font-medium text-text outline-none transition hover:border-border-strong focus:border-primary focus:ring-[3px] focus:ring-primary-ring min-h-10 w-full cursor-text placeholder:text-text-muted placeholder:font-normal"
+                className="rounded-xl rounded-r-none border border-border/70 bg-surface px-4 text-sm font-medium text-text outline-none transition hover:border-border focus:border-primary focus:ring-[3px] focus:ring-primary-ring min-h-10 w-full cursor-text placeholder:text-text-muted placeholder:font-normal"
                 min={MIN_FLOOR_AREA_SQM}
                 max={MAX_FLOOR_AREA_SQM}
                 value={formValues.floor_area_sqm || ""}
@@ -174,11 +173,11 @@ export default function PredictionForm({
               ))}
             </select>
           </Field>
-          <div className="col-span-2 mt-1 grid grid-cols-2 gap-3 max-sm:col-span-1 max-sm:grid-cols-1">
+          <div className="col-span-2 md:col-span-3 max-sm:col-span-1 mt-1 grid grid-cols-2 gap-3 max-sm:grid-cols-1">
             <BtnPrimary loading={loading}>
               {loading ? t("predicting") : t("get_prediction")}
             </BtnPrimary>
-            <button type="button" className="rounded-btn flex min-h-10 cursor-pointer items-center justify-center border border-border bg-transparent px-6 text-sm font-semibold text-text-secondary transition hover:-translate-y-px active:translate-y-0" onClick={onReset}>
+            <button type="button" className="rounded-xl flex min-h-10 cursor-pointer items-center justify-center border border-border/60 bg-transparent px-6 text-sm font-semibold text-text-secondary transition hover:-translate-y-px active:translate-y-0" onClick={onReset}>
               {t("reset_form")}
             </button>
           </div>

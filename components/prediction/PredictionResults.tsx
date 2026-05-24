@@ -56,11 +56,10 @@ export default function PredictionResults({
   const labelClass =
     "block text-[10px] font-bold uppercase tracking-[1px] text-text-muted";
   const chipClass =
-    "rounded-input border px-3.5 py-3 bg-input-bg border-border";
+    "rounded-xl border border-border/50 px-3.5 py-3 bg-input-bg";
 
   return (
-    <div className="rounded-card border border-border bg-surface shadow-card transition-[background,border-color,box-shadow] duration-200 relative overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-primary/30 via-primary to-primary/60" />
+    <div className="rounded-2xl border border-border/50 bg-surface shadow-sm">
       <div className="flex flex-col gap-5 p-6 max-sm:p-4">
       {/* ── Header ── */}
       <div className="flex items-start justify-between gap-4 flex-wrap max-sm:flex-col">
@@ -72,10 +71,10 @@ export default function PredictionResults({
             {t("predicted_price")}
           </h2>
         </div>
-        <div className={`min-w-[180px] rounded-input border px-5 py-3.5 max-sm:w-full${
+        <div className={`min-w-[200px] rounded-xl border px-5 py-3.5 max-sm:w-full${
           hasOutput
-            ? " border-primary/20 bg-gradient-to-br from-primary-subtle to-primary-bg"
-            : " border-primary-muted bg-primary-subtle"
+            ? " border-primary/15 bg-gradient-to-br from-primary-subtle to-primary-bg"
+            : " border-border/50 bg-input-bg"
         }`}>
           <span className="block text-[10px] font-bold uppercase tracking-[1.2px] text-text-muted">
             {t("prediction")}
@@ -94,20 +93,20 @@ export default function PredictionResults({
       </div>
 
       {/* ── Metric pills ── */}
-      <div className="grid grid-cols-3 gap-2.5 max-sm:grid-cols-1">
-        <div className="rounded-input border border-primary-muted bg-primary-bg px-3.5 py-3">
+      <div className="grid grid-cols-3 gap-3 max-sm:grid-cols-1">
+        <div className="rounded-xl border border-primary/10 bg-primary-bg px-4 py-3">
           <span className={labelClass}>{t("ml_model")}</span>
           <strong className="mt-1 block text-sm font-bold leading-[1.3] text-text">
             {summaryValues.ml_model}
           </strong>
         </div>
-        <div className="rounded-input border border-primary-muted bg-primary-bg px-3.5 py-3">
+        <div className="rounded-xl border border-primary/10 bg-primary-bg px-4 py-3">
           <span className={labelClass}>{t("town")}</span>
           <strong className="mt-1 block text-sm font-bold leading-[1.3] text-text">
             {summaryValues.town}
           </strong>
         </div>
-        <div className="rounded-input border border-primary-muted bg-primary-bg px-3.5 py-3">
+        <div className="rounded-xl border border-primary/10 bg-primary-bg px-4 py-3">
           <span className={labelClass}>{t("lease_commence_date")}</span>
           <strong className="mt-1 block text-sm font-bold leading-[1.3] text-text">
             {summaryValues.lease_commence_date.year}
@@ -117,7 +116,7 @@ export default function PredictionResults({
 
       {hasOutput ? (
         /* ── Chart ── */
-        <div className="border-t border-border pt-4">
+        <div className="border-t border-border/50 pt-4">
           <span className="block text-[10px] font-bold uppercase tracking-[1.2px] text-text-muted">
             {t("predicted_trends")}
           </span>

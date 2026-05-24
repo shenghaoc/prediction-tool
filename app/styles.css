@@ -203,10 +203,10 @@ html.dark .field-select {
   align-items: center;
   justify-content: center;
   padding: 0 14px;
-  border: 1px solid var(--color-border);
+  border: 1px solid color-mix(in oklab, var(--color-border) 70%, transparent);
   border-left: none;
-  border-radius: 0 var(--radius-input) var(--radius-input) 0;
-  background: var(--color-input-bg);
+  border-radius: 0 12px 12px 0;
+  background: var(--color-surface);
   color: var(--color-text-muted);
   font-size: 12px;
   font-weight: 600;
