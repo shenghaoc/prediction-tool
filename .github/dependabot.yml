@@ -17,24 +17,6 @@ updates:
         patterns:
           - "react"
           - "react-dom"
-          - "@types/react*"
-        update-types:
-          - "minor"
-          - "patch"
-      ui-components:
-        patterns:
-          - "antd"
-          - "@ant-design/*"
-          - "lucide-react"
-          - "class-variance-authority"
-          - "clsx"
-          - "tailwind-merge"
-        update-types:
-          - "minor"
-          - "patch"
-      visualization:
-        patterns:
-          - "recharts"
         update-types:
           - "minor"
           - "patch"
@@ -52,8 +34,6 @@ updates:
       typescript:
         patterns:
           - "typescript"
-          - "typescript-eslint"
-          - "@typescript-eslint/*"
         update-types:
           - "minor"
           - "patch"
@@ -75,9 +55,6 @@ updates:
       testing:
         patterns:
           - "vitest"
-          - "@vitest/*"
-          - "@playwright/test"
-          - "@testing-library/*"
           - "jsdom"
         update-types:
           - "minor"
