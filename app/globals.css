@@ -1,67 +1,125 @@
 @import "tailwindcss";
+@import "shadcn/tailwind.css";
 
-/* ── Tailwind v4 Theme Tokens ──────────────────────────────────────────
-   All design tokens live here. Colors use light-dark() so dark mode
-   is automatic — no separate .dark block needed for colors.
-   Shadows use per-element overrides in .dark (multi-value shadows
-   can't use light-dark() — commas in substituted var() collide
-   with the function's argument separator).                             */
-@theme {
-  /* Typography */
-  --font-sans: var(--font-dm-sans), 'Avenir Next', 'SF Pro Text', 'Helvetica Neue', 'Segoe UI', Arial, sans-serif;
-  --font-display: var(--font-lora), 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
-  --font-cjk: 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif;
+@custom-variant dark (&:is(.dark *));
 
-  /* Surface */
-  --color-page: light-dark(#f0f2f8, #0c0f1d);
-  --color-surface: light-dark(#ffffff, #171a2e);
-  --color-input-bg: light-dark(#f4f6fa, #111427);
-
-  /* Content */
-  --color-text: light-dark(#0f172a, #f1f5f9);
-  --color-text-secondary: light-dark(#475569, #94a3b8);
-  --color-text-muted: light-dark(#94a3b8, #64748b);
-
-  /* Border */
-  --color-border: light-dark(#e2e8f0, #272b42);
-  --color-border-strong: light-dark(#cbd5e1, #353a55);
-
-  /* Primary — indigo */
-  --color-primary: light-dark(#4f46e5, #818cf8);
-  --color-primary-hover: light-dark(#4338ca, #a5b4fc);
-  --color-primary-subtle: light-dark(#eef2ff, rgba(129, 140, 248, 0.10));
-  --color-primary-muted: light-dark(#e0e7ff, rgba(129, 140, 248, 0.05));
-  --color-primary-bg: light-dark(rgba(79, 70, 229, 0.06), rgba(129, 140, 248, 0.05));
-  --color-primary-ring: light-dark(rgba(79, 70, 229, 0.18), rgba(129, 140, 248, 0.25));
-  --color-on-primary: light-dark(#ffffff, #0f172a);
-
-  /* Chart — separate from primary so SVG can reference directly */
-  --color-chart: light-dark(#4f46e5, #818cf8);
-  --color-chart-fill: light-dark(rgba(79, 70, 229, 0.10), rgba(129, 140, 248, 0.12));
-
-  /* Radii */
-  --radius-card: 12px;
-  --radius-input: 8px;
-  --radius-btn: 8px;
-
-  /* Shadows — light defaults; .dark overrides the multi-value ones below */
-  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.06);
-  --shadow-button: 0 1px 3px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
+@theme inline {
+  --font-sans: var(--font-dm-sans), "Avenir Next", "SF Pro Text", "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+  --font-heading: var(--font-lora), "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --font-serif: var(--font-heading);
+  --font-cjk: "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
 }
 
-/* ── color-scheme: required for light-dark() to resolve ─────────────
-   light-dark() is a no-op without color-scheme; the JS toggles .dark
-   on <html>, so we mirror that into color-scheme here.                  */
-:root { color-scheme: light; }
-html.dark { color-scheme: dark; }
+/* color-scheme follows html.dark so light-dark() tokens resolve correctly.
+   Tailwind dark: variants use the same .dark class via @custom-variant above. */
+:root {
+  color-scheme: light;
 
-/* ── Dark-mode custom property overrides ────────────────────────────
-   Only needed for multi-value shadows (light-dark() can't handle them
-   because commas inside var() substitution collide with the function's
-   comma-separated argument list).                                        */
+  --background: light-dark(#f2f3f8, #0c0f1d);
+  --foreground: light-dark(#0f172a, #f1f5f9);
+  --card: light-dark(#ffffff, #161929);
+  --card-foreground: light-dark(#0f172a, #f1f5f9);
+  --popover: light-dark(#ffffff, #161929);
+  --popover-foreground: light-dark(#0f172a, #f1f5f9);
+  --primary: light-dark(#4f46e5, #818cf8);
+  --primary-foreground: light-dark(#ffffff, #0f172a);
+  --secondary: light-dark(#f4f5fa, #111427);
+  --secondary-foreground: light-dark(#475569, #94a3b8);
+  --muted: light-dark(#f4f5fa, #111427);
+  --muted-foreground: light-dark(#64748b, #94a3b8);
+  --accent: light-dark(#eef2ff, rgba(129, 140, 248, 0.12));
+  --accent-foreground: light-dark(#4338ca, #e0e7ff);
+  --destructive: light-dark(#dc2626, #f87171);
+  --destructive-foreground: light-dark(#ffffff, #2a0c0c);
+  --border: light-dark(#e2e8f0, #272b42);
+  --input: light-dark(#e2e8f0, #353a55);
+  --ring: var(--primary);
+  --chart-1: var(--primary);
+  --chart-2: light-dark(#6366f1, #a5b4fc);
+  --chart-3: light-dark(#8b5cf6, #c4b5fd);
+  --chart-4: light-dark(#10b981, #4ade80);
+  --chart-5: light-dark(#f59e0b, #fbbf24);
+  --radius: 0.625rem;
+
+  /* Pre-shadcn names kept for PriceTrendChart SVG + styles.css */
+  --color-page: var(--background);
+  --color-surface: var(--card);
+  --color-input-bg: var(--secondary);
+  --color-text: var(--foreground);
+  --color-text-secondary: var(--secondary-foreground);
+  --color-text-muted: var(--muted-foreground);
+  --color-chart: var(--chart-1);
+  --color-on-primary: var(--primary-foreground);
+}
+
 .dark {
-  --shadow-card: 0 0 0 1px color-mix(in oklab, var(--color-primary) 6%, transparent), 0 4px 16px rgba(0, 0, 0, 0.24);
-  --shadow-button: 0 1px 3px rgba(0, 0, 0, 0.24), 0 2px 8px rgba(0, 0, 0, 0.16);
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    @apply min-h-screen bg-background font-sans text-foreground antialiased;
+    background-image:
+      radial-gradient(
+        ellipse 80% 50% at 50% -20%,
+        color-mix(in oklab, var(--primary) 12%, transparent),
+        transparent
+      ),
+      radial-gradient(
+        circle,
+        color-mix(in oklab, var(--primary) 10%, transparent) 1px,
+        transparent 1px
+      );
+    background-size:
+      100% 480px,
+      22px 22px;
+    background-position:
+      center top,
+      center center;
+    background-repeat: no-repeat, repeat;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
 }
 
 @import "./styles.css";

@@ -27,7 +27,6 @@ updates:
           - "tailwindcss"
           - "@tailwindcss/*"
           - "postcss"
-          - "autoprefixer"
         update-types:
           - "minor"
           - "patch"
@@ -56,14 +55,6 @@ updates:
         patterns:
           - "vitest"
           - "jsdom"
-        update-types:
-          - "minor"
-          - "patch"
-      i18n:
-        patterns:
-          - "i18next"
-          - "react-i18next"
-          - "i18next-*"
         update-types:
           - "minor"
           - "patch"

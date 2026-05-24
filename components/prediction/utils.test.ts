@@ -1,10 +1,15 @@
-import { normalizePrice, normalizeTrendData } from './utils';
+import { normalizePrice, normalizeTrendData, trendDataHasValidPrices } from './utils';
 
 describe('prediction ui utilities', () => {
 	test('normalizes price values', () => {
 		expect(normalizePrice(501234.6)).toBe(501235);
 		expect(normalizePrice(-120)).toBe(0);
 		expect(normalizePrice(Number.NaN)).toBe(0);
+	});
+
+	test('detects when trend data has displayable prices', () => {
+		expect(trendDataHasValidPrices([{ label: '2022-01', value: 0 }])).toBe(false);
+		expect(trendDataHasValidPrices([{ label: '2022-01', value: 450000 }])).toBe(true);
 	});
 
 	test('normalizes trend data into chart points', () => {

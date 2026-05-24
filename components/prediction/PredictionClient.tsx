@@ -7,6 +7,8 @@ import {
   useRef,
   useState,
 } from "react";
+import { Home, Layers, MapPin, Moon, Sparkles, Sun } from "lucide-react";
+import { toast } from "sonner";
 
 import { I18nProvider, useI18n } from "../../lib/i18n";
 import { Temporal } from "../../lib/temporal";
@@ -17,6 +19,7 @@ import {
 } from "../../lib/prediction";
 import PredictionForm from "./PredictionForm";
 import PredictionResults from "./PredictionResults";
+import { StatTile } from "./stat-tile";
 import { defaultTrendData, initialFormValues } from "./constants";
 import { FLAT_MODELS, ML_MODELS, TOWNS } from "../../lib/lists";
 import type {
@@ -31,7 +34,22 @@ import {
   isAbortError,
   normalizePrice,
   normalizeTrendData,
+  trendDataHasValidPrices,
 } from "./utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+
+const panelCard =
+  "relative overflow-hidden border-border/60 shadow-sm ring-1 ring-foreground/5 transition-all duration-300 hover:shadow-md hover:shadow-primary/5";
 
 export default function PredictionClient() {
   return (
@@ -56,20 +74,30 @@ function PredictionClientInner() {
     lease_commence_date: initialFormValues.lease_commence_date,
   });
   const hasRestoredRef = useRef(false);
+  const resultsRef = useRef<HTMLDivElement>(null);
   const requestControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
+    const isDark = localStorage.getItem(STORAGE_KEYS.theme) === "dark";
+    setDarkMode(isDark);
+    document.documentElement.classList.toggle("dark", isDark);
     setMounted(true);
-    if (localStorage.getItem(STORAGE_KEYS.theme) === "dark") {
-      setDarkMode(true);
-    }
   }, []);
 
   useEffect(() => {
     if (!mounted) return;
     document.documentElement.classList.toggle("dark", darkMode);
-    localStorage.setItem(STORAGE_KEYS.theme, darkMode ? "dark" : "light");
+    try {
+      localStorage.setItem(STORAGE_KEYS.theme, darkMode ? "dark" : "light");
+    } catch {
+      /* storage full or disabled */
+    }
   }, [darkMode, mounted]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    document.documentElement.classList.add("theme-ready");
+  }, [mounted]);
 
   useEffect(() => {
     if (hasRestoredRef.current) return;
@@ -80,20 +108,22 @@ function PredictionClientInner() {
       const parsed = JSON.parse(savedForm) as PersistedFieldValues;
       const { lease_commence_date: savedDate, ...rest } = parsed;
       const leaseDate = savedDate ? Temporal.PlainDate.from(savedDate) : undefined;
-      setFormValues((prev) => ({
-        ...prev,
+      const restored: FieldType = {
+        ...initialFormValues,
         ...rest,
         ...(leaseDate ? { lease_commence_date: leaseDate } : {}),
-      }));
+      };
+      setFormValues(restored);
       setSummaryValues({
-        ml_model: rest.ml_model ?? initialFormValues.ml_model,
-        town: rest.town ?? initialFormValues.town,
-        lease_commence_date: leaseDate ?? initialFormValues.lease_commence_date,
+        ml_model: restored.ml_model,
+        town: restored.town,
+        lease_commence_date: restored.lease_commence_date,
       });
     } catch {
       localStorage.removeItem(STORAGE_KEYS.form);
+      toast.error(t("error_form_restore_failed"));
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     return () => {
@@ -101,26 +131,39 @@ function PredictionClientInner() {
     };
   }, []);
 
-  const handleFormChange = useCallback(
-    (_: unknown, allValues: Partial<FieldType>) => {
-      setError(null);
-      setFormValues((prev) => ({ ...prev, ...allValues }));
-      const persist: PersistedFieldValues = {
-        ...allValues,
-        lease_commence_date: allValues.lease_commence_date
-          ? serializeLeaseCommenceDate(allValues.lease_commence_date)
-          : undefined,
-      };
-      localStorage.setItem(STORAGE_KEYS.form, JSON.stringify(persist));
-      setSummaryValues({
-        ml_model: allValues.ml_model ?? initialFormValues.ml_model,
-        town: allValues.town ?? initialFormValues.town,
-        lease_commence_date:
-          allValues.lease_commence_date ?? initialFormValues.lease_commence_date,
-      });
-    },
-    [],
-  );
+  useEffect(() => {
+    if (output > 0) {
+      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [output]);
+
+  const handleFormChange = useCallback((allValues: Partial<FieldType>) => {
+    setError(null);
+    setFormValues((prev) => {
+      const next = { ...prev, ...allValues };
+      return next;
+    });
+    setSummaryValues((prev) => ({
+      ml_model: allValues.ml_model ?? prev.ml_model,
+      town: allValues.town ?? prev.town,
+      lease_commence_date: allValues.lease_commence_date ?? prev.lease_commence_date,
+    }));
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    try {
+      localStorage.setItem(
+        STORAGE_KEYS.form,
+        JSON.stringify({
+          ...formValues,
+          lease_commence_date: serializeLeaseCommenceDate(formValues.lease_commence_date),
+        } satisfies PersistedFieldValues),
+      );
+    } catch {
+      /* storage full or disabled */
+    }
+  }, [formValues, mounted]);
 
   const handleReset = useCallback(() => {
     requestControllerRef.current?.abort();
@@ -135,7 +178,6 @@ function PredictionClientInner() {
       town: initialFormValues.town,
       lease_commence_date: initialFormValues.lease_commence_date,
     });
-    localStorage.removeItem(STORAGE_KEYS.form);
   }, []);
 
   const handleFinish = useCallback(
@@ -145,6 +187,8 @@ function PredictionClientInner() {
       requestControllerRef.current = controller;
       setLoading(true);
       setError(null);
+      setOutput(0);
+      setTrendData(defaultTrendData);
       const requestBody: PredictionRequestBody = {
         mlModel: values.ml_model,
         town: values.town,
@@ -165,11 +209,25 @@ function PredictionClientInner() {
         }
         const serverData: ApiResponse = await response.json();
         const normalizedData = normalizeTrendData(serverData);
+        if (!trendDataHasValidPrices(normalizedData)) {
+          throw new Error(t("error_invalid_prediction"));
+        }
         setTrendData(normalizedData);
-        setOutput(normalizePrice(normalizedData[normalizedData.length - 1]?.value ?? 0));
+        const predictedPrice = normalizePrice(normalizedData[normalizedData.length - 1]?.value ?? 0);
+        setOutput(predictedPrice);
+        setSummaryValues({
+          ml_model: values.ml_model,
+          town: values.town,
+          lease_commence_date: values.lease_commence_date,
+        });
+        toast.success(t("prediction_success"), { id: "prediction" });
       } catch (err: unknown) {
         if (isAbortError(err)) return;
-        setError(getErrorMessage(err, t("error_fetch")));
+        setOutput(0);
+        setTrendData(defaultTrendData);
+        const msg = getErrorMessage(err, t("error_fetch"));
+        setError(msg);
+        toast.error(msg);
       } finally {
         if (requestControllerRef.current === controller) {
           requestControllerRef.current = null;
@@ -181,32 +239,60 @@ function PredictionClientInner() {
   );
 
   const figures = [
-    { label: t("stat_models"), value: ML_MODELS.length.toString().padStart(2, "0") },
-    { label: t("stat_towns"), value: TOWNS.length.toString().padStart(2, "0") },
-    { label: t("stat_types"), value: FLAT_MODELS.length.toString().padStart(2, "0") },
+    {
+      label: t("stat_models"),
+      value: ML_MODELS.length.toString().padStart(2, "0"),
+      icon: Layers,
+      hint: t("stat_models_hint"),
+    },
+    {
+      label: t("stat_towns"),
+      value: TOWNS.length.toString().padStart(2, "0"),
+      icon: MapPin,
+      hint: t("stat_towns_hint"),
+    },
+    {
+      label: t("stat_types"),
+      value: FLAT_MODELS.length.toString().padStart(2, "0"),
+      icon: Home,
+      hint: t("stat_types_hint"),
+    },
   ];
 
-  if (!mounted) return null;
+  if (!mounted) {
+    return (
+      <main className="min-h-screen px-6 pb-12 pt-5" aria-busy="true">
+        <div className="mx-auto max-w-7xl space-y-5">
+          <Skeleton className="animate-shimmer h-10 w-full max-w-md rounded-xl" />
+          <div className="grid grid-cols-2 gap-5 max-[860px]:grid-cols-1">
+            <Skeleton className="animate-shimmer h-64 rounded-xl" />
+            <Skeleton className="animate-shimmer h-96 rounded-xl" />
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   const isZh = lang === "zh";
 
   return (
-    <main className="min-h-screen bg-page px-6 pb-12 pt-5 text-text transition-[background,color] duration-300 max-sm:px-3 max-sm:pb-8">
+    <main className="min-h-screen px-6 pb-12 pt-5 max-sm:px-3 max-sm:pb-8">
       <div className="mx-auto max-w-7xl">
-        {/* ── Topbar ── */}
-        <header className="mb-6 flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
+        <header className="animate-fade-in-deep sticky top-0 z-20 -mx-6 mb-6 flex items-center justify-between gap-4 border-b border-border/50 bg-background/85 px-6 py-4 backdrop-blur-md max-sm:relative max-sm:mx-0 max-sm:flex-col max-sm:items-start max-sm:px-0">
           <div className="flex items-center gap-2.5">
-            <span className="font-display text-base font-bold tracking-[-0.02em] text-text">
-              {t("brand")}
-            </span>
-            <span className="inline-flex items-center rounded-btn bg-primary-subtle px-2.5 py-[5px] text-[10px] font-bold uppercase tracking-[0.6px] text-primary">
+            <span className="font-heading text-base font-bold tracking-tight">{t("brand")}</span>
+            <Badge variant="secondary" className="gap-1">
+              <Sparkles className="size-3" aria-hidden />
               {t("badge")}
-            </span>
+            </Badge>
           </div>
 
-          <div className="flex gap-2 items-center max-sm:w-full max-sm:[&>*]:flex-1">
-            <button
-              className="rounded-btn flex min-h-[34px] cursor-pointer items-center border border-border bg-input-bg px-3.5 py-1.5 text-[13px] font-semibold text-text-secondary transition hover:-translate-y-px active:translate-y-0"
+          <div className="flex items-center gap-2 max-sm:w-full max-sm:[&>*]:flex-1">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="normal-case tracking-normal max-sm:flex-1"
               onClick={() => {
                 startTransition(() => {
                   changeLang(lang === "en" ? "zh" : "en");
@@ -214,82 +300,101 @@ function PredictionClientInner() {
               }}
             >
               {t("switch_language")}
-            </button>
-            <button
-              className="rounded-btn flex min-h-[34px] w-[34px] cursor-pointer items-center justify-center border border-border bg-input-bg p-0 text-[15px] font-semibold text-text-secondary transition hover:-translate-y-px active:translate-y-0"
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-sm"
+              aria-label={darkMode ? t("switch_to_light_mode") : t("switch_to_dark_mode")}
               onClick={() => setDarkMode((value) => !value)}
-              aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
             >
-              {darkMode ? "☀" : "◑"}
-            </button>
+              {darkMode ? <Sun className="size-4" /> : <Moon className="size-4" />}
+            </Button>
           </div>
         </header>
 
-        {/* ── Layout grid ── */}
-        <div className="grid grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] gap-5 items-start max-[860px]:grid-cols-1">
-          {/* ── Left column ── */}
+        <div className="grid grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] items-start gap-5 max-[860px]:grid-cols-1">
           <div className="flex flex-col gap-5">
-            {/* Intro card */}
-            <div className="rounded-card border border-border bg-surface p-6 shadow-card transition-[background,border-color,box-shadow] duration-200 max-sm:p-4">
-              <div className="flex flex-col gap-4">
-                <h1
-                  className={`font-display text-[clamp(2.4rem,5vw,3.6rem)] font-bold leading-[0.92] tracking-[-0.04em] whitespace-pre-line text-text${
-                    isZh
-                      ? " font-cjk font-extrabold tracking-[-0.02em] leading-[1.02]"
-                      : ""
-                  }`}
+            <Card
+              size="sm"
+              className={cn(panelCard, "animate-fade-in-deep border-l-4 border-l-primary/70 py-6")}
+            >
+              <div
+                className="pointer-events-none absolute -right-20 -top-16 size-56 rounded-full bg-primary/15 blur-3xl"
+                aria-hidden
+              />
+              <div
+                className="pointer-events-none absolute -bottom-20 -left-16 size-48 rounded-full bg-chart-2/15 blur-3xl"
+                aria-hidden
+              />
+              <CardHeader className="relative px-6 pb-0">
+                <CardTitle
+                  asChild
+                  className={cn(
+                    "font-heading whitespace-pre-line text-[clamp(2rem,5vw,3rem)] font-bold normal-case tracking-tight",
+                    isZh && "font-cjk font-extrabold",
+                  )}
                 >
-                  {t("price_prediction")}
-                </h1>
-                <p className="max-w-[34ch] text-sm leading-[1.7] text-text-secondary">
+                  <h1>{t("price_prediction")}</h1>
+                </CardTitle>
+                <CardDescription className="max-w-prose text-base leading-relaxed">
                   {t("intro_blurb")}
-                </p>
-                <div className="grid grid-cols-3 gap-2.5 max-sm:grid-cols-1">
-                  {figures.map((f) => (
-                    <div
-                      key={f.label}
-                      className="flex flex-col gap-1 rounded-input border border-border bg-input-bg p-6"
-                    >
-                      <span className="text-[10px] font-bold uppercase tracking-[0.8px] text-text-muted">
-                        {f.label}
-                      </span>
-                      <strong className="font-display text-xl font-extrabold tracking-[-0.03em] tabular-nums text-primary">
-                        {f.value}
-                      </strong>
-                    </div>
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="relative px-6 pt-4">
+                <div className="animate-stagger grid grid-cols-3 gap-2.5 max-sm:grid-cols-1">
+                  {figures.map((figure) => (
+                    <StatTile
+                      key={figure.label}
+                      icon={figure.icon}
+                      label={figure.label}
+                      value={figure.value}
+                      hint={figure.hint}
+                    />
                   ))}
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
-            {/* Form card */}
-            <div className="rounded-card border border-border bg-surface p-6 shadow-card transition-[background,border-color,box-shadow] duration-200 max-sm:p-4">
-              {error && (
-                <div className="mb-4 rounded-input border border-primary-muted bg-primary-bg px-3.5 py-3 text-sm leading-[1.5] text-text">
-                  {error}
-                </div>
-              )}
-              <PredictionForm
-                formValues={formValues}
-                loading={loading}
-                onFinish={handleFinish}
-                onReset={handleReset}
-                onValuesChange={handleFormChange}
-                t={t}
-              />
-            </div>
+            <Card size="sm" className={cn(panelCard, "animate-fade-in-deep border-l-4 border-l-primary/70 py-6")}>
+              <CardHeader className="px-6 pb-2">
+                <CardTitle asChild className="text-primary normal-case">
+                  <h2>{t("prediction_form")}</h2>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-6">
+                {loading && (
+                  <div className="progress-track mb-4" role="progressbar" aria-label={t("predicting")}>
+                    <div className="progress-bar" style={{ width: "60%" }} />
+                  </div>
+                )}
+                {error && !loading && (
+                  <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                    {error}
+                  </div>
+                )}
+                <PredictionForm
+                  formValues={formValues}
+                  loading={loading}
+                  onFinish={handleFinish}
+                  onReset={handleReset}
+                  onValuesChange={handleFormChange}
+                  t={t}
+                />
+              </CardContent>
+            </Card>
           </div>
 
-          {/* ── Results ── */}
-          <section>
+          <div ref={resultsRef}>
             <PredictionResults
               output={output}
               summaryValues={summaryValues}
               t={t}
               trendData={trendData}
               locale={lang}
+              loading={loading}
             />
-          </section>
+          </div>
         </div>
       </div>
     </main>

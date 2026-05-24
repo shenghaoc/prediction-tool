@@ -1,7 +1,6 @@
 /* ==========================================================
    Minimal custom CSS — only what Tailwind v4 cannot express.
-   @keyframes, scrollbar, ::selection, @property, ripple,
-   and interaction-tied animations.
+   @keyframes, scrollbar, ::selection, and @property.
    ========================================================== */
 
 /* ── Typed custom properties ─────────────────────────────────────────── */
@@ -9,6 +8,12 @@
   syntax: "<length>";
   inherits: true;
   initial-value: 0.5rem;
+}
+
+@property --progress {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
 }
 
 /* ── Reset ───────────────────────────────────────────────────────────── */
@@ -20,6 +25,17 @@
 }
 html, body {
   min-height: 100%;
+}
+
+/* ── Theme transition (only when .theme-ready is set) ────────────────── */
+.theme-ready,
+.theme-ready *,
+.theme-ready *::before,
+.theme-ready *::after {
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease;
 }
 
 /* ── Themed scrollbars ───────────────────────────────────────────────── */
@@ -65,6 +81,11 @@ html {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes fade-up-deep {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes settle {
   0%   { transform: scale(0.96); opacity: 0.72; }
   65%  { transform: scale(1.05); opacity: 1; }
@@ -76,8 +97,31 @@ html {
   50%      { opacity: 0.55; }
 }
 
-@keyframes ripple {
-  to { transform: scale(4); opacity: 0; }
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes progress-indeterminate {
+  0%   { transform: translateX(-100%); }
+  50%  { transform: translateX(0%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 12px color-mix(in oklab, var(--primary) 20%, transparent); }
+  50%      { box-shadow: 0 0 28px color-mix(in oklab, var(--primary) 35%, transparent); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%      { transform: translateY(-6px); }
+}
+
+@keyframes empty-float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  25%      { transform: translateY(-3px) rotate(0.5deg); }
+  75%      { transform: translateY(2px) rotate(-0.5deg); }
 }
 
 /* ── Starting-style — CSS-only entrance animations ───────────────────── */
@@ -91,12 +135,18 @@ html {
 /* ── Reduced motion ──────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in,
+  .animate-fade-in-deep,
   .animate-enter,
-  .animate-pulse {
+  .animate-pulse,
+  .animate-settle,
+  .animate-stagger {
     animation: none;
     transition: none;
     opacity: 1;
     transform: none;
+  }
+  .animate-glow {
+    animation: none;
   }
 }
 
@@ -112,6 +162,7 @@ html {
 @media (prefers-contrast: more) {
   :root {
     --color-border: light-dark(rgba(15, 23, 42, 0.18), rgba(129, 140, 248, 0.22));
+    --border: light-dark(rgba(15, 23, 42, 0.18), rgba(129, 140, 248, 0.22));
   }
 }
 
@@ -121,25 +172,13 @@ html {
   }
 }
 
-/* ── Ripple (DOM-manipulated by PredictionForm button) ────────────────── */
-.ripple-container {
-  position: relative;
-  overflow: hidden;
-}
-
-.ripple-circle {
-  position: absolute;
-  border-radius: 50%;
-  background: currentColor;
-  opacity: 0.15;
-  transform: scale(0);
-  animation: ripple 0.6s ease-out forwards;
-  pointer-events: none;
-}
-
 /* ── Custom animation utilities ──────────────────────────────────────── */
 .animate-fade-in {
   animation: fade-up 0.35s ease-out both;
+}
+
+.animate-fade-in-deep {
+  animation: fade-up-deep 0.5s ease-out both;
 }
 
 .animate-settle {
@@ -150,22 +189,76 @@ html {
   animation: subtle-pulse 1.2s ease-in-out infinite;
 }
 
-/* ── Chart tooltip (positioned by JS so needs custom style) ──────────── */
+.animate-glow {
+  animation: glow-pulse 2.4s ease-in-out infinite;
+}
+
+/* Staggered entrance — add .animate-stagger to each child */
+.animate-stagger > * {
+  opacity: 0;
+  animation: fade-up 0.4s ease-out forwards;
+}
+.animate-stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.animate-stagger > *:nth-child(2) { animation-delay: 0.12s; }
+.animate-stagger > *:nth-child(3) { animation-delay: 0.19s; }
+.animate-stagger > *:nth-child(4) { animation-delay: 0.26s; }
+.animate-stagger > *:nth-child(5) { animation-delay: 0.33s; }
+.animate-stagger > *:nth-child(6) { animation-delay: 0.40s; }
+
+/* Shimmer skeleton */
+.animate-shimmer {
+  background: linear-gradient(
+    110deg,
+    var(--secondary) 8%,
+    color-mix(in oklab, var(--secondary) 60%, var(--primary)) 18%,
+    var(--secondary) 33%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+/* Progress bar */
+.progress-track {
+  position: relative;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: var(--secondary);
+  height: 4px;
+}
+.progress-bar {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(
+    90deg,
+    var(--primary),
+    color-mix(in oklab, var(--primary) 70%, var(--chart-2))
+  );
+  animation: progress-indeterminate 1.8s ease-in-out infinite;
+}
+
+/* ── Chart tooltip ───────────────────────────────────────────────────── */
 .chart-tooltip {
   position: absolute;
   z-index: 10;
-  padding: 10px 14px;
-  border-radius: var(--radius-input);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card);
+  min-width: 8rem;
+  padding: 8px 12px;
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in oklab, var(--border) 50%, transparent);
+  background: var(--popover);
+  color: var(--popover-foreground);
+  box-shadow:
+    0 4px 6px color-mix(in oklab, var(--foreground) 4%, transparent),
+    0 12px 28px color-mix(in oklab, var(--foreground) 10%, transparent);
   pointer-events: none;
   white-space: nowrap;
-  transform: translate(-50%, calc(-100% - 10px));
+  transform: translate(-50%, calc(-100% - 12px));
   opacity: 0;
-  transition: opacity 120ms ease;
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
 }
 .chart-tooltip.visible {
+  transform: translate(-50%, calc(-100% - 14px));
   opacity: 1;
 }
 
@@ -181,30 +274,20 @@ html {
   font-weight: 600;
 }
 
-/* ── Field select (chevron handled via CSS so dark mode works) ───────── */
-.field-select {
-  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%2394a3b8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  background-size: 10px 6px;
-}
-html.dark .field-select {
-  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%2364748b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+/* ── Empty state float ───────────────────────────────────────────────── */
+.empty-float {
+  animation: empty-float 4s ease-in-out infinite;
 }
 
-/* ── Unit tag (paired with input) ─────────────────────────────────────── */
-.unit-tag {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 14px;
-  border: 1px solid var(--color-border);
-  border-left: none;
-  border-radius: 0 var(--radius-input) var(--radius-input) 0;
-  background: var(--color-input-bg);
-  color: var(--color-text-muted);
-  font-size: 12px;
-  font-weight: 600;
+/* ── Sonner toast styles ─────────────────────────────────────────────── */
+.cn-toast {
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+  box-shadow:
+    0 4px 6px color-mix(in oklab, var(--foreground) 4%, transparent),
+    0 12px 28px color-mix(in oklab, var(--foreground) 10%, transparent);
 }
 
 /* ── No-spinner inputs ────────────────────────────────────────────────── */
