@@ -22,6 +22,12 @@ import PredictionResults from "./PredictionResults";
 import { StatTile } from "./stat-tile";
 import { defaultTrendData, initialFormValues } from "./constants";
 import { FLAT_MODELS, ML_MODELS, TOWNS } from "../../lib/lists";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type {
   ApiResponse,
   FieldType,
@@ -54,7 +60,9 @@ const panelCard =
 export default function PredictionClient() {
   return (
     <I18nProvider>
-      <PredictionClientInner />
+      <TooltipProvider delayDuration={300}>
+        <PredictionClientInner />
+      </TooltipProvider>
     </I18nProvider>
   );
 }
@@ -309,15 +317,22 @@ function PredictionClientInner() {
             >
               {t("switch_language")}
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon-sm"
-              aria-label={darkMode ? t("switch_to_light_mode") : t("switch_to_dark_mode")}
-              onClick={() => setDarkMode((value) => !value)}
-            >
-              {darkMode ? <Sun className="size-4" /> : <Moon className="size-4" />}
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon-sm"
+                  aria-label={darkMode ? t("switch_to_light_mode") : t("switch_to_dark_mode")}
+                  onClick={() => setDarkMode((value) => !value)}
+                >
+                  {darkMode ? <Sun className="size-4" /> : <Moon className="size-4" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" sideOffset={8}>
+                {darkMode ? t("switch_to_light_mode") : t("switch_to_dark_mode")}
+              </TooltipContent>
+            </Tooltip>
           </div>
         </header>
 
@@ -377,7 +392,7 @@ function PredictionClientInner() {
                   </div>
                 )}
                 {error && !loading && (
-                  <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                  <div role="alert" className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
                     {error}
                   </div>
                 )}
