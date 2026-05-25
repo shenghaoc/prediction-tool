@@ -1,0 +1,7 @@
+
+## 2024-05-18 - Optimizing React SVG Charts with High-Frequency Events
+**Learning:** In a highly interactive SVG chart (), attaching state updates () to  caused the entire component—including expensive path generators like  and  instantiation—to re-render on every pixel the mouse moved, creating a severe bottleneck.
+**Action:** Always decouple expensive data mapping and rendering logic from high-frequency event handlers. Wrap heavy derivations in  (e.g., path strings, tick data), memoize expensive instances like , and use functional state updates with early returns () to bail out of rendering entirely when the logical state hasn't changed despite the underlying event firing.
+## 2024-05-18 - Optimizing React SVG Charts with High-Frequency Events
+**Learning:** In a highly interactive SVG chart (`PriceTrendChart`), attaching state updates (`setTooltip`) to `onMouseMove` caused the entire component—including expensive path generators like `catmullRom` and `Intl.NumberFormat` instantiation—to re-render on every pixel the mouse moved, creating a severe bottleneck.
+**Action:** Always decouple expensive data mapping and rendering logic from high-frequency event handlers. Wrap heavy derivations in `useMemo` (e.g., path strings, tick data), memoize expensive instances like `Intl.NumberFormat`, and use functional state updates with early returns (`if (prev && prev.idx === closest) return prev;`) to bail out of rendering entirely when the logical state hasn't changed despite the underlying event firing.
