@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 import { Home, Layers, MapPin, TrendingDown, TrendingUp } from "lucide-react";
 import type { TFunction } from "../../lib/i18n";
 import type { SummaryValues, TrendPoint } from "./types";
@@ -39,7 +39,7 @@ type PredictionResultsProps = {
   loading?: boolean;
 };
 
-export default function PredictionResults({
+export default memo(function PredictionResults({
   output,
   summaryValues,
   t,
@@ -237,7 +237,7 @@ export default function PredictionResults({
       </Card>
     </section>
   );
-}
+});
 
 function StatChip({
   label,
