@@ -119,14 +119,14 @@ export default function PredictionForm({
           <Field>
             <FieldLabel htmlFor="input-floor_area">{t("floor_area")}</FieldLabel>
             <FieldContent>
-              <div className="flex rounded-lg shadow-sm transition-shadow duration-200 focus-within:shadow-md focus-within:shadow-primary/10">
+              <div className="flex rounded-lg border border-border/60 bg-card shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:shadow-primary/5 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15 focus-within:shadow-md focus-within:shadow-primary/10">
                 <Input
                   id="input-floor_area"
                   type="number"
                   inputMode="numeric"
                   enterKeyHint="done"
                   aria-describedby="floor-area-unit"
-                  className="h-10 rounded-r-none rounded-l-lg border border-border/60 bg-card px-3 shadow-none transition-colors duration-200 focus-visible:border-primary/40"
+                  className="h-10 rounded-r-none rounded-l-lg border-0 bg-transparent px-3 shadow-none focus-visible:ring-0 focus-visible:border-transparent outline-none focus:outline-none"
                   min={MIN_FLOOR_AREA_SQM}
                   max={MAX_FLOOR_AREA_SQM}
                   value={formValues.floor_area_sqm || ""}
@@ -138,7 +138,7 @@ export default function PredictionForm({
                 />
                 <span
                   id="floor-area-unit"
-                  className="inline-flex h-10 items-center rounded-r-lg border border-l-0 border-border/60 bg-muted px-3 text-xs font-semibold text-muted-foreground transition-colors duration-200"
+                  className="inline-flex h-10 items-center rounded-r-lg border-l border-border/60 bg-muted px-3 text-xs font-semibold text-muted-foreground"
                 >
                   <span className="sr-only">{t("floor_area_unit")}</span>
                   <span aria-hidden>m²</span>
