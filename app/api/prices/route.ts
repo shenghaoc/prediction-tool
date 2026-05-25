@@ -87,7 +87,7 @@ export async function POST(request: Request) {
 		if (!first) {
 			return NextResponse.json(
 				{ error: 'No prediction data found for the given parameters.' },
-				{ status: 500 }
+				{ status: 404 }
 			);
 		}
 
@@ -124,13 +124,10 @@ export async function POST(request: Request) {
 
 		return NextResponse.json({ predictions });
 	} catch (error: unknown) {
-		console.error(error);
+		console.error('[API Error]', error);
 		return NextResponse.json(
 			{
-				error:
-					error instanceof Error && error.message
-						? error.message
-						: 'Prediction service unavailable.'
+				error: 'Prediction service unavailable.'
 			},
 			{ status: 500 }
 		);
