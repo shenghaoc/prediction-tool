@@ -143,11 +143,19 @@ function PredictionClientInner() {
       const next = { ...prev, ...allValues };
       return next;
     });
-    setSummaryValues((prev) => ({
-      ml_model: allValues.ml_model ?? prev.ml_model,
-      town: allValues.town ?? prev.town,
-      lease_commence_date: allValues.lease_commence_date ?? prev.lease_commence_date,
-    }));
+    setSummaryValues((prev) => {
+      const ml_model = allValues.ml_model ?? prev.ml_model;
+      const town = allValues.town ?? prev.town;
+      const lease_commence_date = allValues.lease_commence_date ?? prev.lease_commence_date;
+      if (
+        ml_model === prev.ml_model &&
+        town === prev.town &&
+        lease_commence_date === prev.lease_commence_date
+      ) {
+        return prev;
+      }
+      return { ml_model, town, lease_commence_date };
+    });
   }, []);
 
   useEffect(() => {
