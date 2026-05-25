@@ -87,7 +87,7 @@ export async function POST(request: Request) {
 		if (!first) {
 			return NextResponse.json(
 				{ error: 'No prediction data found for the given parameters.' },
-				{ status: 500 }
+				{ status: 404 }
 			);
 		}
 
@@ -125,8 +125,6 @@ export async function POST(request: Request) {
 		return NextResponse.json({ predictions });
 	} catch (error: unknown) {
 		console.error('[API Error]', error);
-		// Sentinel Security Fix: Do not expose internal error messages (like database fields or queries)
-		// to the client in the response. Log it internally and return a generic error.
 		return NextResponse.json(
 			{
 				error: 'Prediction service unavailable.'

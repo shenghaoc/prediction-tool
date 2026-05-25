@@ -51,6 +51,16 @@ function mockDbWithInvalidNumericField() {
 	} as ReturnType<typeof getCloudflareContext>);
 }
 
+function mockDbWithNoResults() {
+	const mockAll = vi.fn().mockResolvedValue({ results: [] });
+	const mockBind = vi.fn().mockReturnValue({ all: mockAll });
+	const mockPrepare = vi.fn().mockReturnValue({ bind: mockBind });
+
+	vi.mocked(getCloudflareContext).mockReturnValue({
+		env: { DB: { prepare: mockPrepare } }
+	} as ReturnType<typeof getCloudflareContext>);
+}
+
 function mockDbThatThrows(message: string) {
 	const mockAll = vi.fn().mockRejectedValue(new Error(message));
 	const mockBind = vi.fn().mockReturnValue({ all: mockAll });
@@ -76,6 +86,16 @@ describe('POST /api/prices error responses', () => {
 		expect(body.error).toBe('Prediction service unavailable.');
 		expect(JSON.stringify(body)).not.toContain('intercept_map');
 		expect(JSON.stringify(body)).not.toContain(sensitiveDbError);
+	});
+
+	test('returns 404 when no prediction data matches the request', async () => {
+		mockDbWithNoResults();
+
+		const response = await POST(createPostRequest());
+		const body = (await response.json()) as { error?: string };
+
+		expect(response.status).toBe(404);
+		expect(body.error).toBe('No prediction data found for the given parameters.');
 	});
 
 	test('does not expose internal error.message from database failures', async () => {
