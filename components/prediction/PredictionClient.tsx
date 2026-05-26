@@ -168,17 +168,24 @@ function PredictionClientInner() {
 
   useEffect(() => {
     if (!mounted) return;
-    try {
-      localStorage.setItem(
-        STORAGE_KEYS.form,
-        JSON.stringify({
-          ...formValues,
-          lease_commence_date: serializeLeaseCommenceDate(formValues.lease_commence_date),
-        } satisfies PersistedFieldValues),
-      );
-    } catch {
-      /* storage full or disabled */
-    }
+
+    // ⚡ Bolt Optimization: Debounce localStorage writes
+    // Impact: Prevents main thread blocking and layout thrashing during rapid keystrokes in uncontrolled inputs like floor area.
+    const timeoutId = setTimeout(() => {
+      try {
+        localStorage.setItem(
+          STORAGE_KEYS.form,
+          JSON.stringify({
+            ...formValues,
+            lease_commence_date: serializeLeaseCommenceDate(formValues.lease_commence_date),
+          } satisfies PersistedFieldValues),
+        );
+      } catch {
+        /* storage full or disabled */
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
   }, [formValues, mounted]);
 
   const handleReset = useCallback(() => {
