@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useMemo } from "react";
 import type { TrendPoint } from "./types";
 
 type PriceTrendChartProps = {
@@ -22,74 +22,97 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
   const padL = 56, padR = 18, padT = 20, padB = 36;
   const cW = W - padL - padR, cH = H - padT - padB;
 
-  if (!data || data.length === 0) return null;
+  // ⚡ Bolt Optimization: Memoize expensive calculations
+  // Impact: Prevents recalculation of chart data and SVG paths on every mouse move
+  // Measurement: Significant reduction in CPU time during hover events
+  const chartData = useMemo(() => {
+    if (!data || data.length === 0) return null;
 
-  const values = data.map((d) => d.value);
-  const minV = Math.min(...values) * 0.92;
-  const maxV = Math.max(...values) * 1.04;
-  const rangeV = maxV - minV || 1;
+    const values = data.map((d) => d.value);
+    const minV = Math.min(...values) * 0.92;
+    const maxV = Math.max(...values) * 1.04;
+    const rangeV = maxV - minV || 1;
 
-  const pts = data.map((d, i) => ({
-    x: padL + (i / (data.length - 1)) * cW,
-    y: padT + cH - ((d.value - minV) / rangeV) * cH,
-    ...d,
-  }));
+    const pts = data.map((d, i) => ({
+      x: padL + (data.length > 1 ? (i / (data.length - 1)) * cW : cW / 2),
+      y: padT + cH - ((d.value - minV) / rangeV) * cH,
+      ...d,
+    }));
 
-  const catmullRom = (p: typeof pts, t = 0.35) => {
-    if (p.length < 2) return "";
-    let d = `M${p[0].x},${p[0].y}`;
-    for (let i = 0; i < p.length - 1; i++) {
-      const p0 = p[Math.max(i - 1, 0)];
-      const p1 = p[i];
-      const p2 = p[i + 1];
-      const p3 = p[Math.min(i + 2, p.length - 1)];
-      const cp1x = p1.x + (p2.x - p0.x) * t / 3;
-      const cp1y = p1.y + (p2.y - p0.y) * t / 3;
-      const cp2x = p2.x - (p3.x - p1.x) * t / 3;
-      const cp2y = p2.y - (p3.y - p1.y) * t / 3;
-      d += ` C${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
-    }
-    return d;
-  };
+    const catmullRom = (p: typeof pts, t = 0.35) => {
+      if (p.length < 2) return "";
+      let d = `M${p[0].x},${p[0].y}`;
+      for (let i = 0; i < p.length - 1; i++) {
+        const p0 = p[Math.max(i - 1, 0)];
+        const p1 = p[i];
+        const p2 = p[i + 1];
+        const p3 = p[Math.min(i + 2, p.length - 1)];
+        const cp1x = p1.x + (p2.x - p0.x) * t / 3;
+        const cp1y = p1.y + (p2.y - p0.y) * t / 3;
+        const cp2x = p2.x - (p3.x - p1.x) * t / 3;
+        const cp2y = p2.y - (p3.y - p1.y) * t / 3;
+        d += ` C${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
+      }
+      return d;
+    };
 
-  const linePath = catmullRom(pts);
-  const areaPath = linePath + ` L${pts[pts.length - 1].x},${padT + cH} L${pts[0].x},${padT + cH} Z`;
+    const linePath = catmullRom(pts);
+    const areaPath = linePath
+      ? linePath + ` L${pts[pts.length - 1].x},${padT + cH} L${pts[0].x},${padT + cH} Z`
+      : "";
 
-  const gridN = 4;
-  const yTicks = Array.from({ length: gridN + 1 }, (_, i) => {
-    const val = minV + (rangeV * i) / gridN;
-    const y = padT + cH - (i / gridN) * cH;
-    return { val, y };
-  });
+    const gridN = 4;
+    const yTicks = Array.from({ length: gridN + 1 }, (_, i) => {
+      const val = minV + (rangeV * i) / gridN;
+      const y = padT + cH - (i / gridN) * cH;
+      return { val, y };
+    });
 
-  const peakIdx = values.indexOf(Math.max(...values));
-  const lastIdx = values.length - 1;
+    const peakIdx = values.indexOf(Math.max(...values));
+    const lastIdx = values.length - 1;
 
-  const formatter = new Intl.NumberFormat(locale === "zh" ? "zh-SG" : "en-SG", {
-    style: "currency",
-    currency: "SGD",
-    maximumFractionDigits: 0,
-  });
-  const fmtFull = (v: number) => formatter.format(Math.round(v));
-  const fmtK = (v: number) => {
-    if (v >= 1e6) return `${(v / 1e6).toFixed(1)}M`;
-    if (v >= 1e3) return `${Math.round(v / 1e3)}k`;
-    return fmtFull(v);
-  };
+    return { pts, linePath, areaPath, yTicks, peakIdx, lastIdx };
+  }, [data, padL, padT, cW, cH]);
+
+  // ⚡ Bolt Optimization: Memoize Intl.NumberFormat
+  // Impact: NumberFormat instantiation is slow. Memoizing it prevents re-creation on every render.
+  const { formatter, fmtFull, fmtK } = useMemo(() => {
+    const formatter = new Intl.NumberFormat(locale === "zh" ? "zh-SG" : "en-SG", {
+      style: "currency",
+      currency: "SGD",
+      maximumFractionDigits: 0,
+    });
+    const fmtFull = (v: number) => formatter.format(Math.round(v));
+    const fmtK = (v: number) => {
+      if (v >= 1e6) return `${(v / 1e6).toFixed(1)}M`;
+      if (v >= 1e3) return `${Math.round(v / 1e3)}k`;
+      return fmtFull(v);
+    };
+    return { formatter, fmtFull, fmtK };
+  }, [locale]);
+
+  if (!chartData) return null;
+  const { pts, linePath, areaPath, yTicks, peakIdx, lastIdx } = chartData;
 
   const handleMove = (e: React.MouseEvent) => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || !chartData) return;
     const rect = containerRef.current.getBoundingClientRect();
     const svgX = ((e.clientX - rect.left) / rect.width) * W;
     let closest = 0, closestDist = Infinity;
-    pts.forEach((p, i) => {
+    chartData.pts.forEach((p, i) => {
       const dist = Math.abs(p.x - svgX);
       if (dist < closestDist) { closestDist = dist; closest = i; }
     });
-    const p = pts[closest];
-    const pxX = (p.x / W) * rect.width;
-    const pxY = (p.y / H) * rect.height;
-    setTooltip({ idx: closest, x: pxX, y: pxY, label: p.label, value: p.value });
+
+    // ⚡ Bolt Optimization: Bail out of state updates if tooltip index hasn't changed
+    // Impact: Completely bypasses React reconciliation when mouse moves within the same data point's bounds
+    setTooltip((prev) => {
+      if (prev && prev.idx === closest) return prev;
+      const p = chartData.pts[closest];
+      const pxX = (p.x / W) * rect.width;
+      const pxY = (p.y / H) * rect.height;
+      return { idx: closest, x: pxX, y: pxY, label: p.label, value: p.value };
+    });
   };
 
   return (
