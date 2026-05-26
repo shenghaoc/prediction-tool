@@ -29,7 +29,10 @@ describe('next security headers configuration', () => {
 			'X-Content-Type-Options': 'nosniff',
 			'X-Frame-Options': 'DENY',
 			'Referrer-Policy': 'strict-origin-when-cross-origin',
-			'Strict-Transport-Security': 'max-age=31536000; includeSubDomains'
+			'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+			'Content-Security-Policy':
+				"default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:;",
+			'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'
 		});
 	});
 });
