@@ -34,7 +34,7 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
     const rangeV = maxV - minV || 1;
 
     const pts = data.map((d, i) => ({
-      x: padL + (i / (data.length - 1)) * cW,
+      x: padL + (data.length > 1 ? (i / (data.length - 1)) * cW : cW / 2),
       y: padT + cH - ((d.value - minV) / rangeV) * cH,
       ...d,
     }));
@@ -57,7 +57,9 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
     };
 
     const linePath = catmullRom(pts);
-    const areaPath = linePath + ` L${pts[pts.length - 1].x},${padT + cH} L${pts[0].x},${padT + cH} Z`;
+    const areaPath = linePath
+      ? linePath + ` L${pts[pts.length - 1].x},${padT + cH} L${pts[0].x},${padT + cH} Z`
+      : "";
 
     const gridN = 4;
     const yTicks = Array.from({ length: gridN + 1 }, (_, i) => {
