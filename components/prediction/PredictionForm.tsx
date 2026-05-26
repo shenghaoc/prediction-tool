@@ -119,7 +119,7 @@ export default function PredictionForm({
           <Field>
             <FieldLabel htmlFor="input-floor_area">{t("floor_area")}</FieldLabel>
             <FieldContent>
-              <div className="flex rounded-lg border border-border/60 bg-card shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:shadow-primary/5 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15 focus-within:shadow-md focus-within:shadow-primary/10">
+              <div className="group flex rounded-lg border border-border/60 bg-card shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:shadow-primary/5 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15 focus-within:shadow-md focus-within:shadow-primary/10">
                 <Input
                   id="input-floor_area"
                   type="number"
@@ -138,7 +138,7 @@ export default function PredictionForm({
                 />
                 <span
                   id="floor-area-unit"
-                  className="inline-flex h-10 items-center rounded-r-lg border-l border-border/60 bg-muted px-3 text-xs font-semibold text-muted-foreground"
+                  className="inline-flex h-10 items-center rounded-r-lg border-l border-border/60 bg-muted px-3 text-xs font-semibold text-muted-foreground transition-colors duration-200 group-hover:border-l-primary/30 group-focus-within:border-l-primary/50"
                 >
                   <span className="sr-only">{t("floor_area_unit")}</span>
                   <span aria-hidden>m²</span>
