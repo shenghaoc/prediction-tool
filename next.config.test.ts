@@ -1,16 +1,22 @@
-import { describe, expect, test, vi } from 'vitest';
+// @vitest-environment node
+
+import { beforeAll, describe, expect, test, vi } from 'vitest';
 
 vi.mock('@opennextjs/cloudflare', () => ({
 	initOpenNextCloudflareForDev: vi.fn()
 }));
 
-const { default: nextConfig } = await import('./next.config.js');
+let nextConfig: Awaited<typeof import('./next.config.js')>['default'];
+
+beforeAll(async () => {
+	({ default: nextConfig } = await import('./next.config.js'));
+});
 
 describe('next security headers configuration', () => {
 	test('applies the expected security headers to all routes', async () => {
-		expect(nextConfig.headers).toEqual(expect.any(Function));
+		expect(nextConfig!.headers).toEqual(expect.any(Function));
 
-		const headerRules = await nextConfig.headers();
+		const headerRules = await nextConfig!.headers();
 
 		expect(headerRules).toHaveLength(1);
 		expect(headerRules[0].source).toBe('/:path*');
