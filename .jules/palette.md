@@ -1,0 +1,3 @@
+## 2024-05-18 - Unifying Focus States for Composite Input Components
+**Learning:** When dealing with composite inputs containing multiple interactive sub-elements (like an `Input` accompanied by an inline unit label/span), using `focus-within` on the parent container provides a unified and cohesive focus state. Applying focus states directly to inner children often results in conflicting border overlaps or partial highlighting.
+**Action:** When designing or refactoring composite form components in Tailwind CSS/Shadcn, apply focus, hover, and shadow states directly to a wrapping container using `focus-within:` classes, and remove default borders and outlines from the nested elements. This ensures visual consistency across the entire component block.

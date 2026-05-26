@@ -124,6 +124,8 @@ export default memo(function PredictionResults({
                 : "border-border/60 bg-gradient-to-br from-secondary/40 to-card",
               "shadow-[inset_0_1px_0_0_color-mix(in_oklab,var(--primary-foreground)_12%,transparent)]",
             )}
+            aria-live="polite"
+            aria-atomic="true"
           >
             <div
               className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,color-mix(in_oklab,var(--primary)_18%,transparent),transparent_55%)]"
