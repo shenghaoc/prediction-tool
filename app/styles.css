@@ -296,3 +296,23 @@ input[data-no-spinner="true"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
+/* ── v5: Focus-visible only (React Aria pattern) ──────────────────────── */
+:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── v5: Combobox listbox scrollbar ───────────────────────────────────── */
+[role="listbox"]::-webkit-scrollbar {
+  width: 4px;
+}
+[role="listbox"]::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--foreground) 15%, transparent);
+  border-radius: 9999px;
+}

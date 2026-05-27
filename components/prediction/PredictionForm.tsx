@@ -8,8 +8,9 @@ import { MAX_FLOOR_AREA_SQM, MIN_FLOOR_AREA_SQM } from "../../lib/prediction";
 import { FLAT_MODELS, ML_MODELS, STOREY_RANGES, TOWNS, LEASE_COMMENCE_YEARS } from "../../lib/lists";
 import { FormSelect, type FormSelectOption } from "@/components/ui/form-select";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Field, FieldContent, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Combobox, type ComboboxOption } from "@/components/ui/combobox";
+import { NumberField } from "@/components/ui/number-field";
 import type { FieldType } from "./types";
 
 type PredictionFormProps = {
@@ -49,7 +50,10 @@ export default function PredictionForm({
     () => labeledOptions(ML_MODELS, (m) => t(`ml_models.${m}`, m)),
     [t],
   );
-  const townOptions = useMemo(() => labeledOptions(TOWNS, (m) => t(`towns.${m}`, m)), [t]);
+  const townComboboxOptions: ComboboxOption[] = useMemo(
+    () => TOWNS.map((town) => ({ value: town, label: t(`towns.${town}`, town) })),
+    [t],
+  );
   const storeyOptions = useMemo(
     () => labeledOptions(STOREY_RANGES, (m) => t(`storey_ranges.${m}`, m)),
     [t],
@@ -83,12 +87,13 @@ export default function PredictionForm({
           <Field>
             <FieldLabel htmlFor="input-town">{t("town")}</FieldLabel>
             <FieldContent>
-              <FormSelect
+              <Combobox
                 id="input-town"
                 value={formValues.town}
-                onChange={(value) => handleChange("town", value)}
-                options={townOptions}
+                onChange={(value) => handleChange("town", value as typeof formValues.town)}
+                options={townComboboxOptions}
                 placeholder={t("select_town")}
+                ariaLabel={t("town")}
               />
             </FieldContent>
           </Field>
@@ -119,31 +124,17 @@ export default function PredictionForm({
           <Field>
             <FieldLabel htmlFor="input-floor_area">{t("floor_area")}</FieldLabel>
             <FieldContent>
-              <div className="group flex rounded-lg border border-border/60 bg-card shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:shadow-primary/5 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15 focus-within:shadow-md focus-within:shadow-primary/10">
-                <Input
-                  id="input-floor_area"
-                  type="number"
-                  inputMode="numeric"
-                  enterKeyHint="done"
-                  aria-describedby="floor-area-unit"
-                  className="h-10 rounded-r-none rounded-l-lg border-0 bg-transparent px-3 shadow-none focus-visible:ring-0 focus-visible:border-transparent outline-none focus:outline-none"
-                  min={MIN_FLOOR_AREA_SQM}
-                  max={MAX_FLOOR_AREA_SQM}
-                  value={formValues.floor_area_sqm || ""}
-                  placeholder={t("enter_floor_area")}
-                  onChange={(e) =>
-                    handleChange("floor_area_sqm", e.target.value ? Number(e.target.value) : 0)
-                  }
-                  required
-                />
-                <span
-                  id="floor-area-unit"
-                  className="inline-flex h-10 items-center rounded-r-lg border-l border-border/60 bg-muted px-3 text-xs font-semibold text-muted-foreground transition-colors duration-200 group-hover:border-l-primary/30 group-focus-within:border-l-primary/50"
-                >
-                  <span className="sr-only">{t("floor_area_unit")}</span>
-                  <span aria-hidden>m²</span>
-                </span>
-              </div>
+              <NumberField
+                id="input-floor_area"
+                value={formValues.floor_area_sqm || ""}
+                onChange={(value) => handleChange("floor_area_sqm", value || 0)}
+                min={MIN_FLOOR_AREA_SQM}
+                max={MAX_FLOOR_AREA_SQM}
+                step={5}
+                placeholder={t("enter_floor_area")}
+                unit="m²"
+                ariaLabel={t("floor_area")}
+              />
             </FieldContent>
           </Field>
         </div>

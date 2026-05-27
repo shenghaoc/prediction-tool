@@ -135,10 +135,18 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
             <stop offset="60%" stopColor="var(--color-chart)" stopOpacity="0.06" />
             <stop offset="100%" stopColor="var(--color-chart)" stopOpacity="0" />
           </linearGradient>
+          {/* v5: horizontal gradient for line stroke */}
+          <linearGradient id="chartLineGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="var(--color-chart)" />
+            <stop offset="100%" stopColor="var(--chart-2, var(--color-chart))" />
+          </linearGradient>
         </defs>
         {yTicks.map((t, i) => (
           <g key={i}>
-            <line x1={padL} x2={W - padR} y1={t.y} y2={t.y} stroke="var(--color-border)" strokeWidth="1" />
+            {/* v5: dashed grid lines for non-baseline ticks */}
+            <line x1={padL} x2={W - padR} y1={t.y} y2={t.y}
+              stroke="var(--color-border)" strokeWidth="1"
+              strokeDasharray={i === 0 ? "none" : "3 4"} />
             <text x={padL - 10} y={t.y + 4} textAnchor="end" className="chart-tick-text">{fmtK(t.val)}</text>
           </g>
         ))}
@@ -146,9 +154,12 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
           <text key={i} x={p.x} y={padT + cH + 22} textAnchor="middle" className="chart-axis-label">{p.label.slice(5)}</text>
         ))}
         <path d={areaPath} fill="url(#chartGrad)" />
-        <path d={linePath} fill="none" stroke="var(--color-chart)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-        {/* Peak dot */}
-        <circle cx={pts[peakIdx].x} cy={pts[peakIdx].y} r="4" fill="var(--color-primary)" stroke="var(--color-surface)" strokeWidth="2" />
+        {/* v5: gradient line stroke */}
+        <path d={linePath} fill="none" stroke="url(#chartLineGrad)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        {/* v5: peak dot uses chart-2 for visual hierarchy */}
+        <circle cx={pts[peakIdx].x} cy={pts[peakIdx].y} r="4" fill="var(--chart-2, var(--color-primary))" stroke="var(--color-surface)" strokeWidth="2" />
+        {/* v5: glow ring behind latest dot */}
+        <circle cx={pts[lastIdx].x} cy={pts[lastIdx].y} r="7" fill="var(--color-chart)" fillOpacity="0.15" stroke="none" />
         {/* Latest dot */}
         <circle cx={pts[lastIdx].x} cy={pts[lastIdx].y} r="5" fill="var(--color-primary)" stroke="var(--color-surface)" strokeWidth="2.5" />
         {/* Hover line + dot */}

@@ -83,6 +83,8 @@ function PredictionClientInner() {
   });
   const hasRestoredRef = useRef(false);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const liveRef = useRef<HTMLDivElement>(null);
   const requestControllerRef = useRef<AbortController | null>(null);
   const latestFormRef = useRef(formValues);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -91,6 +93,15 @@ function PredictionClientInner() {
   useEffect(() => {
     latestFormRef.current = formValues;
   }, [formValues]);
+
+  const announce = useCallback((message: string, priority: "polite" | "assertive" = "polite") => {
+    if (!liveRef.current) return;
+    liveRef.current.setAttribute("aria-live", priority);
+    liveRef.current.textContent = "";
+    requestAnimationFrame(() => {
+      if (liveRef.current) liveRef.current.textContent = message;
+    });
+  }, []);
 
   useEffect(() => {
     const isDark = localStorage.getItem(STORAGE_KEYS.theme) === "dark";
@@ -149,6 +160,10 @@ function PredictionClientInner() {
   useEffect(() => {
     if (output > 0) {
       resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      // Focus management: move focus to results area after prediction
+      setTimeout(() => {
+        resultsRef.current?.focus({ preventScroll: false });
+      }, 100);
     }
   }, [output]);
 
@@ -281,6 +296,12 @@ function PredictionClientInner() {
           lease_commence_date: values.lease_commence_date,
         });
         toast.success(t("prediction_success"), { id: "prediction" });
+        announce(
+          lang === "zh"
+            ? `预测完成。预估价格：$${Math.round(predictedPrice).toLocaleString()}`
+            : `Prediction complete. Estimated price: $${Math.round(predictedPrice).toLocaleString()}`,
+          "assertive",
+        );
       } catch (err: unknown) {
         if (isAbortError(err)) return;
         setOutput(0);
@@ -297,6 +318,26 @@ function PredictionClientInner() {
     },
     [t],
   );
+
+  // Keyboard shortcuts: Ctrl/Cmd+Enter to submit, Escape to reset
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        if (!loading) handleFinish(formValues);
+      }
+      if (
+        e.key === "Escape" &&
+        !document.querySelector('[role="listbox"]') &&
+        formRef.current?.contains(document.activeElement)
+      ) {
+        handleReset();
+        announce(lang === "zh" ? "表单已重置" : "Form reset");
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [loading, lang, formValues, handleFinish, handleReset, announce]);
 
   const figures = [
     {
@@ -337,6 +378,23 @@ function PredictionClientInner() {
 
   return (
     <main className="min-h-screen px-6 pb-12 pt-5 max-sm:px-3 max-sm:pb-8">
+      {/* Skip navigation — visible on focus for keyboard users */}
+      <a
+        href="#input-ml_model"
+        className="fixed -left-[9999px] top-auto z-[100] h-px w-px overflow-hidden focus:fixed focus:left-4 focus:top-4 focus:h-auto focus:w-auto focus:overflow-visible focus:rounded-lg focus:bg-primary focus:px-5 focus:py-2.5 focus:text-sm focus:font-bold focus:text-primary-foreground focus:no-underline focus:shadow-lg"
+      >
+        Skip to form
+      </a>
+
+      {/* Live region for screen reader announcements */}
+      <div
+        ref={liveRef}
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="absolute size-px overflow-hidden whitespace-nowrap border-0 p-0 [clip:rect(0,0,0,0)]"
+      />
+
       <div className="mx-auto max-w-7xl">
         <header className="animate-fade-in-deep sticky top-0 z-20 -mx-6 mb-6 flex items-center justify-between gap-4 border-b border-border/50 bg-background/85 px-6 py-4 backdrop-blur-md max-sm:relative max-sm:mx-0 max-sm:flex-col max-sm:items-start max-sm:px-0">
           <div className="flex items-center gap-2.5">
@@ -420,6 +478,9 @@ function PredictionClientInner() {
                     />
                   ))}
                 </div>
+                <p className="mt-3.5 text-[0.82rem] leading-relaxed text-muted-foreground">
+                  {t("intro_caption")}
+                </p>
               </CardContent>
             </Card>
 
@@ -430,11 +491,6 @@ function PredictionClientInner() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="px-6">
-                {loading && (
-                  <div className="progress-track mb-4" role="progressbar" aria-label={t("predicting")}>
-                    <div className="progress-bar" style={{ width: "60%" }} />
-                  </div>
-                )}
                 {error && !loading && (
                   <div role="alert" className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
                     {error}
@@ -448,11 +504,16 @@ function PredictionClientInner() {
                   onValuesChange={handleFormChange}
                   t={t}
                 />
+                {loading && (
+                  <div className="progress-track mt-4" role="progressbar" aria-label={t("predicting")}>
+                    <div className="progress-bar" style={{ width: "60%" }} />
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
 
-          <div ref={resultsRef}>
+          <div ref={resultsRef} tabIndex={-1} className="outline-none" aria-label={t("predicted_price")}>
             <PredictionResults
               output={output}
               summaryValues={summaryValues}

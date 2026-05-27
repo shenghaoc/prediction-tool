@@ -16,6 +16,7 @@
   "switch_language": "中文/English",
   "price_prediction": "价格\n预测",
   "intro_blurb": "比较房屋属性，提交一个情境，并快速查看估算转售价与过去12个月趋势。",
+  "intro_caption": "新加坡组屋转售价估算器 — 快速情境测试。",
   "prediction_form": "预测表单",
   "ml_model": "机器学习模型",
   "select_ml_model": "选择机器学习模型",
