@@ -90,6 +90,7 @@ function PredictionClientInner() {
   const loadingRef = useRef(false);
   const latestFormRef = useRef(formValues);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const predictionCacheRef = useRef<Record<string, ApiResponse>>({});
 
   // Keep latestFormRef in sync without triggering re-renders
   useEffect(() => {
@@ -271,8 +272,6 @@ function PredictionClientInner() {
       requestControllerRef.current = controller;
       setLoading(true);
       setError(null);
-      setOutput(0);
-      setTrendData(defaultTrendData);
       const floorArea =
         typeof values.floor_area_sqm === "number"
           ? Math.max(MIN_FLOOR_AREA_SQM, Math.min(MAX_FLOOR_AREA_SQM, values.floor_area_sqm))
@@ -285,17 +284,31 @@ function PredictionClientInner() {
         floorAreaSqm: floorArea,
         leaseCommenceYear: values.lease_commence_date.year,
       };
+
+      // ⚡ Bolt: Cache API responses to prevent redundant network requests
+      // when users toggle inputs back and forth or submit identical queries.
+      const cacheKey = JSON.stringify(requestBody);
+      let serverData: ApiResponse;
+
       try {
-        const response = await fetch("/api/prices", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(requestBody),
-          signal: controller.signal,
-        });
-        if (!response.ok) {
-          throw new Error(await getResponseErrorMessage(response, t("error_fetch")));
+        if (predictionCacheRef.current[cacheKey]) {
+          serverData = predictionCacheRef.current[cacheKey];
+        } else {
+          setOutput(0);
+          setTrendData(defaultTrendData);
+          const response = await fetch("/api/prices", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: cacheKey,
+            signal: controller.signal,
+          });
+          if (!response.ok) {
+            throw new Error(await getResponseErrorMessage(response, t("error_fetch")));
+          }
+          serverData = await response.json();
+          predictionCacheRef.current[cacheKey] = serverData;
         }
-        const serverData: ApiResponse = await response.json();
+
         const normalizedData = normalizeTrendData(serverData);
         if (!trendDataHasValidPrices(normalizedData)) {
           throw new Error(t("error_invalid_prediction"));
