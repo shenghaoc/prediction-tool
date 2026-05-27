@@ -24,7 +24,7 @@ export function StatTile({ icon: Icon, label, value, hint, className }: StatTile
       className={cn(
         "group/tile flex items-center gap-3 rounded-xl border border-border/60 bg-card/90 p-4 shadow-sm transition-all duration-300",
         "hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md hover:shadow-primary/5",
-        hint && "cursor-help focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2",
+        hint && "cursor-help focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         className,
       )}
     >
