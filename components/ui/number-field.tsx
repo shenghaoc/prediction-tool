@@ -14,6 +14,7 @@ type NumberFieldProps = {
   placeholder?: string;
   unit?: string;
   ariaLabel: string;
+  required?: boolean;
   className?: string;
 };
 
@@ -27,14 +28,24 @@ export function NumberField({
   placeholder,
   unit,
   ariaLabel,
+  required = false,
   className,
 }: NumberFieldProps) {
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const holdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const valueRef = useRef(value);
-
   useEffect(() => { valueRef.current = value; }, [value]);
+
+  // Cleanup hold timer on unmount
+  useEffect(() => {
+    return () => {
+      if (holdRef.current) {
+        clearTimeout(holdRef.current);
+        holdRef.current = null;
+      }
+    };
+  }, []);
 
   const numValue = typeof value === "number" ? value : NaN;
   const clamp = useCallback(
@@ -97,14 +108,17 @@ export function NumberField({
       onChange("");
       return;
     }
-    const n = parseInt(raw, 10);
+    const n = Number(raw);
     if (!isNaN(n)) onChange(n);
   };
 
   const handleBlur = () => {
     setFocused(false);
-    if (typeof value === "number") {
-      onChange(clamp(value));
+    // Read the latest value from the ref to avoid the falsy-zero pitfall
+    // where the prop value is "" but the ref still holds the last number.
+    const latest = valueRef.current;
+    if (typeof latest === "number") {
+      onChange(clamp(latest));
     }
   };
 
@@ -153,6 +167,7 @@ export function NumberField({
         aria-valuemin={min}
         aria-valuemax={max}
         aria-valuenow={isNaN(numValue) ? undefined : numValue}
+        aria-required={required}
         aria-label={ariaLabel}
         value={value === "" || value === undefined ? "" : value}
         placeholder={placeholder}
@@ -175,6 +190,10 @@ export function NumberField({
         >
           {unit}
         </span>
+      )}
+      {/* Accessible unit label for screen readers */}
+      {unit && (
+        <span className="sr-only">{unit === "m²" ? "square meters" : unit}</span>
       )}
 
       {/* Increment */}

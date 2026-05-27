@@ -14,7 +14,7 @@ export type FormSelectOption<T extends string = string> = {
 };
 
 const triggerClassName =
-  "h-[var(--height-field,32px)] w-full rounded-[var(--radius-sm,3px)] border border-border bg-card px-3 transition-all duration-200 hover:border-primary/30 focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/15 data-[placeholder]:text-muted-foreground";
+  "h-[var(--height-field,32px)] data-[size=default]:h-[var(--height-field,32px)] w-full rounded-[var(--radius-sm,3px)] border border-border bg-card px-3 transition-all duration-200 hover:border-primary/30 focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/15 data-[placeholder]:text-muted-foreground";
 
 type FormSelectProps<T extends string = string> = {
   id?: string;

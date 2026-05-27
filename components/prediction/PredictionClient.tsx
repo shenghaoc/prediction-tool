@@ -85,6 +85,7 @@ function PredictionClientInner() {
   const resultsRef = useRef<HTMLDivElement>(null);
   const liveRef = useRef<HTMLDivElement>(null);
   const requestControllerRef = useRef<AbortController | null>(null);
+  const loadingRef = useRef(false);
   const latestFormRef = useRef(formValues);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -93,13 +94,20 @@ function PredictionClientInner() {
     latestFormRef.current = formValues;
   }, [formValues]);
 
+  // Keep loadingRef in sync to prevent stale closure in keyboard shortcut
+  useEffect(() => {
+    loadingRef.current = loading;
+  }, [loading]);
+
   const announce = useCallback((message: string, priority: "polite" | "assertive" = "polite") => {
     if (!liveRef.current) return;
     liveRef.current.setAttribute("aria-live", priority);
     liveRef.current.textContent = "";
-    requestAnimationFrame(() => {
+    // Use setTimeout instead of rAF so the announcement fires even in background tabs.
+    // The small delay (50ms) ensures screen readers detect the text change.
+    setTimeout(() => {
       if (liveRef.current) liveRef.current.textContent = message;
-    });
+    }, 50);
   }, []);
 
   useEffect(() => {
@@ -323,7 +331,7 @@ function PredictionClientInner() {
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
         e.preventDefault();
-        if (!loading) handleFinish(formValues);
+        if (!loadingRef.current) handleFinish(formValues);
       }
       if (
         e.key === "Escape" &&

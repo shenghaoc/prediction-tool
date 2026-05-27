@@ -43,6 +43,7 @@ export function Combobox({
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const suppressFocusOpenRef = useRef(false);
 
   const selectedLabel = useMemo(() => {
     const opt = options.find((o) => o.value === value);
@@ -80,6 +81,7 @@ export function Combobox({
       setQuery("");
       setIsOpen(false);
       setActiveIndex(-1);
+      suppressFocusOpenRef.current = true;
       inputRef.current?.focus();
     },
     [onChange],
@@ -155,8 +157,12 @@ export function Combobox({
           onKeyDown={handleKeyDown}
           onFocus={() => {
             setFocused(true);
-            setIsOpen(true);
-            setQuery("");
+            if (suppressFocusOpenRef.current) {
+              suppressFocusOpenRef.current = false;
+            } else {
+              setIsOpen(true);
+              setQuery("");
+            }
           }}
           onBlur={(e) => {
             setFocused(false);

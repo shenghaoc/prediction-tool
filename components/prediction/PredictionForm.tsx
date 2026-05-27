@@ -126,14 +126,15 @@ export default function PredictionForm({
             <FieldContent>
               <NumberField
                 id="input-floor_area"
-                value={formValues.floor_area_sqm || ""}
-                onChange={(value) => handleChange("floor_area_sqm", value || 0)}
+                value={typeof formValues.floor_area_sqm === "number" ? formValues.floor_area_sqm : ""}
+                onChange={(value) => handleChange("floor_area_sqm", value === "" ? 0 : value)}
                 min={MIN_FLOOR_AREA_SQM}
                 max={MAX_FLOOR_AREA_SQM}
                 step={5}
                 placeholder={t("enter_floor_area")}
                 unit="m²"
                 ariaLabel={t("floor_area")}
+                required
               />
             </FieldContent>
           </Field>
