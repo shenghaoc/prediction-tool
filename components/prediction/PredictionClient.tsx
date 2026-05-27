@@ -90,7 +90,7 @@ function PredictionClientInner() {
   // Keep latestFormRef in sync without triggering re-renders
   useEffect(() => {
     latestFormRef.current = formValues;
-  });
+  }, [formValues]);
 
   useEffect(() => {
     const isDark = localStorage.getItem(STORAGE_KEYS.theme) === "dark";
@@ -173,9 +173,8 @@ function PredictionClientInner() {
     });
   }, []);
 
-  // ⚡ Bolt Optimization: Debounce localStorage writes
-  // Prevents main thread blocking during rapid keystrokes.
-  // Uses latestFormRef + unmount flush to prevent data loss on navigation away.
+  // Debounce localStorage writes to prevent main thread blocking during rapid keystrokes.
+  // Uses a ref so the timeout callback always reads the latest values without re-closing.
   useEffect(() => {
     if (!mounted) return;
 
@@ -201,9 +200,12 @@ function PredictionClientInner() {
     return () => clearTimeout(saveTimeoutRef.current);
   }, [formValues, mounted]);
 
-  // Flush pending localStorage write on unmount to prevent data loss
+  // Flush pending localStorage write on unmount to prevent data loss.
+  // Skip if the restore effect hasn't run yet — writing initialFormValues
+  // would overwrite the user's previously saved form state.
   useEffect(() => {
     return () => {
+      if (!hasRestoredRef.current) return;
       if (saveTimeoutRef.current !== undefined) {
         clearTimeout(saveTimeoutRef.current);
       }
