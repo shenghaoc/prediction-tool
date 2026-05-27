@@ -83,7 +83,7 @@ export default function PredictionForm({
           </FieldContent>
         </Field>
 
-        <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
+        <div className="grid grid-cols-2 gap-4 max-[520px]:grid-cols-1">
           <Field>
             <FieldLabel htmlFor="input-town">{t("town")}</FieldLabel>
             <FieldContent>
@@ -154,11 +154,11 @@ export default function PredictionForm({
           </FieldContent>
         </Field>
 
-        <div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
+        <div className="grid grid-cols-2 gap-3 max-[520px]:grid-cols-1">
           <Button
             type="submit"
             size="lg"
-            className="w-full normal-case tracking-normal shadow-md shadow-primary/20 transition-all duration-200 hover:shadow-lg hover:shadow-primary/25 hover:brightness-110"
+            className="w-full normal-case tracking-normal transition-all duration-200 hover:brightness-110"
             disabled={loading}
           >
             {loading ? (
@@ -174,7 +174,7 @@ export default function PredictionForm({
             type="button"
             variant="outline"
             size="lg"
-            className="w-full normal-case tracking-normal transition-all duration-200 hover:bg-muted/80"
+            className="w-full normal-case tracking-normal transition-all duration-200"
             onClick={onReset}
           >
             {t("reset_form")}

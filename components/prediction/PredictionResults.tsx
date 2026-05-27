@@ -28,7 +28,7 @@ const PriceTrendChart = dynamic(() => import("./PriceTrendChart"), {
 });
 
 const panelCard =
-  "relative overflow-hidden border-border/60 shadow-sm ring-1 ring-foreground/5 transition-all duration-300 hover:shadow-md hover:shadow-primary/5";
+  "relative overflow-hidden border-border/60 shadow-none transition-all duration-300";
 
 type PredictionResultsProps = {
   output: number;
@@ -99,11 +99,7 @@ export default memo(function PredictionResults({
 
   return (
     <section aria-labelledby="prediction-results-heading" aria-busy={loading}>
-      <Card size="sm" className={cn(panelCard, "animate-fade-in-deep border-l-4 border-l-primary/70 py-6")}>
-        <div
-          className="pointer-events-none absolute -right-24 -top-24 size-64 rounded-full bg-primary/10 blur-3xl"
-          aria-hidden
-        />
+      <Card size="sm" className={cn(panelCard, "py-6")}>
         <CardHeader className="relative flex flex-row items-start justify-between gap-4 px-6 pb-2 max-sm:flex-col">
           <div>
             <Badge variant="secondary" className="mb-2">
@@ -111,36 +107,31 @@ export default memo(function PredictionResults({
             </Badge>
             <CardTitle
               asChild
-              className="font-heading text-2xl normal-case tracking-tight"
+              className="font-sans text-2xl font-extrabold normal-case tracking-tight"
             >
               <h2 id="prediction-results-heading">{t("predicted_price")}</h2>
             </CardTitle>
           </div>
           <div
             className={cn(
-              "relative min-w-[200px] overflow-hidden rounded-xl border px-5 py-4 max-sm:w-full transition-all duration-500",
+              "min-w-[200px] overflow-hidden rounded-[var(--radius-sm,3px)] border px-4 py-3 max-sm:w-full transition-all duration-300",
               hasOutput
-                ? "border-primary/25 bg-gradient-to-br from-primary/12 via-accent/60 to-card animate-glow"
-                : "border-border/60 bg-gradient-to-br from-secondary/40 to-card",
-              "shadow-[inset_0_1px_0_0_color-mix(in_oklab,var(--primary-foreground)_12%,transparent)]",
+                ? "border-primary/25 bg-primary/5"
+                : "border-border bg-secondary",
             )}
             aria-live="polite"
             aria-atomic="true"
           >
-            <div
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,color-mix(in_oklab,var(--primary)_18%,transparent),transparent_55%)]"
-              aria-hidden
-            />
-            <p className="relative text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
               {t("prediction")}
             </p>
             {showSkeleton ? (
-              <Skeleton className="animate-shimmer relative mt-2 h-9 w-36 rounded-lg" />
+              <Skeleton className="animate-shimmer mt-2 h-9 w-36 rounded-lg" />
             ) : (
               <p
                 key={output}
                 className={cn(
-                  "relative mt-1 font-heading text-3xl font-extrabold tabular-nums tracking-tight transition-all duration-500",
+                  "mt-1 font-sans text-3xl font-extrabold tabular-nums tracking-tight transition-all duration-500",
                   !hasOutput && "text-base font-semibold text-muted-foreground",
                   hasOutput && "text-primary animate-settle",
                 )}
@@ -162,11 +153,11 @@ export default memo(function PredictionResults({
                   return (
                     <div
                       key={item.label}
-                      className="animate-fade-in flex items-center gap-3 rounded-xl border border-border/60 bg-secondary/40 p-3 backdrop-blur-sm transition-all duration-300 hover:border-primary/20 hover:bg-secondary/60 hover:shadow-sm"
+                      className="animate-fade-in flex items-center gap-3 rounded-[var(--radius-sm,3px)] border border-border bg-secondary p-3 transition-all duration-200 hover:border-primary/25"
                       style={{ animationDelay: `${i * 0.08}s`, animationFillMode: "both" }}
                     >
                       <div
-                        className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-primary/15"
+                        className="flex size-8 shrink-0 items-center justify-center rounded-[var(--radius-md,6px)] bg-primary/10"
                         aria-hidden
                       >
                         <Icon className="size-4 text-primary" />
@@ -189,7 +180,7 @@ export default memo(function PredictionResults({
                     <CardDescription className="mb-1 uppercase tracking-wider">
                       {t("predicted_trends")}
                     </CardDescription>
-                    <h3 className="mb-3 font-heading text-sm font-semibold normal-case">
+                    <h3 className="mb-3 font-sans text-sm font-semibold normal-case">
                       {t("chart_story_title")}
                     </h3>
                     <div className="mb-4 grid grid-cols-3 gap-2.5 max-sm:grid-cols-1">
@@ -216,7 +207,7 @@ export default memo(function PredictionResults({
                 </>
               ) : (
                 <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-border/70 bg-gradient-to-b from-muted/30 to-transparent px-4 py-12 text-center">
-                  <div className="empty-float flex items-end gap-1.5 opacity-40" aria-hidden>
+                  <div className="flex items-end gap-1.5 opacity-40" aria-hidden>
                     {[0.35, 0.55, 0.85, 0.45, 0.7, 0.3].map((h, i) => (
                       <div
                         key={i}
@@ -225,7 +216,7 @@ export default memo(function PredictionResults({
                       />
                     ))}
                   </div>
-                  <h3 className="animate-fade-in font-heading text-base font-semibold text-foreground">
+                  <h3 className="animate-fade-in font-sans text-base font-semibold text-foreground">
                     {t("placeholder_title")}
                   </h3>
                   <p className="animate-fade-in mx-auto max-w-[32ch] text-sm leading-relaxed text-muted-foreground" style={{ animationDelay: "0.08s", animationFillMode: "both" }}>
@@ -255,7 +246,7 @@ function StatChip({
   const TrendIcon = trend === "down" ? TrendingDown : trend === "up" ? TrendingUp : null;
 
   return (
-    <div className="rounded-xl border border-border/60 bg-secondary/40 px-3 py-2.5 backdrop-blur-sm transition-all duration-300 hover:border-primary/20 hover:shadow-sm">
+    <div className="rounded-[var(--radius-sm,3px)] border border-border bg-secondary px-3 py-2.5 transition-all duration-200 hover:border-primary/25">
       <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
       <p
         className={cn(

@@ -55,7 +55,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 const panelCard =
-  "relative overflow-hidden border-border/60 shadow-sm ring-1 ring-foreground/5 transition-all duration-300 hover:shadow-md hover:shadow-primary/5";
+  "relative overflow-hidden border-border/60 shadow-none transition-all duration-300";
 
 export default function PredictionClient() {
   return (
@@ -364,7 +364,7 @@ function PredictionClientInner() {
       <main className="min-h-screen px-6 pb-12 pt-5" aria-busy="true">
         <div className="mx-auto max-w-7xl space-y-5">
           <Skeleton className="animate-shimmer h-10 w-full max-w-md rounded-xl" />
-          <div className="grid grid-cols-2 gap-5 max-[860px]:grid-cols-1">
+          <div className="grid grid-cols-2 gap-5 max-[960px]:grid-cols-1">
             <Skeleton className="animate-shimmer h-64 rounded-xl" />
             <Skeleton className="animate-shimmer h-96 rounded-xl" />
           </div>
@@ -395,9 +395,9 @@ function PredictionClientInner() {
       />
 
       <div className="mx-auto max-w-7xl">
-        <header className="animate-fade-in-deep sticky top-0 z-20 -mx-6 mb-6 flex items-center justify-between gap-4 border-b border-border/50 bg-background/85 px-6 py-4 backdrop-blur-md max-sm:relative max-sm:mx-0 max-sm:flex-col max-sm:items-start max-sm:px-0">
+        <header className="sticky top-0 z-20 -mx-6 mb-6 flex items-center justify-between gap-4 border-b border-border/50 bg-background/85 px-6 py-4 backdrop-blur-md max-sm:relative max-sm:mx-0 max-sm:flex-col max-sm:items-start max-sm:px-0">
           <div className="flex items-center gap-2.5">
-            <span className="font-heading text-base font-bold tracking-tight">{t("brand")}</span>
+            <span className="font-sans text-xs font-bold tracking-tight">{t("brand")}</span>
             <Badge variant="secondary" className="gap-1">
               <Sparkles className="size-3" aria-hidden />
               {t("badge")}
@@ -437,36 +437,28 @@ function PredictionClientInner() {
           </div>
         </header>
 
-        <div className="grid grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] items-start gap-5 max-[860px]:grid-cols-1">
+        <div className="grid grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] items-start gap-5 max-[960px]:grid-cols-1">
           <div className="flex flex-col gap-5">
             <Card
               size="sm"
-              className={cn(panelCard, "animate-fade-in-deep border-l-4 border-l-primary/70 py-6")}
+              className={cn(panelCard, "py-6")}
             >
-              <div
-                className="pointer-events-none absolute -right-20 -top-16 size-56 rounded-full bg-primary/15 blur-3xl"
-                aria-hidden
-              />
-              <div
-                className="pointer-events-none absolute -bottom-20 -left-16 size-48 rounded-full bg-chart-2/15 blur-3xl"
-                aria-hidden
-              />
-              <CardHeader className="relative px-6 pb-0">
+              <CardHeader className="px-6 pb-0">
                 <CardTitle
                   asChild
                   className={cn(
-                    "font-heading whitespace-pre-line text-[clamp(2rem,5vw,3rem)] font-bold normal-case tracking-tight",
+                    "whitespace-pre-line text-[clamp(1.8rem,4vw,2.4rem)] font-extrabold normal-case tracking-tight",
                     isZh && "font-cjk font-extrabold",
                   )}
                 >
                   <h1>{t("price_prediction")}</h1>
                 </CardTitle>
-                <CardDescription className="max-w-prose text-base leading-relaxed">
+                <CardDescription className="max-w-prose text-sm leading-relaxed">
                   {t("intro_blurb")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="relative px-6 pt-4">
-                <div className="animate-stagger grid grid-cols-3 gap-2.5 max-sm:grid-cols-1">
+                <div className="grid grid-cols-3 gap-2.5 max-sm:grid-cols-1">
                   {figures.map((figure) => (
                     <StatTile
                       key={figure.label}
@@ -483,7 +475,7 @@ function PredictionClientInner() {
               </CardContent>
             </Card>
 
-            <Card size="sm" className={cn(panelCard, "animate-fade-in-deep border-l-4 border-l-primary/70 py-6")}>
+            <Card size="sm" className={cn(panelCard, "py-6")}>
               <CardHeader className="px-6 pb-2">
                 <CardTitle asChild className="text-primary normal-case">
                   <h2>{t("prediction_form")}</h2>

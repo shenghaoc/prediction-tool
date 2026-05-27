@@ -116,10 +116,10 @@ export function NumberField({
       role="group"
       aria-label={ariaLabel}
       className={cn(
-        "grid overflow-hidden rounded-[var(--radius-xl,0.875rem)] border transition-all duration-200",
+        "grid overflow-hidden rounded-[var(--radius-sm,3px)] border transition-all duration-200",
         focused
-          ? "border-primary/50 shadow-[var(--shadow-focus,0_0_0_3px_color-mix(in_oklab,var(--ring,var(--primary))_25%,transparent)),0_4px_12px_color-mix(in_oklab,var(--primary)_5%,transparent)]"
-          : "border-border/60",
+          ? "border-primary/50 shadow-[var(--shadow-focus)]"
+          : "border-border",
         unit ? "grid-cols-[40px_1fr_auto_40px]" : "grid-cols-[40px_1fr_40px]",
         className,
       )}
@@ -162,7 +162,7 @@ export function NumberField({
         onBlur={handleBlur}
         autoComplete="off"
         className={cn(
-          "h-[var(--height-field,42px)] w-full border-x border-border/40 bg-card px-3 text-center text-[0.95rem] font-semibold tabular-nums text-foreground outline-none",
+          "h-[var(--height-field,32px)] w-full border-x border-border/40 bg-card px-3 text-center text-[0.875rem] font-medium tabular-nums text-foreground outline-none",
           "[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
         )}
       />

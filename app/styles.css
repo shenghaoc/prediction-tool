@@ -81,10 +81,6 @@ html {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes fade-up-deep {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
 
 @keyframes settle {
   0%   { transform: scale(0.96); opacity: 0.72; }
@@ -108,15 +104,6 @@ html {
   100% { transform: translateX(100%); }
 }
 
-@keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 12px color-mix(in oklab, var(--primary) 20%, transparent); }
-  50%      { box-shadow: 0 0 28px color-mix(in oklab, var(--primary) 35%, transparent); }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50%      { transform: translateY(-6px); }
-}
 
 @keyframes empty-float {
   0%, 100% { transform: translateY(0px) rotate(0deg); }
@@ -129,24 +116,6 @@ html {
   .animate-enter {
     opacity: 0;
     transform: translateY(6px);
-  }
-}
-
-/* ── Reduced motion ──────────────────────────────────────────────────── */
-@media (prefers-reduced-motion: reduce) {
-  .animate-fade-in,
-  .animate-fade-in-deep,
-  .animate-enter,
-  .animate-pulse,
-  .animate-settle,
-  .animate-stagger {
-    animation: none;
-    transition: none;
-    opacity: 1;
-    transform: none;
-  }
-  .animate-glow {
-    animation: none;
   }
 }
 
@@ -177,9 +146,6 @@ html {
   animation: fade-up 0.35s ease-out both;
 }
 
-.animate-fade-in-deep {
-  animation: fade-up-deep 0.5s ease-out both;
-}
 
 .animate-settle {
   animation: settle 0.55s ease;
@@ -189,23 +155,18 @@ html {
   animation: subtle-pulse 1.2s ease-in-out infinite;
 }
 
-.animate-glow {
-  animation: glow-pulse 2.4s ease-in-out infinite;
+/* ── Reduced motion ──────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-enter,
+  .animate-pulse,
+  .animate-settle {
+    animation: none;
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
 }
-
-/* Staggered entrance — add .animate-stagger to each child */
-.animate-stagger > * {
-  opacity: 0;
-  animation: fade-up 0.4s ease-out forwards;
-}
-.animate-stagger > *:nth-child(1) { animation-delay: 0.05s; }
-.animate-stagger > *:nth-child(2) { animation-delay: 0.12s; }
-.animate-stagger > *:nth-child(3) { animation-delay: 0.19s; }
-.animate-stagger > *:nth-child(4) { animation-delay: 0.26s; }
-.animate-stagger > *:nth-child(5) { animation-delay: 0.33s; }
-.animate-stagger > *:nth-child(6) { animation-delay: 0.40s; }
-
-/* Shimmer skeleton */
 .animate-shimmer {
   background: linear-gradient(
     110deg,

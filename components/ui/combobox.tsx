@@ -168,10 +168,10 @@ export function Combobox({
           autoComplete="off"
           spellCheck={false}
           className={cn(
-            "h-[var(--height-field,42px)] w-full rounded-[var(--radius-xl,0.875rem)] border bg-card pl-3.5 pr-9 text-[0.95rem] font-semibold text-foreground outline-none transition-all duration-200 placeholder:text-muted-foreground",
+            "h-[var(--height-field,32px)] w-full rounded-[var(--radius-sm,3px)] border bg-card pl-3.5 pr-9 text-[0.875rem] font-medium text-foreground outline-none transition-all duration-200 placeholder:text-muted-foreground",
             focused
-              ? "border-primary/50 shadow-[var(--shadow-focus,0_0_0_3px_color-mix(in_oklab,var(--ring,var(--primary))_25%,transparent)),0_4px_12px_color-mix(in_oklab,var(--primary)_5%,transparent)]"
-              : "border-border/60",
+              ? "border-primary/50 shadow-[var(--shadow-focus)]"
+              : "border-border",
           )}
         />
         <button
@@ -195,10 +195,10 @@ export function Combobox({
           id={listboxId}
           role="listbox"
           aria-label={ariaLabel}
-          className="absolute z-50 left-0 right-0 top-[calc(100%+6px)] max-h-60 overflow-y-auto rounded-[var(--radius-xl,0.875rem)] border border-border/60 bg-card p-1 shadow-lg"
+          className="absolute z-50 left-0 right-0 top-[calc(100%+6px)] max-h-60 overflow-y-auto rounded-[var(--radius-sm,3px)] border border-border bg-card p-1 shadow-lg"
         >
           {filtered.length === 0 ? (
-            <li className="px-3.5 py-3 text-center text-[0.85rem] italic text-muted-foreground">
+            <li className="px-3.5 py-3 text-center text-[0.8125rem] italic text-muted-foreground">
               No matches
             </li>
           ) : (
@@ -214,7 +214,7 @@ export function Combobox({
                   onClick={() => handleSelect(opt.value)}
                   onMouseEnter={() => setActiveIndex(i)}
                   className={cn(
-                    "flex cursor-pointer items-center justify-between gap-2 rounded-[calc(var(--radius-xl,0.875rem)-4px)] px-3 py-2.5 text-[0.9rem] transition-colors duration-100",
+                    "flex cursor-pointer items-center justify-between gap-2 rounded-[var(--radius-sm,3px)] px-2.5 py-2 text-[0.8125rem] transition-colors duration-100",
                     isActive && "bg-primary/10",
                     isSelected && "font-bold text-primary",
                     !isActive && !isSelected && "font-semibold text-foreground",
