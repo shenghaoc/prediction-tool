@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import { I18nProvider, useI18n } from "../../lib/i18n";
 import { Temporal } from "../../lib/temporal";
 import {
+  MAX_FLOOR_AREA_SQM,
+  MIN_FLOOR_AREA_SQM,
   STORAGE_KEYS,
   type PredictionRequestBody,
   serializeLeaseCommenceDate,
@@ -187,7 +189,7 @@ function PredictionClientInner() {
       if (
         ml_model === prev.ml_model &&
         town === prev.town &&
-        lease_commence_date === prev.lease_commence_date
+        lease_commence_date.year === prev.lease_commence_date.year
       ) {
         return prev;
       }
@@ -271,12 +273,16 @@ function PredictionClientInner() {
       setError(null);
       setOutput(0);
       setTrendData(defaultTrendData);
+      const floorArea =
+        typeof values.floor_area_sqm === "number"
+          ? Math.max(MIN_FLOOR_AREA_SQM, Math.min(MAX_FLOOR_AREA_SQM, values.floor_area_sqm))
+          : MIN_FLOOR_AREA_SQM;
       const requestBody: PredictionRequestBody = {
         mlModel: values.ml_model,
         town: values.town,
         storeyRange: values.storey_range,
         flatModel: values.flat_model,
-        floorAreaSqm: values.floor_area_sqm,
+        floorAreaSqm: floorArea,
         leaseCommenceYear: values.lease_commence_date.year,
       };
       try {
