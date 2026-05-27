@@ -31,7 +31,7 @@ export function NumberField({
 }: NumberFieldProps) {
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const holdRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const holdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const numValue = typeof value === "number" ? value : NaN;
   const clamp = useCallback(
@@ -51,19 +51,23 @@ export function NumberField({
     onChange(clamp(current - step));
   }, [numValue, min, step, clamp, onChange]);
 
-  // Long-press to repeat
+  // Long-press to repeat with recursive setTimeout for dynamic acceleration
   const startHold = useCallback((fn: () => void) => {
     fn();
     let count = 0;
-    holdRef.current = setInterval(() => {
-      count++;
-      fn();
-    }, count < 5 ? 200 : 80);
+    const execute = () => {
+      holdRef.current = setTimeout(() => {
+        count++;
+        fn();
+        execute();
+      }, count < 5 ? 200 : 80);
+    };
+    execute();
   }, []);
 
   const stopHold = useCallback(() => {
     if (holdRef.current) {
-      clearInterval(holdRef.current);
+      clearTimeout(holdRef.current);
       holdRef.current = null;
     }
   }, []);
@@ -91,7 +95,14 @@ export function NumberField({
       return;
     }
     const n = parseInt(raw, 10);
-    if (!isNaN(n)) onChange(clamp(n));
+    if (!isNaN(n)) onChange(n);
+  };
+
+  const handleBlur = () => {
+    setFocused(false);
+    if (typeof value === "number") {
+      onChange(clamp(value));
+    }
   };
 
   const stepperBtn =
@@ -145,7 +156,7 @@ export function NumberField({
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
+        onBlur={handleBlur}
         autoComplete="off"
         className={cn(
           "h-[var(--height-field,42px)] w-full border-x border-border/40 bg-card px-3 text-center text-[0.95rem] font-semibold tabular-nums text-foreground outline-none",

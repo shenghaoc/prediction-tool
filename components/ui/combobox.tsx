@@ -101,9 +101,11 @@ export function Combobox({
         if (isOpen) setActiveIndex((i) => Math.max(i - 1, 0));
         break;
       case "Enter":
-        e.preventDefault();
-        if (isOpen && activeIndex >= 0 && filtered[activeIndex]) {
-          handleSelect(filtered[activeIndex].value);
+        if (isOpen) {
+          e.preventDefault();
+          if (activeIndex >= 0 && filtered[activeIndex]) {
+            handleSelect(filtered[activeIndex].value);
+          }
         }
         break;
       case "Escape":
@@ -156,7 +158,13 @@ export function Combobox({
             setIsOpen(true);
             setQuery("");
           }}
-          onBlur={() => setFocused(false)}
+          onBlur={(e) => {
+            setFocused(false);
+            if (!containerRef.current?.contains(e.relatedTarget as Node)) {
+              setIsOpen(false);
+              setQuery("");
+            }
+          }}
           autoComplete="off"
           spellCheck={false}
           className={cn(

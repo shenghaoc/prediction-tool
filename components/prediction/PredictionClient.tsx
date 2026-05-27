@@ -83,7 +83,6 @@ function PredictionClientInner() {
   });
   const hasRestoredRef = useRef(false);
   const resultsRef = useRef<HTMLDivElement>(null);
-  const formRef = useRef<HTMLFormElement>(null);
   const liveRef = useRef<HTMLDivElement>(null);
   const requestControllerRef = useRef<AbortController | null>(null);
   const latestFormRef = useRef(formValues);
@@ -329,7 +328,7 @@ function PredictionClientInner() {
       if (
         e.key === "Escape" &&
         !document.querySelector('[role="listbox"]') &&
-        formRef.current?.contains(document.activeElement)
+        document.activeElement?.closest("form")
       ) {
         handleReset();
         announce(lang === "zh" ? "表单已重置" : "Form reset");
