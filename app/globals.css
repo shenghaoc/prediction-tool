@@ -4,9 +4,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: var(--font-dm-sans), "Avenir Next", "SF Pro Text", "Helvetica Neue", "Segoe UI", Arial, sans-serif;
-  --font-heading: var(--font-lora), "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
-  --font-serif: var(--font-heading);
+  --font-sans: var(--font-source-sans), "Source Sans 3", "Source Sans Pro", "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+  --font-heading: var(--font-source-sans), "Source Sans 3", "Source Sans Pro", "Helvetica Neue", "Segoe UI", Arial, sans-serif;
   --font-cjk: "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -32,11 +31,11 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: calc(var(--radius) * 1);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-xl: calc(var(--radius) * 1.33);
+  --radius-2xl: calc(var(--radius) * 1.67);
 }
 
 /* color-scheme follows html.dark so light-dark() tokens resolve correctly.
@@ -44,35 +43,47 @@
 :root {
   color-scheme: light;
 
-  --background: light-dark(#f2f3f8, #0c0f1d);
-  --foreground: light-dark(#0f172a, #f1f5f9);
-  --card: light-dark(#ffffff, #161929);
-  --card-foreground: light-dark(#0f172a, #f1f5f9);
-  --popover: light-dark(#ffffff, #161929);
-  --popover-foreground: light-dark(#0f172a, #f1f5f9);
+  --background: light-dark(#f4f5f7, #0f1117);
+  --foreground: light-dark(#1a1a2e, #e8eaf0);
+  --card: light-dark(#ffffff, #1a1c25);
+  --card-foreground: light-dark(#1a1a2e, #e8eaf0);
+  --popover: light-dark(#ffffff, #1a1c25);
+  --popover-foreground: light-dark(#1a1a2e, #e8eaf0);
   --primary: light-dark(#4f46e5, #818cf8);
   --primary-foreground: light-dark(#ffffff, #0f172a);
-  --secondary: light-dark(#f4f5fa, #111427);
+  --secondary: light-dark(#eef0f4, #1e2029);
   --secondary-foreground: light-dark(#475569, #94a3b8);
-  --muted: light-dark(#f4f5fa, #111427);
+  --muted: light-dark(#eef0f4, #1e2029);
   --muted-foreground: light-dark(#64748b, #94a3b8);
   --accent: light-dark(#eef2ff, rgba(129, 140, 248, 0.12));
   --accent-foreground: light-dark(#4338ca, #e0e7ff);
   --destructive: light-dark(#dc2626, #f87171);
   --destructive-foreground: light-dark(#ffffff, #2a0c0c);
-  --border: light-dark(#e2e8f0, #272b42);
-  --input: light-dark(#e2e8f0, #353a55);
+  --border: light-dark(#dde1e8, #2a2d3a);
+  --border-strong: light-dark(#cbd5e1, #353a55);
+  --input: light-dark(#dde1e8, #353a55);
   --ring: var(--primary);
   --chart-1: var(--primary);
   --chart-2: light-dark(#6366f1, #a5b4fc);
   --chart-3: light-dark(#8b5cf6, #c4b5fd);
   --chart-4: light-dark(#10b981, #4ade80);
   --chart-5: light-dark(#f59e0b, #fbbf24);
-  --radius: 0.625rem;
+  --radius: 6px;
+
+  /* v6 compact sizes */
+  --height-field: 32px;
+  --height-button: 32px;
+  --height-button-sm: 28px;
+  --height-icon-button: 32px;
+  --spacing-card-inner: 16px;
+  --shadow-focus: 0 0 0 2px color-mix(in oklab, var(--ring) 18%, transparent);
+  --shadow-button: none;
+  --shadow-button-hover: none;
 
   /* Pre-shadcn names kept for PriceTrendChart SVG + styles.css */
   --color-page: var(--background);
   --color-surface: var(--card);
+  --color-border: var(--border);
   --color-input-bg: var(--secondary);
   --color-text: var(--foreground);
   --color-text-secondary: var(--secondary-foreground);
@@ -94,24 +105,6 @@
   html,
   body {
     @apply min-h-screen bg-background font-sans text-foreground antialiased;
-    background-image:
-      radial-gradient(
-        ellipse 80% 50% at 50% -20%,
-        color-mix(in oklab, var(--primary) 12%, transparent),
-        transparent
-      ),
-      radial-gradient(
-        circle,
-        color-mix(in oklab, var(--primary) 10%, transparent) 1px,
-        transparent 1px
-      );
-    background-size:
-      100% 480px,
-      22px 22px;
-    background-position:
-      center top,
-      center center;
-    background-repeat: no-repeat, repeat;
   }
 
   button,

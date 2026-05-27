@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import { I18nProvider, useI18n } from "../../lib/i18n";
 import { Temporal } from "../../lib/temporal";
 import {
+  MAX_FLOOR_AREA_SQM,
+  MIN_FLOOR_AREA_SQM,
   STORAGE_KEYS,
   type PredictionRequestBody,
   serializeLeaseCommenceDate,
@@ -55,7 +57,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 const panelCard =
-  "relative overflow-hidden border-border/60 shadow-sm ring-1 ring-foreground/5 transition-all duration-300 hover:shadow-md hover:shadow-primary/5";
+  "relative overflow-hidden border-border/60 shadow-none transition-all duration-300";
 
 export default function PredictionClient() {
   return (
@@ -83,7 +85,9 @@ function PredictionClientInner() {
   });
   const hasRestoredRef = useRef(false);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const liveRef = useRef<HTMLDivElement>(null);
   const requestControllerRef = useRef<AbortController | null>(null);
+  const loadingRef = useRef(false);
   const latestFormRef = useRef(formValues);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -91,6 +95,22 @@ function PredictionClientInner() {
   useEffect(() => {
     latestFormRef.current = formValues;
   }, [formValues]);
+
+  // Keep loadingRef in sync to prevent stale closure in keyboard shortcut
+  useEffect(() => {
+    loadingRef.current = loading;
+  }, [loading]);
+
+  const announce = useCallback((message: string, priority: "polite" | "assertive" = "polite") => {
+    if (!liveRef.current) return;
+    liveRef.current.setAttribute("aria-live", priority);
+    liveRef.current.textContent = "";
+    // Use setTimeout instead of rAF so the announcement fires even in background tabs.
+    // The small delay (50ms) ensures screen readers detect the text change.
+    setTimeout(() => {
+      if (liveRef.current) liveRef.current.textContent = message;
+    }, 50);
+  }, []);
 
   useEffect(() => {
     const isDark = localStorage.getItem(STORAGE_KEYS.theme) === "dark";
@@ -149,6 +169,10 @@ function PredictionClientInner() {
   useEffect(() => {
     if (output > 0) {
       resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      // Focus management: move focus to results area after prediction
+      setTimeout(() => {
+        resultsRef.current?.focus({ preventScroll: false });
+      }, 100);
     }
   }, [output]);
 
@@ -165,7 +189,7 @@ function PredictionClientInner() {
       if (
         ml_model === prev.ml_model &&
         town === prev.town &&
-        lease_commence_date === prev.lease_commence_date
+        lease_commence_date.year === prev.lease_commence_date.year
       ) {
         return prev;
       }
@@ -249,12 +273,16 @@ function PredictionClientInner() {
       setError(null);
       setOutput(0);
       setTrendData(defaultTrendData);
+      const floorArea =
+        typeof values.floor_area_sqm === "number"
+          ? Math.max(MIN_FLOOR_AREA_SQM, Math.min(MAX_FLOOR_AREA_SQM, values.floor_area_sqm))
+          : MIN_FLOOR_AREA_SQM;
       const requestBody: PredictionRequestBody = {
         mlModel: values.ml_model,
         town: values.town,
         storeyRange: values.storey_range,
         flatModel: values.flat_model,
-        floorAreaSqm: values.floor_area_sqm,
+        floorAreaSqm: floorArea,
         leaseCommenceYear: values.lease_commence_date.year,
       };
       try {
@@ -281,6 +309,12 @@ function PredictionClientInner() {
           lease_commence_date: values.lease_commence_date,
         });
         toast.success(t("prediction_success"), { id: "prediction" });
+        announce(
+          lang === "zh"
+            ? `预测完成。预估价格：$${Math.round(predictedPrice).toLocaleString()}`
+            : `Prediction complete. Estimated price: $${Math.round(predictedPrice).toLocaleString()}`,
+          "assertive",
+        );
       } catch (err: unknown) {
         if (isAbortError(err)) return;
         setOutput(0);
@@ -295,8 +329,28 @@ function PredictionClientInner() {
         }
       }
     },
-    [t],
+    [t, lang, announce],
   );
+
+  // Keyboard shortcuts: Ctrl/Cmd+Enter to submit, Escape to reset
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        if (!loadingRef.current) handleFinish(latestFormRef.current);
+      }
+      if (
+        e.key === "Escape" &&
+        !document.querySelector('[role="listbox"]') &&
+        document.activeElement?.closest("form")
+      ) {
+        handleReset();
+        announce(lang === "zh" ? "表单已重置" : "Form reset");
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [lang, handleFinish, handleReset, announce]);
 
   const figures = [
     {
@@ -324,7 +378,7 @@ function PredictionClientInner() {
       <main className="min-h-screen px-6 pb-12 pt-5" aria-busy="true">
         <div className="mx-auto max-w-7xl space-y-5">
           <Skeleton className="animate-shimmer h-10 w-full max-w-md rounded-xl" />
-          <div className="grid grid-cols-2 gap-5 max-[860px]:grid-cols-1">
+          <div className="grid grid-cols-2 gap-5 max-[960px]:grid-cols-1">
             <Skeleton className="animate-shimmer h-64 rounded-xl" />
             <Skeleton className="animate-shimmer h-96 rounded-xl" />
           </div>
@@ -337,10 +391,27 @@ function PredictionClientInner() {
 
   return (
     <main className="min-h-screen px-6 pb-12 pt-5 max-sm:px-3 max-sm:pb-8">
+      {/* Skip navigation — visible on focus for keyboard users */}
+      <a
+        href="#input-ml_model"
+        className="fixed -left-[9999px] top-auto z-[100] h-px w-px overflow-hidden focus:fixed focus:left-4 focus:top-4 focus:h-auto focus:w-auto focus:overflow-visible focus:rounded-lg focus:bg-primary focus:px-5 focus:py-2.5 focus:text-sm focus:font-bold focus:text-primary-foreground focus:no-underline focus:shadow-lg"
+      >
+        Skip to form
+      </a>
+
+      {/* Live region for screen reader announcements */}
+      <div
+        ref={liveRef}
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="absolute size-px overflow-hidden whitespace-nowrap border-0 p-0 [clip:rect(0,0,0,0)]"
+      />
+
       <div className="mx-auto max-w-7xl">
-        <header className="animate-fade-in-deep sticky top-0 z-20 -mx-6 mb-6 flex items-center justify-between gap-4 border-b border-border/50 bg-background/85 px-6 py-4 backdrop-blur-md max-sm:relative max-sm:mx-0 max-sm:flex-col max-sm:items-start max-sm:px-0">
+        <header className="sticky top-0 z-20 -mx-6 mb-6 flex items-center justify-between gap-4 border-b border-border/50 bg-background/85 px-6 py-4 backdrop-blur-md max-sm:relative max-sm:mx-0 max-sm:flex-col max-sm:items-start max-sm:px-0">
           <div className="flex items-center gap-2.5">
-            <span className="font-heading text-base font-bold tracking-tight">{t("brand")}</span>
+            <span className="font-sans text-xs font-bold tracking-tight">{t("brand")}</span>
             <Badge variant="secondary" className="gap-1">
               <Sparkles className="size-3" aria-hidden />
               {t("badge")}
@@ -380,36 +451,28 @@ function PredictionClientInner() {
           </div>
         </header>
 
-        <div className="grid grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] items-start gap-5 max-[860px]:grid-cols-1">
+        <div className="grid grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] items-start gap-5 max-[960px]:grid-cols-1">
           <div className="flex flex-col gap-5">
             <Card
               size="sm"
-              className={cn(panelCard, "animate-fade-in-deep border-l-4 border-l-primary/70 py-6")}
+              className={cn(panelCard, "py-6")}
             >
-              <div
-                className="pointer-events-none absolute -right-20 -top-16 size-56 rounded-full bg-primary/15 blur-3xl"
-                aria-hidden
-              />
-              <div
-                className="pointer-events-none absolute -bottom-20 -left-16 size-48 rounded-full bg-chart-2/15 blur-3xl"
-                aria-hidden
-              />
-              <CardHeader className="relative px-6 pb-0">
+              <CardHeader className="px-6 pb-0">
                 <CardTitle
                   asChild
                   className={cn(
-                    "font-heading whitespace-pre-line text-[clamp(2rem,5vw,3rem)] font-bold normal-case tracking-tight",
+                    "whitespace-pre-line text-[clamp(1.8rem,4vw,2.4rem)] font-extrabold normal-case tracking-tight",
                     isZh && "font-cjk font-extrabold",
                   )}
                 >
                   <h1>{t("price_prediction")}</h1>
                 </CardTitle>
-                <CardDescription className="max-w-prose text-base leading-relaxed">
+                <CardDescription className="max-w-prose text-sm leading-relaxed">
                   {t("intro_blurb")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="relative px-6 pt-4">
-                <div className="animate-stagger grid grid-cols-3 gap-2.5 max-sm:grid-cols-1">
+                <div className="grid grid-cols-3 gap-2.5 max-sm:grid-cols-1">
                   {figures.map((figure) => (
                     <StatTile
                       key={figure.label}
@@ -420,21 +483,19 @@ function PredictionClientInner() {
                     />
                   ))}
                 </div>
+                <p className="mt-3.5 text-[0.82rem] leading-relaxed text-muted-foreground">
+                  {t("intro_caption")}
+                </p>
               </CardContent>
             </Card>
 
-            <Card size="sm" className={cn(panelCard, "animate-fade-in-deep border-l-4 border-l-primary/70 py-6")}>
+            <Card size="sm" className={cn(panelCard, "py-6")}>
               <CardHeader className="px-6 pb-2">
                 <CardTitle asChild className="text-primary normal-case">
                   <h2>{t("prediction_form")}</h2>
                 </CardTitle>
               </CardHeader>
               <CardContent className="px-6">
-                {loading && (
-                  <div className="progress-track mb-4" role="progressbar" aria-label={t("predicting")}>
-                    <div className="progress-bar" style={{ width: "60%" }} />
-                  </div>
-                )}
                 {error && !loading && (
                   <div role="alert" className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
                     {error}
@@ -448,11 +509,16 @@ function PredictionClientInner() {
                   onValuesChange={handleFormChange}
                   t={t}
                 />
+                {loading && (
+                  <div className="progress-track mt-4" role="progressbar" aria-label={t("predicting")}>
+                    <div className="progress-bar" style={{ width: "60%" }} />
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
 
-          <div ref={resultsRef}>
+          <div ref={resultsRef} tabIndex={-1} className="outline-none" aria-label={t("predicted_price")}>
             <PredictionResults
               output={output}
               summaryValues={summaryValues}

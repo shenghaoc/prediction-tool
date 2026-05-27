@@ -1,6 +1,6 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { DM_Sans, Lora } from 'next/font/google';
+import { Source_Sans_3 } from 'next/font/google';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import {
@@ -11,17 +11,10 @@ import {
 	SITE_URL
 } from '../lib/site';
 
-const dmSans = DM_Sans({
+const sourceSans3 = Source_Sans_3({
 	subsets: ['latin'],
-	weight: ['400', '500', '600', '700', '800'],
-	variable: '--font-dm-sans',
-	display: 'swap'
-});
-
-const lora = Lora({
-	subsets: ['latin'],
-	weight: ['400', '500', '600', '700'],
-	variable: '--font-lora',
+	weight: ['300', '400', '500', '600', '700', '800', '900'],
+	variable: '--font-source-sans',
 	display: 'swap'
 });
 
@@ -68,7 +61,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<html lang="en" className={`${dmSans.variable} ${lora.variable}`}>
+		<html lang="en" className={sourceSans3.variable}>
 			<body>
 				<TooltipProvider delayDuration={300}>{children}</TooltipProvider>
 				<Toaster richColors closeButton />

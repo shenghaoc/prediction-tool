@@ -16,6 +16,7 @@
   "switch_language": "中文/English",
   "price_prediction": "Price\nPrediction",
   "intro_blurb": "Compare flat attributes, submit a scenario, and get a quick resale estimate with a 12-month trend view.",
+  "intro_caption": "Fast scenario testing for layout, lease, and town combinations.",
   "prediction_form": "Prediction Form",
   "ml_model": "ML Model",
   "select_ml_model": "Select ML Model",
