@@ -31,7 +31,7 @@ describe('next security headers configuration', () => {
 			'Referrer-Policy': 'strict-origin-when-cross-origin',
 			'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
 			'Content-Security-Policy':
-				"default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:;",
+				"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:;",
 			'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'
 		});
 	});
