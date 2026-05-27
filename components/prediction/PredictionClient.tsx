@@ -331,7 +331,7 @@ function PredictionClientInner() {
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
         e.preventDefault();
-        if (!loadingRef.current) handleFinish(formValues);
+        if (!loadingRef.current) handleFinish(latestFormRef.current);
       }
       if (
         e.key === "Escape" &&
@@ -344,7 +344,7 @@ function PredictionClientInner() {
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [loading, lang, formValues, handleFinish, handleReset, announce]);
+  }, [lang, handleFinish, handleReset, announce]);
 
   const figures = [
     {

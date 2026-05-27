@@ -5,7 +5,6 @@ import { useMemo, memo } from "react";
 import { Home, Layers, MapPin, TrendingDown, TrendingUp } from "lucide-react";
 import type { TFunction } from "../../lib/i18n";
 import type { SummaryValues, TrendPoint } from "./types";
-import { ResultsSkeleton } from "./results-skeleton";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -48,7 +47,6 @@ export default memo(function PredictionResults({
   loading = false,
 }: PredictionResultsProps) {
   const hasOutput = output > 0;
-  const showSkeleton = loading && !hasOutput;
 
   const chartStats = useMemo(() => {
     const latestValue = trendData[trendData.length - 1]?.value ?? 0;
@@ -125,29 +123,22 @@ export default memo(function PredictionResults({
             <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
               {t("prediction")}
             </p>
-            {showSkeleton ? (
-              <Skeleton className="animate-shimmer mt-2 h-9 w-36 rounded-lg" />
-            ) : (
-              <p
-                key={output}
-                className={cn(
-                  "mt-1 font-sans text-3xl font-extrabold tabular-nums tracking-tight transition-all duration-500",
-                  !hasOutput && "text-base font-semibold text-muted-foreground",
-                  hasOutput && "text-primary animate-settle",
-                )}
-              >
-                {hasOutput ? fmt(output) : t("awaiting")}
-              </p>
-            )}
+            <p
+              key={output}
+              className={cn(
+                "mt-1 font-sans text-3xl font-extrabold tabular-nums tracking-tight transition-all duration-500",
+                loading && !hasOutput && "animate-pulse text-base font-semibold text-muted-foreground",
+                !loading && !hasOutput && "text-base font-semibold text-muted-foreground",
+                hasOutput && "text-primary animate-settle",
+              )}
+            >
+              {hasOutput ? fmt(output) : loading ? t("predicting") : t("awaiting")}
+            </p>
           </div>
         </CardHeader>
 
-        <CardContent className="relative flex flex-col gap-5 px-6">
-          {showSkeleton ? (
-            <ResultsSkeleton />
-          ) : (
-            <>
-              <div className="grid grid-cols-3 gap-2.5 max-sm:grid-cols-1">
+        <CardContent className="flex flex-col gap-5 px-6">
+          <div className="grid grid-cols-3 gap-2.5 max-sm:grid-cols-1">
                 {summaryItems.map((item, i) => {
                   const Icon = item.icon;
                   return (
@@ -216,16 +207,14 @@ export default memo(function PredictionResults({
                       />
                     ))}
                   </div>
-                  <h3 className="animate-fade-in font-sans text-base font-semibold text-foreground">
+                  <h3 className="font-sans text-base font-semibold text-foreground">
                     {t("placeholder_title")}
                   </h3>
-                  <p className="animate-fade-in mx-auto max-w-[32ch] text-sm leading-relaxed text-muted-foreground" style={{ animationDelay: "0.08s", animationFillMode: "both" }}>
+                  <p className="mx-auto max-w-[32ch] text-sm leading-relaxed text-muted-foreground">
                     {t("placeholder_body")}
                   </p>
                 </div>
               )}
-            </>
-          )}
         </CardContent>
       </Card>
     </section>

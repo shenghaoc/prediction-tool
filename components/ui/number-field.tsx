@@ -67,6 +67,10 @@ export function NumberField({
 
   // Long-press to repeat with recursive setTimeout for dynamic acceleration
   const startHold = useCallback((fn: () => void) => {
+    if (holdRef.current) {
+      clearTimeout(holdRef.current);
+      holdRef.current = null;
+    }
     fn();
     let count = 0;
     const execute = () => {
@@ -104,11 +108,12 @@ export function NumberField({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
-    if (raw === "") {
+    const sanitized = raw.replace(/[^0-9]/g, "");
+    if (sanitized === "") {
       onChange("");
       return;
     }
-    const n = Number(raw);
+    const n = Number(sanitized);
     if (!isNaN(n)) onChange(n);
   };
 
@@ -167,6 +172,7 @@ export function NumberField({
         aria-valuemin={min}
         aria-valuemax={max}
         aria-valuenow={isNaN(numValue) ? undefined : numValue}
+        required={required}
         aria-required={required}
         aria-label={ariaLabel}
         value={value === "" || value === undefined ? "" : value}

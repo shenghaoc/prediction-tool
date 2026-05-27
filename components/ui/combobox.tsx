@@ -217,6 +217,7 @@ export function Combobox({
                   id={`${id}-opt-${i}`}
                   role="option"
                   aria-selected={isSelected}
+                  onMouseDown={(e) => e.preventDefault()}
                   onClick={() => handleSelect(opt.value)}
                   onMouseEnter={() => setActiveIndex(i)}
                   className={cn(
