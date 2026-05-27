@@ -315,7 +315,7 @@ function PredictionClientInner() {
         }
       }
     },
-    [t],
+    [t, lang, announce],
   );
 
   // Keyboard shortcuts: Ctrl/Cmd+Enter to submit, Escape to reset

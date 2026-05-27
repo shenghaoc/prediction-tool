@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, type KeyboardEvent } from "react";
+import { useState, useRef, useCallback, useEffect, type KeyboardEvent } from "react";
 import { Minus, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -32,6 +32,9 @@ export function NumberField({
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const holdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const valueRef = useRef(value);
+
+  useEffect(() => { valueRef.current = value; }, [value]);
 
   const numValue = typeof value === "number" ? value : NaN;
   const clamp = useCallback(
@@ -42,14 +45,14 @@ export function NumberField({
   const atMax = !isNaN(numValue) && numValue >= max;
 
   const increment = useCallback(() => {
-    const current = isNaN(numValue) ? min : numValue;
+    const current = typeof valueRef.current === "number" ? valueRef.current : min;
     onChange(clamp(current + step));
-  }, [numValue, min, step, clamp, onChange]);
+  }, [min, step, clamp, onChange]);
 
   const decrement = useCallback(() => {
-    const current = isNaN(numValue) ? min : numValue;
+    const current = typeof valueRef.current === "number" ? valueRef.current : min;
     onChange(clamp(current - step));
-  }, [numValue, min, step, clamp, onChange]);
+  }, [min, step, clamp, onChange]);
 
   // Long-press to repeat with recursive setTimeout for dynamic acceleration
   const startHold = useCallback((fn: () => void) => {

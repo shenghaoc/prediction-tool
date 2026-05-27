@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useMemo } from "react";
+import React, { useRef, useState, useMemo, useId } from "react";
 import type { TrendPoint } from "./types";
 
 type PriceTrendChartProps = {
@@ -10,6 +10,9 @@ type PriceTrendChartProps = {
 
 export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const uid = useId();
+  const gradId = `chartGrad-${uid}`;
+  const lineGradId = `chartLineGrad-${uid}`;
   const [tooltip, setTooltip] = useState<{
     idx: number;
     x: number;
@@ -22,9 +25,6 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
   const padL = 56, padR = 18, padT = 20, padB = 36;
   const cW = W - padL - padR, cH = H - padT - padB;
 
-  // ⚡ Bolt Optimization: Memoize expensive calculations
-  // Impact: Prevents recalculation of chart data and SVG paths on every mouse move
-  // Measurement: Significant reduction in CPU time during hover events
   const chartData = useMemo(() => {
     if (!data || data.length === 0) return null;
 
@@ -74,9 +74,7 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
     return { pts, linePath, areaPath, yTicks, peakIdx, lastIdx };
   }, [data, padL, padT, cW, cH]);
 
-  // ⚡ Bolt Optimization: Memoize Intl.NumberFormat
-  // Impact: NumberFormat instantiation is slow. Memoizing it prevents re-creation on every render.
-  const { formatter, fmtFull, fmtK } = useMemo(() => {
+  const { fmtFull, fmtK } = useMemo(() => {
     const formatter = new Intl.NumberFormat(locale === "zh" ? "zh-SG" : "en-SG", {
       style: "currency",
       currency: "SGD",
@@ -88,7 +86,7 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
       if (v >= 1e3) return `${Math.round(v / 1e3)}k`;
       return fmtFull(v);
     };
-    return { formatter, fmtFull, fmtK };
+    return { fmtFull, fmtK };
   }, [locale]);
 
   if (!chartData) return null;
@@ -104,8 +102,6 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
       if (dist < closestDist) { closestDist = dist; closest = i; }
     });
 
-    // ⚡ Bolt Optimization: Bail out of state updates if tooltip index hasn't changed
-    // Impact: Completely bypasses React reconciliation when mouse moves within the same data point's bounds
     setTooltip((prev) => {
       if (prev && prev.idx === closest) return prev;
       const p = chartData.pts[closest];
@@ -130,13 +126,13 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
         aria-label="Price trend chart"
       >
         <defs>
-          <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="var(--color-chart)" stopOpacity="0.28" />
             <stop offset="60%" stopColor="var(--color-chart)" stopOpacity="0.06" />
             <stop offset="100%" stopColor="var(--color-chart)" stopOpacity="0" />
           </linearGradient>
           {/* v5: horizontal gradient for line stroke */}
-          <linearGradient id="chartLineGrad" x1="0" y1="0" x2="1" y2="0">
+          <linearGradient id={lineGradId} x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="var(--color-chart)" />
             <stop offset="100%" stopColor="var(--chart-2, var(--color-chart))" />
           </linearGradient>
@@ -153,9 +149,9 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
         {pts.filter((_, i) => i % 3 === 0 || i === lastIdx).map((p, i) => (
           <text key={i} x={p.x} y={padT + cH + 22} textAnchor="middle" className="chart-axis-label">{p.label.slice(5)}</text>
         ))}
-        <path d={areaPath} fill="url(#chartGrad)" />
+        <path d={areaPath} fill={`url(#${gradId})`} />
         {/* v5: gradient line stroke */}
-        <path d={linePath} fill="none" stroke="url(#chartLineGrad)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d={linePath} fill="none" stroke={`url(#${lineGradId})`} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
         {/* v5: peak dot uses chart-2 for visual hierarchy */}
         <circle cx={pts[peakIdx].x} cy={pts[peakIdx].y} r="4" fill="var(--chart-2, var(--color-primary))" stroke="var(--color-surface)" strokeWidth="2" />
         {/* v5: glow ring behind latest dot */}
