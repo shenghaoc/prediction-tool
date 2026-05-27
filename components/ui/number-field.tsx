@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect, type KeyboardEvent } from "react";
+import { useRef, useCallback, useEffect, type KeyboardEvent } from "react";
 import { Minus, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -31,7 +31,6 @@ export function NumberField({
   required = false,
   className,
 }: NumberFieldProps) {
-  const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const holdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const valueRef = useRef(value);
@@ -118,7 +117,6 @@ export function NumberField({
   };
 
   const handleBlur = () => {
-    setFocused(false);
     // Read the latest value from the ref to avoid the falsy-zero pitfall
     // where the prop value is "" but the ref still holds the last number.
     const latest = valueRef.current;
@@ -136,9 +134,7 @@ export function NumberField({
       aria-label={ariaLabel}
       className={cn(
         "grid overflow-hidden rounded-[var(--radius-sm,3px)] border transition-all duration-200",
-        focused
-          ? "border-primary/50 shadow-[var(--shadow-focus)]"
-          : "border-border",
+        "border-border hover:border-primary/30 focus-within:border-primary/50 focus-within:shadow-[var(--shadow-focus)]",
         unit ? "grid-cols-[40px_1fr_auto_40px]" : "grid-cols-[40px_1fr_40px]",
         className,
       )}
@@ -179,7 +175,6 @@ export function NumberField({
         placeholder={placeholder}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
-        onFocus={() => setFocused(true)}
         onBlur={handleBlur}
         autoComplete="off"
         className={cn(
