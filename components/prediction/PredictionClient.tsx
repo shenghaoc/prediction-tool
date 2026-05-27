@@ -84,6 +84,13 @@ function PredictionClientInner() {
   const hasRestoredRef = useRef(false);
   const resultsRef = useRef<HTMLDivElement>(null);
   const requestControllerRef = useRef<AbortController | null>(null);
+  const latestFormRef = useRef(formValues);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  // Keep latestFormRef in sync without triggering re-renders
+  useEffect(() => {
+    latestFormRef.current = formValues;
+  });
 
   useEffect(() => {
     const isDark = localStorage.getItem(STORAGE_KEYS.theme) === "dark";
@@ -166,27 +173,55 @@ function PredictionClientInner() {
     });
   }, []);
 
+  // ⚡ Bolt Optimization: Debounce localStorage writes
+  // Prevents main thread blocking during rapid keystrokes.
+  // Uses latestFormRef + unmount flush to prevent data loss on navigation away.
   useEffect(() => {
     if (!mounted) return;
 
-    // ⚡ Bolt Optimization: Debounce localStorage writes
-    // Impact: Prevents main thread blocking and layout thrashing during rapid keystrokes in uncontrolled inputs like floor area.
-    const timeoutId = setTimeout(() => {
+    const writeForm = () => {
+      saveTimeoutRef.current = undefined;
       try {
         localStorage.setItem(
           STORAGE_KEYS.form,
           JSON.stringify({
-            ...formValues,
-            lease_commence_date: serializeLeaseCommenceDate(formValues.lease_commence_date),
+            ...latestFormRef.current,
+            lease_commence_date: serializeLeaseCommenceDate(
+              latestFormRef.current.lease_commence_date,
+            ),
           } satisfies PersistedFieldValues),
         );
       } catch {
         /* storage full or disabled */
       }
-    }, 500);
+    };
 
-    return () => clearTimeout(timeoutId);
+    saveTimeoutRef.current = setTimeout(writeForm, 500);
+
+    return () => clearTimeout(saveTimeoutRef.current);
   }, [formValues, mounted]);
+
+  // Flush pending localStorage write on unmount to prevent data loss
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current !== undefined) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+      try {
+        localStorage.setItem(
+          STORAGE_KEYS.form,
+          JSON.stringify({
+            ...latestFormRef.current,
+            lease_commence_date: serializeLeaseCommenceDate(
+              latestFormRef.current.lease_commence_date,
+            ),
+          } satisfies PersistedFieldValues),
+        );
+      } catch {
+        /* storage full or disabled */
+      }
+    };
+  }, []);
 
   const handleReset = useCallback(() => {
     requestControllerRef.current?.abort();
