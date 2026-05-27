@@ -84,6 +84,13 @@ function PredictionClientInner() {
   const hasRestoredRef = useRef(false);
   const resultsRef = useRef<HTMLDivElement>(null);
   const requestControllerRef = useRef<AbortController | null>(null);
+  const latestFormRef = useRef(formValues);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  // Keep latestFormRef in sync without triggering re-renders
+  useEffect(() => {
+    latestFormRef.current = formValues;
+  }, [formValues]);
 
   useEffect(() => {
     const isDark = localStorage.getItem(STORAGE_KEYS.theme) === "dark";
@@ -166,20 +173,57 @@ function PredictionClientInner() {
     });
   }, []);
 
+  // Debounce localStorage writes to prevent main thread blocking during rapid keystrokes.
+  // Uses a ref so the timeout callback always reads the latest values without re-closing.
   useEffect(() => {
     if (!mounted) return;
-    try {
-      localStorage.setItem(
-        STORAGE_KEYS.form,
-        JSON.stringify({
-          ...formValues,
-          lease_commence_date: serializeLeaseCommenceDate(formValues.lease_commence_date),
-        } satisfies PersistedFieldValues),
-      );
-    } catch {
-      /* storage full or disabled */
-    }
+
+    const writeForm = () => {
+      saveTimeoutRef.current = undefined;
+      try {
+        localStorage.setItem(
+          STORAGE_KEYS.form,
+          JSON.stringify({
+            ...latestFormRef.current,
+            lease_commence_date: serializeLeaseCommenceDate(
+              latestFormRef.current.lease_commence_date,
+            ),
+          } satisfies PersistedFieldValues),
+        );
+      } catch {
+        /* storage full or disabled */
+      }
+    };
+
+    saveTimeoutRef.current = setTimeout(writeForm, 500);
+
+    return () => clearTimeout(saveTimeoutRef.current);
   }, [formValues, mounted]);
+
+  // Flush pending localStorage write on unmount to prevent data loss.
+  // Skip if the restore effect hasn't run yet — writing initialFormValues
+  // would overwrite the user's previously saved form state.
+  useEffect(() => {
+    return () => {
+      if (!hasRestoredRef.current) return;
+      if (saveTimeoutRef.current !== undefined) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+      try {
+        localStorage.setItem(
+          STORAGE_KEYS.form,
+          JSON.stringify({
+            ...latestFormRef.current,
+            lease_commence_date: serializeLeaseCommenceDate(
+              latestFormRef.current.lease_commence_date,
+            ),
+          } satisfies PersistedFieldValues),
+        );
+      } catch {
+        /* storage full or disabled */
+      }
+    };
+  }, []);
 
   const handleReset = useCallback(() => {
     requestControllerRef.current?.abort();
