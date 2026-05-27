@@ -510,7 +510,7 @@ function PredictionClientInner() {
                   t={t}
                 />
                 {loading && (
-                  <div className="progress-track mt-4" role="progressbar" aria-label={t("predicting")}>
+                  <div className="progress-track mt-4" role="progressbar" aria-label={t("predicting")} aria-valuemin={0} aria-valuemax={100}>
                     <div className="progress-bar" style={{ width: "60%" }} />
                   </div>
                 )}
