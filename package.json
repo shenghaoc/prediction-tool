@@ -49,6 +49,11 @@
     "vitest": "^4.1.7",
     "wrangler": "^4.94.0"
   },
+  "pnpm": {
+    "overrides": {
+      "postcss": "^8.5.10"
+    }
+  },
   "overrides": {
     "@opennextjs/aws": {
       "esbuild": "0.27.3"
