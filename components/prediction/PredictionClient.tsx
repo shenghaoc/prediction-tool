@@ -44,6 +44,19 @@ import {
   normalizeTrendData,
   trendDataHasValidPrices,
 } from "./utils";
+
+const MAX_PREDICTION_CACHE_SIZE = 50;
+
+function getPredictionCacheKey(body: PredictionRequestBody): string {
+  return JSON.stringify(
+    Object.keys(body)
+      .sort()
+      .reduce<Record<string, unknown>>((acc, key) => {
+        acc[key] = body[key as keyof PredictionRequestBody];
+        return acc;
+      }, {}),
+  );
+}
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -90,7 +103,7 @@ function PredictionClientInner() {
   const loadingRef = useRef(false);
   const latestFormRef = useRef(formValues);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const predictionCacheRef = useRef<Record<string, ApiResponse>>({});
+  const predictionCacheRef = useRef<Map<string, ApiResponse>>(new Map());
 
   // Keep latestFormRef in sync without triggering re-renders
   useEffect(() => {
@@ -287,12 +300,12 @@ function PredictionClientInner() {
 
       // ⚡ Bolt: Cache API responses to prevent redundant network requests
       // when users toggle inputs back and forth or submit identical queries.
-      const cacheKey = JSON.stringify(requestBody);
+      const cacheKey = getPredictionCacheKey(requestBody);
       let serverData: ApiResponse;
 
       try {
-        if (predictionCacheRef.current[cacheKey]) {
-          serverData = predictionCacheRef.current[cacheKey];
+        if (predictionCacheRef.current.has(cacheKey)) {
+          serverData = predictionCacheRef.current.get(cacheKey)!;
         } else {
           setOutput(0);
           setTrendData(defaultTrendData);
@@ -306,7 +319,14 @@ function PredictionClientInner() {
             throw new Error(await getResponseErrorMessage(response, t("error_fetch")));
           }
           serverData = await response.json();
-          predictionCacheRef.current[cacheKey] = serverData;
+
+          if (predictionCacheRef.current.size >= MAX_PREDICTION_CACHE_SIZE) {
+            const oldestKey = predictionCacheRef.current.keys().next().value;
+            if (oldestKey !== undefined) {
+              predictionCacheRef.current.delete(oldestKey);
+            }
+          }
+          predictionCacheRef.current.set(cacheKey, serverData);
         }
 
         const normalizedData = normalizeTrendData(serverData);
