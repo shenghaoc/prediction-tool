@@ -6,7 +6,7 @@ import { useTheme } from "next-themes";
 import { Temporal } from "../../lib/temporal";
 import { STORAGE_KEYS, serializeLeaseCommenceDate } from "../../lib/prediction";
 import { initialFormValues } from "./constants";
-import type { FieldType, PersistedFieldValues } from "./types";
+import { FORM_SCHEMA_VERSION, type FieldType, type PersistedForm } from "./types";
 
 // Theme toggle backed by next-themes. `isDark` is only meaningful after mount
 // (the server can't know the persisted theme), so it stays false until then to
@@ -85,9 +85,12 @@ export function useKeyboardShortcuts({
 
 function serializeForm(values: FieldType): string {
   return JSON.stringify({
-    ...values,
-    lease_commence_date: serializeLeaseCommenceDate(values.lease_commence_date),
-  } satisfies PersistedFieldValues);
+    v: FORM_SCHEMA_VERSION,
+    data: {
+      ...values,
+      lease_commence_date: serializeLeaseCommenceDate(values.lease_commence_date),
+    },
+  } satisfies PersistedForm);
 }
 
 // Persists form values to localStorage: restores once on mount, debounces
@@ -124,8 +127,13 @@ export function useFormPersistence({
     const savedForm = localStorage.getItem(STORAGE_KEYS.form);
     if (!savedForm) return;
     try {
-      const parsed = JSON.parse(savedForm) as PersistedFieldValues;
-      const { lease_commence_date: savedDate, ...rest } = parsed;
+      const parsed = JSON.parse(savedForm) as Partial<PersistedForm>;
+      // Discard payloads from an older/unknown schema silently — not an error.
+      if (parsed.v !== FORM_SCHEMA_VERSION || !parsed.data) {
+        localStorage.removeItem(STORAGE_KEYS.form);
+        return;
+      }
+      const { lease_commence_date: savedDate, ...rest } = parsed.data;
       const leaseDate = savedDate ? Temporal.PlainDate.from(savedDate) : undefined;
       onRestoreRef.current({
         ...initialFormValues,

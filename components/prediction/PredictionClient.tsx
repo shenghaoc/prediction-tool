@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useCallback, useEffect, useRef, useState } from "react";
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Home, Layers, MapPin, Moon, Sparkles, Sun } from "lucide-react";
 import { toast } from "sonner";
 
@@ -71,11 +71,17 @@ export default function PredictionClient() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formValues, setFormValues] = useState<FieldType>(initialFormValues);
-  const [summaryValues, setSummaryValues] = useState<SummaryValues>({
-    ml_model: initialFormValues.ml_model,
-    town: initialFormValues.town,
-    lease_commence_date: initialFormValues.lease_commence_date,
-  });
+  // Derived from the form rather than stored: the summary tiles mirror the
+  // current selection. Memoized so PredictionResults (memo) only re-renders
+  // when one of these three fields actually changes.
+  const summaryValues = useMemo<SummaryValues>(
+    () => ({
+      ml_model: formValues.ml_model,
+      town: formValues.town,
+      lease_commence_date: formValues.lease_commence_date,
+    }),
+    [formValues.ml_model, formValues.town, formValues.lease_commence_date],
+  );
   const resultsRef = useRef<HTMLDivElement>(null);
   const requestControllerRef = useRef<AbortController | null>(null);
   const predictionCacheRef = useRef<Map<string, ApiResponse>>(new Map());
@@ -88,14 +94,7 @@ export default function PredictionClient() {
 
   useFormPersistence({
     formValues,
-    onRestore: (restored) => {
-      setFormValues(restored);
-      setSummaryValues({
-        ml_model: restored.ml_model,
-        town: restored.town,
-        lease_commence_date: restored.lease_commence_date,
-      });
-    },
+    onRestore: setFormValues,
     onRestoreError: () => toast.error(t("error_form_restore_failed")),
   });
 
@@ -117,23 +116,7 @@ export default function PredictionClient() {
 
   const handleFormChange = useCallback((allValues: Partial<FieldType>) => {
     setError(null);
-    setFormValues((prev) => {
-      const next = { ...prev, ...allValues };
-      return next;
-    });
-    setSummaryValues((prev) => {
-      const ml_model = allValues.ml_model ?? prev.ml_model;
-      const town = allValues.town ?? prev.town;
-      const lease_commence_date = allValues.lease_commence_date ?? prev.lease_commence_date;
-      if (
-        ml_model === prev.ml_model &&
-        town === prev.town &&
-        lease_commence_date.year === prev.lease_commence_date.year
-      ) {
-        return prev;
-      }
-      return { ml_model, town, lease_commence_date };
-    });
+    setFormValues((prev) => ({ ...prev, ...allValues }));
   }, []);
 
   const handleReset = useCallback(() => {
@@ -144,11 +127,6 @@ export default function PredictionClient() {
     setFormValues(initialFormValues);
     setOutput(0);
     setTrendData(defaultTrendData);
-    setSummaryValues({
-      ml_model: initialFormValues.ml_model,
-      town: initialFormValues.town,
-      lease_commence_date: initialFormValues.lease_commence_date,
-    });
   }, []);
 
   const handleFinish = useCallback(
@@ -174,11 +152,6 @@ export default function PredictionClient() {
         setTrendData(normalizedData);
         const predictedPrice = normalizePrice(normalizedData[normalizedData.length - 1]?.value ?? 0);
         setOutput(predictedPrice);
-        setSummaryValues({
-          ml_model: values.ml_model,
-          town: values.town,
-          lease_commence_date: values.lease_commence_date,
-        });
         toast.success(t("prediction_success"), { id: "prediction" });
         announce(
           lang === "zh"
