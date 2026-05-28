@@ -171,8 +171,7 @@ export function Combobox({
           autoComplete="off"
           spellCheck={false}
           className={cn(
-            "h-[var(--height-field,32px)] w-full rounded-[var(--radius-sm,3px)] border bg-card pl-3.5 pr-9 text-[0.875rem] font-medium text-foreground outline-none transition-all duration-200 placeholder:text-muted-foreground",
-            "border-border hover:border-primary/30 focus-visible:border-primary/50 focus-visible:shadow-[var(--shadow-focus)]",
+            "h-[var(--height-field,32px)] w-full rounded-[var(--radius-sm,3px)] border border-border bg-card pl-3.5 pr-9 text-[0.875rem] font-medium text-foreground outline-none transition-all duration-200 placeholder:text-muted-foreground hover:border-primary/30 focus-visible:border-primary/50 focus-visible:shadow-[var(--shadow-focus)]",
           )}
         />
         <button

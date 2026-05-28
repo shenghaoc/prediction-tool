@@ -133,8 +133,7 @@ export function NumberField({
       role="group"
       aria-label={ariaLabel}
       className={cn(
-        "grid overflow-hidden rounded-[var(--radius-sm,3px)] border transition-all duration-200",
-        "border-border hover:border-primary/30 focus-within:border-primary/50 focus-within:shadow-[var(--shadow-focus)]",
+        "grid overflow-hidden rounded-[var(--radius-sm,3px)] border border-border transition-all duration-200 hover:border-primary/30 focus-within:border-primary/50 focus-within:shadow-[var(--shadow-focus)]",
         unit ? "grid-cols-[40px_1fr_auto_40px]" : "grid-cols-[40px_1fr_40px]",
         className,
       )}
