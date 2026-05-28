@@ -29,6 +29,10 @@ const PriceTrendChart = dynamic(() => import("./PriceTrendChart"), {
 const panelCard =
   "relative overflow-hidden border-border/60 shadow-none transition-all duration-300";
 
+// Static decorative bar heights for the empty state — hoisted so the array
+// isn't re-created on every render.
+const PLACEHOLDER_BAR_HEIGHTS = [0.35, 0.55, 0.85, 0.45, 0.7, 0.3];
+
 type PredictionResultsProps = {
   output: number;
   summaryValues: SummaryValues;
@@ -199,7 +203,7 @@ export default memo(function PredictionResults({
               ) : (
                 <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-border/70 bg-gradient-to-b from-muted/30 to-transparent px-4 py-12 text-center">
                   <div className="flex items-end gap-1.5 opacity-40" aria-hidden>
-                    {[0.35, 0.55, 0.85, 0.45, 0.7, 0.3].map((h, i) => (
+                    {PLACEHOLDER_BAR_HEIGHTS.map((h, i) => (
                       <div
                         key={i}
                         className="w-2.5 rounded-sm bg-primary"
