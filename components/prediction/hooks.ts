@@ -29,6 +29,7 @@ export function useThemeToggle() {
 // Imperative screen-reader announcer backed by an aria-live region.
 export function useAnnouncer() {
   const liveRef = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const announce = useCallback(
     (message: string, priority: "polite" | "assertive" = "polite") => {
@@ -37,12 +38,15 @@ export function useAnnouncer() {
       liveRef.current.textContent = "";
       // Use setTimeout instead of rAF so the announcement fires even in background tabs.
       // The small delay (50ms) ensures screen readers detect the text change.
-      setTimeout(() => {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
         if (liveRef.current) liveRef.current.textContent = message;
       }, 50);
     },
     [],
   );
+
+  useEffect(() => () => clearTimeout(timeoutRef.current), []);
 
   return { liveRef, announce };
 }
@@ -147,11 +151,10 @@ export function useFormPersistence({
   }, []);
 
   // Debounce writes to prevent main thread blocking during rapid keystrokes.
-  // Skip until the restore attempt has run so we never overwrite saved state
-  // with the initial form values.
+  // The restore effect above runs before this one on mount, and the write reads
+  // latestFormRef at fire time (500ms later) — so a restored value is never
+  // clobbered by the initial form values.
   useEffect(() => {
-    if (!hasRestoredRef.current) return;
-
     const writeForm = () => {
       saveTimeoutRef.current = undefined;
       try {

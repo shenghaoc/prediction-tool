@@ -40,7 +40,7 @@ export function I18nProvider({
 
 	const changeLang = useCallback((l: Lang) => {
 		setLang(l);
-		document.cookie = `${LANGUAGE_COOKIE}=${l};path=/;max-age=31536000;samesite=lax`;
+		document.cookie = `${LANGUAGE_COOKIE}=${l};path=/;max-age=31536000;samesite=lax;secure`;
 	}, []);
 
 	const t: TFunction = useCallback(

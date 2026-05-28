@@ -154,9 +154,10 @@ export default function PredictionClient() {
         setOutput(predictedPrice);
         toast.success(t("prediction_success"), { id: "prediction" });
         announce(
-          lang === "zh"
-            ? `预测完成。预估价格：$${Math.round(predictedPrice).toLocaleString()}`
-            : `Prediction complete. Estimated price: $${Math.round(predictedPrice).toLocaleString()}`,
+          t("sr_prediction_complete").replace(
+            "{price}",
+            `$${Math.round(predictedPrice).toLocaleString()}`,
+          ),
           "assertive",
         );
       };
@@ -223,7 +224,7 @@ export default function PredictionClient() {
         }
       }
     },
-    [t, lang, announce],
+    [t, announce],
   );
 
   // Keyboard shortcuts: Ctrl/Cmd+Enter to submit, Escape to reset
@@ -233,7 +234,7 @@ export default function PredictionClient() {
     },
     onReset: () => {
       handleReset();
-      announce(lang === "zh" ? "表单已重置" : "Form reset");
+      announce(t("sr_form_reset"));
     },
   });
 
