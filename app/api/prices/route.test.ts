@@ -109,3 +109,14 @@ describe('POST /api/prices error responses', () => {
 		expect(JSON.stringify(body)).not.toContain(sensitiveDbError);
 	});
 });
+
+describe('POST /api/prices payload length', () => {
+	test('returns 413 when request payload is too large', async () => {
+		const largeBody = { ...validRequestBody, extra: 'a'.repeat(3000) };
+		const response = await POST(createPostRequest(largeBody));
+		const body = (await response.json()) as { error?: string };
+
+		expect(response.status).toBe(413);
+		expect(body.error).toBe('Request payload too large.');
+	});
+});

@@ -36,7 +36,12 @@ export async function POST(request: Request) {
 	let requestBody: unknown;
 
 	try {
-		requestBody = await request.json();
+		// Security enhancement: Limit input length to prevent memory exhaustion / DoS
+		const rawBody = await request.text();
+		if (rawBody.length > 2048) {
+			return NextResponse.json({ error: 'Request payload too large.' }, { status: 413 });
+		}
+		requestBody = JSON.parse(rawBody);
 	} catch {
 		return NextResponse.json({ error: 'Invalid JSON request body.' }, { status: 400 });
 	}
