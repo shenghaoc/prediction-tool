@@ -108,9 +108,10 @@ export default function PredictionClient() {
     if (output > 0) {
       resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
       // Focus management: move focus to results area after prediction
-      setTimeout(() => {
+      const id = setTimeout(() => {
         resultsRef.current?.focus({ preventScroll: false });
       }, 100);
+      return () => clearTimeout(id);
     }
   }, [output]);
 
