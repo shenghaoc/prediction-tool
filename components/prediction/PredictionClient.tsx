@@ -44,6 +44,17 @@ import {
   normalizeTrendData,
   trendDataHasValidPrices,
 } from "./utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 const MAX_PREDICTION_CACHE_SIZE = 50;
 
@@ -57,17 +68,6 @@ function getPredictionCacheKey(body: PredictionRequestBody): string {
       }, {}),
   );
 }
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 
 const panelCard =
   "relative overflow-hidden border-border/60 shadow-none transition-all duration-300";
