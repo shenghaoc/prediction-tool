@@ -192,11 +192,11 @@ export function useFormPersistence({
       if (!isRestoredAndSyncedRef.current) return;
       if (saveTimeoutRef.current !== undefined) {
         clearTimeout(saveTimeoutRef.current);
-      }
-      try {
-        localStorage.setItem(STORAGE_KEYS.form, serializeForm(latestFormRef.current));
-      } catch {
-        /* storage full or disabled */
+        try {
+          localStorage.setItem(STORAGE_KEYS.form, serializeForm(latestFormRef.current));
+        } catch {
+          /* storage full or disabled */
+        }
       }
     };
   }, []);
