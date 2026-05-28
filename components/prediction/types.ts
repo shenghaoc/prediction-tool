@@ -18,6 +18,14 @@ export type PersistedFieldValues = Omit<Partial<FieldType>, 'lease_commence_date
 	lease_commence_date?: string;
 };
 
+// Bump when the persisted shape changes; older payloads are discarded on read.
+export const FORM_SCHEMA_VERSION = 1;
+
+export type PersistedForm = {
+	v: number;
+	data: PersistedFieldValues;
+};
+
 export type ApiResponse = PredictionApiResponse;
 
 export type TrendPoint = {

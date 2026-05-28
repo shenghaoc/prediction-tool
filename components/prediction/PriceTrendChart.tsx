@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useMemo, useId } from "react";
+import { useRef, useState, useMemo, useId, type MouseEvent } from "react";
 import type { TrendPoint } from "./types";
 
 type PriceTrendChartProps = {
@@ -30,12 +30,17 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
 
     const values = data.map((d) => d.value);
     const minV = Math.min(...values) * 0.92;
-    const maxV = Math.max(...values) * 1.04;
+    const maxRaw = Math.max(...values);
+    const maxV = maxRaw * 1.04;
     const rangeV = maxV - minV || 1;
 
+    // Round coordinates to 1 decimal: sub-pixel at this viewBox, but trims the
+    // serialized path/SVG byte size (rendering-svg-precision).
+    const round = (n: number) => Math.round(n * 10) / 10;
+
     const pts = data.map((d, i) => ({
-      x: padL + (data.length > 1 ? (i / (data.length - 1)) * cW : cW / 2),
-      y: padT + cH - ((d.value - minV) / rangeV) * cH,
+      x: round(padL + (data.length > 1 ? (i / (data.length - 1)) * cW : cW / 2)),
+      y: round(padT + cH - ((d.value - minV) / rangeV) * cH),
       ...d,
     }));
 
@@ -51,7 +56,7 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
         const cp1y = p1.y + (p2.y - p0.y) * t / 3;
         const cp2x = p2.x - (p3.x - p1.x) * t / 3;
         const cp2y = p2.y - (p3.y - p1.y) * t / 3;
-        d += ` C${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
+        d += ` C${round(cp1x)},${round(cp1y)} ${round(cp2x)},${round(cp2y)} ${p2.x},${p2.y}`;
       }
       return d;
     };
@@ -64,11 +69,11 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
     const gridN = 4;
     const yTicks = Array.from({ length: gridN + 1 }, (_, i) => {
       const val = minV + (rangeV * i) / gridN;
-      const y = padT + cH - (i / gridN) * cH;
+      const y = round(padT + cH - (i / gridN) * cH);
       return { val, y };
     });
 
-    const peakIdx = values.indexOf(Math.max(...values));
+    const peakIdx = values.indexOf(maxRaw);
     const lastIdx = values.length - 1;
 
     return { pts, linePath, areaPath, yTicks, peakIdx, lastIdx };
@@ -92,7 +97,7 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
   if (!chartData) return null;
   const { pts, linePath, areaPath, yTicks, peakIdx, lastIdx } = chartData;
 
-  const handleMove = (e: React.MouseEvent) => {
+  const handleMove = (e: MouseEvent) => {
     if (!containerRef.current || !chartData) return;
     const rect = containerRef.current.getBoundingClientRect();
     const svgX = ((e.clientX - rect.left) / rect.width) * W;

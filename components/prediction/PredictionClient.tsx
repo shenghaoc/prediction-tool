@@ -1,41 +1,32 @@
 "use client";
 
-import {
-  startTransition,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Home, Layers, MapPin, Moon, Sparkles, Sun } from "lucide-react";
 import { toast } from "sonner";
 
-import { I18nProvider, useI18n } from "../../lib/i18n";
-import { Temporal } from "../../lib/temporal";
+import { useI18n } from "../../lib/i18n";
 import {
-  MAX_FLOOR_AREA_SQM,
   MIN_FLOOR_AREA_SQM,
-  STORAGE_KEYS,
+  clampFloorAreaSqm,
   type PredictionRequestBody,
-  serializeLeaseCommenceDate,
 } from "../../lib/prediction";
 import PredictionForm from "./PredictionForm";
 import PredictionResults from "./PredictionResults";
 import { StatTile } from "./stat-tile";
 import { defaultTrendData, initialFormValues } from "./constants";
+import {
+  useAnnouncer,
+  useFormPersistence,
+  useKeyboardShortcuts,
+  useThemeToggle,
+} from "./hooks";
 import { FLAT_MODELS, ML_MODELS, TOWNS } from "../../lib/lists";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type {
-  ApiResponse,
-  FieldType,
-  PersistedFieldValues,
-  SummaryValues,
-} from "./types";
+import type { ApiResponse, FieldType, SummaryValues } from "./types";
 import {
   getErrorMessage,
   getResponseErrorMessage,
@@ -53,7 +44,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 const MAX_PREDICTION_CACHE_SIZE = 50;
@@ -73,106 +63,40 @@ const panelCard =
   "relative overflow-hidden border-border/60 shadow-none transition-all duration-300";
 
 export default function PredictionClient() {
-  return (
-    <I18nProvider>
-      <TooltipProvider delayDuration={300}>
-        <PredictionClientInner />
-      </TooltipProvider>
-    </I18nProvider>
-  );
-}
-
-function PredictionClientInner() {
   const { t, lang, changeLang } = useI18n();
-  const [mounted, setMounted] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const { isDark, toggle: toggleTheme } = useThemeToggle();
+  const { liveRef, announce } = useAnnouncer();
   const [output, setOutput] = useState(0);
   const [trendData, setTrendData] = useState(defaultTrendData);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formValues, setFormValues] = useState<FieldType>(initialFormValues);
-  const [summaryValues, setSummaryValues] = useState<SummaryValues>({
-    ml_model: initialFormValues.ml_model,
-    town: initialFormValues.town,
-    lease_commence_date: initialFormValues.lease_commence_date,
-  });
-  const hasRestoredRef = useRef(false);
+  // Derived from the form rather than stored: the summary tiles mirror the
+  // current selection. Memoized so PredictionResults (memo) only re-renders
+  // when one of these three fields actually changes.
+  const summaryValues = useMemo<SummaryValues>(
+    () => ({
+      ml_model: formValues.ml_model,
+      town: formValues.town,
+      lease_commence_date: formValues.lease_commence_date,
+    }),
+    [formValues.ml_model, formValues.town, formValues.lease_commence_date],
+  );
   const resultsRef = useRef<HTMLDivElement>(null);
-  const liveRef = useRef<HTMLDivElement>(null);
   const requestControllerRef = useRef<AbortController | null>(null);
-  const loadingRef = useRef(false);
-  const latestFormRef = useRef(formValues);
-  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const predictionCacheRef = useRef<Map<string, ApiResponse>>(new Map());
 
-  // Keep latestFormRef in sync without triggering re-renders
+  // Enable theme color transitions only after the first paint, so the initial
+  // (pre-painted) theme doesn't animate.
   useEffect(() => {
-    latestFormRef.current = formValues;
-  }, [formValues]);
-
-  // Keep loadingRef in sync to prevent stale closure in keyboard shortcut
-  useEffect(() => {
-    loadingRef.current = loading;
-  }, [loading]);
-
-  const announce = useCallback((message: string, priority: "polite" | "assertive" = "polite") => {
-    if (!liveRef.current) return;
-    liveRef.current.setAttribute("aria-live", priority);
-    liveRef.current.textContent = "";
-    // Use setTimeout instead of rAF so the announcement fires even in background tabs.
-    // The small delay (50ms) ensures screen readers detect the text change.
-    setTimeout(() => {
-      if (liveRef.current) liveRef.current.textContent = message;
-    }, 50);
-  }, []);
-
-  useEffect(() => {
-    const isDark = localStorage.getItem(STORAGE_KEYS.theme) === "dark";
-    setDarkMode(isDark);
-    document.documentElement.classList.toggle("dark", isDark);
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-    document.documentElement.classList.toggle("dark", darkMode);
-    try {
-      localStorage.setItem(STORAGE_KEYS.theme, darkMode ? "dark" : "light");
-    } catch {
-      /* storage full or disabled */
-    }
-  }, [darkMode, mounted]);
-
-  useEffect(() => {
-    if (!mounted) return;
     document.documentElement.classList.add("theme-ready");
-  }, [mounted]);
+  }, []);
 
-  useEffect(() => {
-    if (hasRestoredRef.current) return;
-    hasRestoredRef.current = true;
-    const savedForm = localStorage.getItem(STORAGE_KEYS.form);
-    if (!savedForm) return;
-    try {
-      const parsed = JSON.parse(savedForm) as PersistedFieldValues;
-      const { lease_commence_date: savedDate, ...rest } = parsed;
-      const leaseDate = savedDate ? Temporal.PlainDate.from(savedDate) : undefined;
-      const restored: FieldType = {
-        ...initialFormValues,
-        ...rest,
-        ...(leaseDate ? { lease_commence_date: leaseDate } : {}),
-      };
-      setFormValues(restored);
-      setSummaryValues({
-        ml_model: restored.ml_model,
-        town: restored.town,
-        lease_commence_date: restored.lease_commence_date,
-      });
-    } catch {
-      localStorage.removeItem(STORAGE_KEYS.form);
-      toast.error(t("error_form_restore_failed"));
-    }
-  }, [t]);
+  useFormPersistence({
+    formValues,
+    onRestore: setFormValues,
+    onRestoreError: () => toast.error(t("error_form_restore_failed")),
+  });
 
   useEffect(() => {
     return () => {
@@ -184,83 +108,16 @@ function PredictionClientInner() {
     if (output > 0) {
       resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
       // Focus management: move focus to results area after prediction
-      setTimeout(() => {
+      const id = setTimeout(() => {
         resultsRef.current?.focus({ preventScroll: false });
       }, 100);
+      return () => clearTimeout(id);
     }
   }, [output]);
 
   const handleFormChange = useCallback((allValues: Partial<FieldType>) => {
     setError(null);
-    setFormValues((prev) => {
-      const next = { ...prev, ...allValues };
-      return next;
-    });
-    setSummaryValues((prev) => {
-      const ml_model = allValues.ml_model ?? prev.ml_model;
-      const town = allValues.town ?? prev.town;
-      const lease_commence_date = allValues.lease_commence_date ?? prev.lease_commence_date;
-      if (
-        ml_model === prev.ml_model &&
-        town === prev.town &&
-        lease_commence_date.year === prev.lease_commence_date.year
-      ) {
-        return prev;
-      }
-      return { ml_model, town, lease_commence_date };
-    });
-  }, []);
-
-  // Debounce localStorage writes to prevent main thread blocking during rapid keystrokes.
-  // Uses a ref so the timeout callback always reads the latest values without re-closing.
-  useEffect(() => {
-    if (!mounted) return;
-
-    const writeForm = () => {
-      saveTimeoutRef.current = undefined;
-      try {
-        localStorage.setItem(
-          STORAGE_KEYS.form,
-          JSON.stringify({
-            ...latestFormRef.current,
-            lease_commence_date: serializeLeaseCommenceDate(
-              latestFormRef.current.lease_commence_date,
-            ),
-          } satisfies PersistedFieldValues),
-        );
-      } catch {
-        /* storage full or disabled */
-      }
-    };
-
-    saveTimeoutRef.current = setTimeout(writeForm, 500);
-
-    return () => clearTimeout(saveTimeoutRef.current);
-  }, [formValues, mounted]);
-
-  // Flush pending localStorage write on unmount to prevent data loss.
-  // Skip if the restore effect hasn't run yet — writing initialFormValues
-  // would overwrite the user's previously saved form state.
-  useEffect(() => {
-    return () => {
-      if (!hasRestoredRef.current) return;
-      if (saveTimeoutRef.current !== undefined) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-      try {
-        localStorage.setItem(
-          STORAGE_KEYS.form,
-          JSON.stringify({
-            ...latestFormRef.current,
-            lease_commence_date: serializeLeaseCommenceDate(
-              latestFormRef.current.lease_commence_date,
-            ),
-          } satisfies PersistedFieldValues),
-        );
-      } catch {
-        /* storage full or disabled */
-      }
-    };
+    setFormValues((prev) => ({ ...prev, ...allValues }));
   }, []);
 
   const handleReset = useCallback(() => {
@@ -271,19 +128,13 @@ function PredictionClientInner() {
     setFormValues(initialFormValues);
     setOutput(0);
     setTrendData(defaultTrendData);
-    setSummaryValues({
-      ml_model: initialFormValues.ml_model,
-      town: initialFormValues.town,
-      lease_commence_date: initialFormValues.lease_commence_date,
-    });
   }, []);
 
   const handleFinish = useCallback(
     async (values: FieldType) => {
-      const floorArea =
-        typeof values.floor_area_sqm === "number"
-          ? Math.max(MIN_FLOOR_AREA_SQM, Math.min(MAX_FLOOR_AREA_SQM, values.floor_area_sqm))
-          : MIN_FLOOR_AREA_SQM;
+      const floorArea = Number.isFinite(values.floor_area_sqm)
+        ? clampFloorAreaSqm(values.floor_area_sqm)
+        : MIN_FLOOR_AREA_SQM;
       const requestBody: PredictionRequestBody = {
         mlModel: values.ml_model,
         town: values.town,
@@ -301,16 +152,12 @@ function PredictionClientInner() {
         setTrendData(normalizedData);
         const predictedPrice = normalizePrice(normalizedData[normalizedData.length - 1]?.value ?? 0);
         setOutput(predictedPrice);
-        setSummaryValues({
-          ml_model: values.ml_model,
-          town: values.town,
-          lease_commence_date: values.lease_commence_date,
-        });
         toast.success(t("prediction_success"), { id: "prediction" });
         announce(
-          lang === "zh"
-            ? `预测完成。预估价格：$${Math.round(predictedPrice).toLocaleString()}`
-            : `Prediction complete. Estimated price: $${Math.round(predictedPrice).toLocaleString()}`,
+          t("sr_prediction_complete").replace(
+            "{price}",
+            `$${Math.round(predictedPrice).toLocaleString()}`,
+          ),
           "assertive",
         );
       };
@@ -377,28 +224,19 @@ function PredictionClientInner() {
         }
       }
     },
-    [t, lang, announce],
+    [t, announce],
   );
 
   // Keyboard shortcuts: Ctrl/Cmd+Enter to submit, Escape to reset
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
-        e.preventDefault();
-        if (!loadingRef.current) handleFinish(latestFormRef.current);
-      }
-      if (
-        e.key === "Escape" &&
-        !document.querySelector('[role="listbox"]') &&
-        document.activeElement?.closest("form")
-      ) {
-        handleReset();
-        announce(lang === "zh" ? "表单已重置" : "Form reset");
-      }
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [lang, handleFinish, handleReset, announce]);
+  useKeyboardShortcuts({
+    onSubmit: () => {
+      if (!loading) handleFinish(formValues);
+    },
+    onReset: () => {
+      handleReset();
+      announce(t("sr_form_reset"));
+    },
+  });
 
   const figures = [
     {
@@ -420,20 +258,6 @@ function PredictionClientInner() {
       hint: t("stat_types_hint"),
     },
   ];
-
-  if (!mounted) {
-    return (
-      <main className="min-h-screen px-6 pb-12 pt-5" aria-busy="true">
-        <div className="mx-auto max-w-7xl space-y-5">
-          <Skeleton className="animate-shimmer h-10 w-full max-w-md rounded-xl" />
-          <div className="grid grid-cols-2 gap-5 max-[960px]:grid-cols-1">
-            <Skeleton className="animate-shimmer h-64 rounded-xl" />
-            <Skeleton className="animate-shimmer h-96 rounded-xl" />
-          </div>
-        </div>
-      </main>
-    );
-  }
 
   const isZh = lang === "zh";
 
@@ -486,14 +310,14 @@ function PredictionClientInner() {
                   type="button"
                   variant="outline"
                   size="icon-sm"
-                  aria-label={darkMode ? t("switch_to_light_mode") : t("switch_to_dark_mode")}
-                  onClick={() => setDarkMode((value) => !value)}
+                  aria-label={isDark ? t("switch_to_light_mode") : t("switch_to_dark_mode")}
+                  onClick={toggleTheme}
                 >
-                  {darkMode ? <Sun className="size-4" /> : <Moon className="size-4" />}
+                  {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="bottom" sideOffset={8}>
-                {darkMode ? t("switch_to_light_mode") : t("switch_to_dark_mode")}
+                {isDark ? t("switch_to_light_mode") : t("switch_to_dark_mode")}
               </TooltipContent>
             </Tooltip>
           </div>

@@ -1,8 +1,13 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Source_Sans_3 } from 'next/font/google';
+import { ThemeProvider } from 'next-themes';
+import { cookies } from 'next/headers';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { I18nProvider } from '../lib/i18n';
+import { LANGUAGE_COOKIE, parseLang } from '../lib/locale';
+import { STORAGE_KEYS } from '../lib/prediction';
 import {
 	SITE_DESCRIPTION,
 	SITE_KEYWORDS,
@@ -59,12 +64,23 @@ export const metadata: Metadata = {
 	category: 'finance'
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+	const lang = parseLang((await cookies()).get(LANGUAGE_COOKIE)?.value);
+
 	return (
-		<html lang="en" className={sourceSans3.variable}>
+		<html lang={lang} data-lang={lang} className={sourceSans3.variable} suppressHydrationWarning>
 			<body>
-				<TooltipProvider delayDuration={300}>{children}</TooltipProvider>
-				<Toaster richColors closeButton />
+				<ThemeProvider
+					attribute="class"
+					defaultTheme="light"
+					enableSystem={false}
+					storageKey={STORAGE_KEYS.theme}
+				>
+					<I18nProvider initialLang={lang}>
+						<TooltipProvider delayDuration={300}>{children}</TooltipProvider>
+					</I18nProvider>
+					<Toaster richColors closeButton />
+				</ThemeProvider>
 			</body>
 		</html>
 	);

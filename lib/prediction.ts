@@ -12,7 +12,6 @@ import {
 
 export const STORAGE_KEYS = {
 	theme: 'prediction-tool:theme',
-	language: 'prediction-tool:language',
 	form: 'prediction-tool:form'
 } as const;
 

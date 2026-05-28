@@ -43,6 +43,8 @@
   "vs_12m_ago": "对比12个月前",
   "prediction": "预测",
   "prediction_success": "预测完成！向下滚动查看结果。",
+  "sr_prediction_complete": "预测完成。预估价格：{price}",
+  "sr_form_reset": "表单已重置",
   "placeholder_title": "提交一个情境后即可生成预测",
   "placeholder_body": "选择模型并调整房屋资料后提交表单，即可查看预测转售价与过去12个月趋势。",
   "ml_models": {
