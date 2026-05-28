@@ -56,6 +56,19 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
+const MAX_PREDICTION_CACHE_SIZE = 50;
+
+function getPredictionCacheKey(body: PredictionRequestBody): string {
+  return JSON.stringify(
+    Object.keys(body)
+      .sort()
+      .reduce<Record<string, unknown>>((acc, key) => {
+        acc[key] = body[key as keyof PredictionRequestBody];
+        return acc;
+      }, {}),
+  );
+}
+
 const panelCard =
   "relative overflow-hidden border-border/60 shadow-none transition-all duration-300";
 
@@ -90,6 +103,7 @@ function PredictionClientInner() {
   const loadingRef = useRef(false);
   const latestFormRef = useRef(formValues);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const predictionCacheRef = useRef<Map<string, ApiResponse>>(new Map());
 
   // Keep latestFormRef in sync without triggering re-renders
   useEffect(() => {
@@ -266,13 +280,6 @@ function PredictionClientInner() {
 
   const handleFinish = useCallback(
     async (values: FieldType) => {
-      requestControllerRef.current?.abort();
-      const controller = new AbortController();
-      requestControllerRef.current = controller;
-      setLoading(true);
-      setError(null);
-      setOutput(0);
-      setTrendData(defaultTrendData);
       const floorArea =
         typeof values.floor_area_sqm === "number"
           ? Math.max(MIN_FLOOR_AREA_SQM, Math.min(MAX_FLOOR_AREA_SQM, values.floor_area_sqm))
@@ -285,17 +292,8 @@ function PredictionClientInner() {
         floorAreaSqm: floorArea,
         leaseCommenceYear: values.lease_commence_date.year,
       };
-      try {
-        const response = await fetch("/api/prices", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(requestBody),
-          signal: controller.signal,
-        });
-        if (!response.ok) {
-          throw new Error(await getResponseErrorMessage(response, t("error_fetch")));
-        }
-        const serverData: ApiResponse = await response.json();
+
+      const applyServerData = (serverData: ApiResponse) => {
         const normalizedData = normalizeTrendData(serverData);
         if (!trendDataHasValidPrices(normalizedData)) {
           throw new Error(t("error_invalid_prediction"));
@@ -315,6 +313,56 @@ function PredictionClientInner() {
             : `Prediction complete. Estimated price: $${Math.round(predictedPrice).toLocaleString()}`,
           "assertive",
         );
+      };
+
+      // ⚡ Bolt: Cache API responses to prevent redundant network requests
+      // when users toggle inputs back and forth or submit identical queries.
+      const cacheKey = getPredictionCacheKey(requestBody);
+      const cached = predictionCacheRef.current.get(cacheKey);
+      if (cached) {
+        predictionCacheRef.current.delete(cacheKey);
+        predictionCacheRef.current.set(cacheKey, cached);
+        try {
+          setError(null);
+          applyServerData(cached);
+        } catch (err: unknown) {
+          setOutput(0);
+          setTrendData(defaultTrendData);
+          const msg = getErrorMessage(err, t("error_fetch"));
+          setError(msg);
+          toast.error(msg);
+        }
+        return;
+      }
+
+      requestControllerRef.current?.abort();
+      const controller = new AbortController();
+      requestControllerRef.current = controller;
+      setLoading(true);
+      setError(null);
+      setOutput(0);
+      setTrendData(defaultTrendData);
+
+      try {
+        const response = await fetch("/api/prices", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: cacheKey,
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          throw new Error(await getResponseErrorMessage(response, t("error_fetch")));
+        }
+        const serverData: ApiResponse = await response.json();
+
+        if (predictionCacheRef.current.size >= MAX_PREDICTION_CACHE_SIZE) {
+          const oldestKey = predictionCacheRef.current.keys().next().value;
+          if (oldestKey !== undefined) {
+            predictionCacheRef.current.delete(oldestKey);
+          }
+        }
+        predictionCacheRef.current.set(cacheKey, serverData);
+        applyServerData(serverData);
       } catch (err: unknown) {
         if (isAbortError(err)) return;
         setOutput(0);
