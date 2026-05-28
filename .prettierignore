@@ -2,7 +2,9 @@
 build
 coverage
 
-# Ignore files for PNPM, NPM and YARN
-pnpm-lock.yaml
+# Ignore files for NPM, YARN, PNPM, and BUN
 package-lock.json
 yarn.lock
+pnpm-lock.yaml
+bun.lock
+bun.lockb
