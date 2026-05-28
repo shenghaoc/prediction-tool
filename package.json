@@ -42,7 +42,7 @@
     "eslint-config-next": "^16.2.6",
     "eslint-config-prettier": "^10.1.8",
     "jsdom": "^29.1.1",
-    "postcss": "^8.5.10",
+    "postcss": "^8.5.15",
     "prettier": "3.8.3",
     "shadcn": "^4.8.0",
     "tailwindcss": "^4.3.0",
@@ -54,7 +54,7 @@
     "@opennextjs/aws": {
       "esbuild": "0.27.3"
     },
-    "postcss": "^8.5.10"
+    "postcss": "^8.5.15"
   },
   "type": "module"
 }
