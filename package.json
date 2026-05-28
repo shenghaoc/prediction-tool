@@ -2,6 +2,7 @@
   "name": "prediction-tool",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "npm@11.12.1",
   "scripts": {
     "build": "next build",
     "dev": "next dev --turbopack",
@@ -52,7 +53,8 @@
   "overrides": {
     "@opennextjs/aws": {
       "esbuild": "0.27.3"
-    }
+    },
+    "postcss": "^8.5.15"
   },
   "type": "module"
 }
