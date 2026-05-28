@@ -4,9 +4,7 @@ import { createContext, useContext, useState, useCallback, useEffect } from 'rea
 
 import en from '../app/locales/en.json';
 import zh from '../app/locales/zh.json';
-import { STORAGE_KEYS } from './prediction';
-
-type Lang = 'en' | 'zh';
+import { LANGUAGE_COOKIE, type Lang } from './locale';
 
 type Translations = Record<string, string | Record<string, string>>;
 const RESOURCES: Record<Lang, Translations> = { en, zh };
@@ -31,23 +29,18 @@ type I18nContextValue = {
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
-export function I18nProvider({ children }: { children: React.ReactNode }) {
-	const [lang, setLang] = useState<Lang>('en');
-
-	useEffect(() => {
-		const saved = localStorage.getItem(STORAGE_KEYS.language);
-		if (saved === 'en' || saved === 'zh') {
-			setLang(saved);
-		}
-	}, []);
+export function I18nProvider({
+	children,
+	initialLang
+}: {
+	children: React.ReactNode;
+	initialLang: Lang;
+}) {
+	const [lang, setLang] = useState<Lang>(initialLang);
 
 	const changeLang = useCallback((l: Lang) => {
 		setLang(l);
-		try {
-			localStorage.setItem(STORAGE_KEYS.language, l);
-		} catch {
-			/* quota exceeded — can't persist */
-		}
+		document.cookie = `${LANGUAGE_COOKIE}=${l};path=/;max-age=31536000;samesite=lax`;
 	}, []);
 
 	const t: TFunction = useCallback(

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useMemo, useId } from "react";
+import { useRef, useState, useMemo, useId, type MouseEvent } from "react";
 import type { TrendPoint } from "./types";
 
 type PriceTrendChartProps = {
@@ -92,7 +92,7 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
   if (!chartData) return null;
   const { pts, linePath, areaPath, yTicks, peakIdx, lastIdx } = chartData;
 
-  const handleMove = (e: React.MouseEvent) => {
+  const handleMove = (e: MouseEvent) => {
     if (!containerRef.current || !chartData) return;
     const rect = containerRef.current.getBoundingClientRect();
     const svgX = ((e.clientX - rect.left) / rect.width) * W;
