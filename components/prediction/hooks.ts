@@ -109,7 +109,8 @@ export function useFormPersistence({
   onRestore: (restored: FieldType) => void;
   onRestoreError: () => void;
 }) {
-  const hasRestoredRef = useRef(false);
+  const isRestoredAndSyncedRef = useRef(false);
+  const restoredValuesRef = useRef<FieldType | null>(null);
   const latestFormRef = useRef(formValues);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const onRestoreRef = useRef(onRestore);
@@ -117,6 +118,9 @@ export function useFormPersistence({
 
   useEffect(() => {
     latestFormRef.current = formValues;
+    if (restoredValuesRef.current && formValues === restoredValuesRef.current) {
+      isRestoredAndSyncedRef.current = true;
+    }
   }, [formValues]);
 
   useEffect(() => {
@@ -126,35 +130,48 @@ export function useFormPersistence({
 
   // Restore once on mount.
   useEffect(() => {
-    if (hasRestoredRef.current) return;
-    hasRestoredRef.current = true;
-    const savedForm = localStorage.getItem(STORAGE_KEYS.form);
-    if (!savedForm) return;
+    if (isRestoredAndSyncedRef.current) return;
     try {
+      const savedForm = localStorage.getItem(STORAGE_KEYS.form);
+      if (!savedForm) {
+        isRestoredAndSyncedRef.current = true;
+        return;
+      }
       const parsed = JSON.parse(savedForm) as Partial<PersistedForm>;
       // Discard payloads from an older/unknown schema silently — not an error.
       if (parsed.v !== FORM_SCHEMA_VERSION || !parsed.data) {
-        localStorage.removeItem(STORAGE_KEYS.form);
+        try {
+          localStorage.removeItem(STORAGE_KEYS.form);
+        } catch {
+          /* ignore */
+        }
+        isRestoredAndSyncedRef.current = true;
         return;
       }
       const { lease_commence_date: savedDate, ...rest } = parsed.data;
       const leaseDate = savedDate ? Temporal.PlainDate.from(savedDate) : undefined;
-      onRestoreRef.current({
+      const restored: FieldType = {
         ...initialFormValues,
         ...rest,
         ...(leaseDate ? { lease_commence_date: leaseDate } : {}),
-      });
+      };
+      restoredValuesRef.current = restored;
+      onRestoreRef.current(restored);
     } catch {
-      localStorage.removeItem(STORAGE_KEYS.form);
+      try {
+        localStorage.removeItem(STORAGE_KEYS.form);
+      } catch {
+        /* ignore */
+      }
       onRestoreErrorRef.current();
+      isRestoredAndSyncedRef.current = true;
     }
   }, []);
 
   // Debounce writes to prevent main thread blocking during rapid keystrokes.
-  // The restore effect above runs before this one on mount, and the write reads
-  // latestFormRef at fire time (500ms later) — so a restored value is never
-  // clobbered by the initial form values.
   useEffect(() => {
+    if (!isRestoredAndSyncedRef.current) return;
+
     const writeForm = () => {
       saveTimeoutRef.current = undefined;
       try {
@@ -169,12 +186,10 @@ export function useFormPersistence({
     return () => clearTimeout(saveTimeoutRef.current);
   }, [formValues]);
 
-  // Flush a pending write on unmount to prevent data loss. Skip if the restore
-  // effect hasn't run yet — writing initialFormValues would overwrite the
-  // user's previously saved form state.
+  // Flush a pending write on unmount to prevent data loss.
   useEffect(() => {
     return () => {
-      if (!hasRestoredRef.current) return;
+      if (!isRestoredAndSyncedRef.current) return;
       if (saveTimeoutRef.current !== undefined) {
         clearTimeout(saveTimeoutRef.current);
       }

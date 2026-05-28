@@ -131,10 +131,9 @@ export default function PredictionClient() {
 
   const handleFinish = useCallback(
     async (values: FieldType) => {
-      const floorArea =
-        typeof values.floor_area_sqm === "number"
-          ? clampFloorAreaSqm(values.floor_area_sqm)
-          : MIN_FLOOR_AREA_SQM;
+      const floorArea = Number.isFinite(values.floor_area_sqm)
+        ? clampFloorAreaSqm(values.floor_area_sqm)
+        : MIN_FLOOR_AREA_SQM;
       const requestBody: PredictionRequestBody = {
         mlModel: values.ml_model,
         town: values.town,
