@@ -111,6 +111,10 @@ describe('POST /api/prices error responses', () => {
 });
 
 describe('POST /api/prices payload length', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
 	test('returns 413 when request payload is too large', async () => {
 		const largeBody = { ...validRequestBody, extra: 'a'.repeat(3000) };
 		const response = await POST(createPostRequest(largeBody));
@@ -118,5 +122,24 @@ describe('POST /api/prices payload length', () => {
 
 		expect(response.status).toBe(413);
 		expect(body.error).toBe('Request payload too large.');
+	});
+
+	test('does not reject payload of exactly 2048 characters', async () => {
+		const request = new Request('http://localhost/api/prices', {
+			method: 'POST',
+			body: 'a'.repeat(2048)
+		});
+		const response = await POST(request);
+		expect(response.status).not.toBe(413);
+	});
+
+	test('rejects payload of exactly 2049 characters', async () => {
+		const request = new Request('http://localhost/api/prices', {
+			method: 'POST',
+			body: 'a'.repeat(2049)
+		});
+		const response = await POST(request);
+
+		expect(response.status).toBe(413);
 	});
 });

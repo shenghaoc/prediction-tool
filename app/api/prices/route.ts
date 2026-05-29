@@ -36,6 +36,13 @@ export async function POST(request: Request) {
 	let requestBody: unknown;
 
 	try {
+		const contentLength = request.headers.get('content-length');
+		if (contentLength !== null) {
+			const length = parseInt(contentLength, 10);
+			if (Number.isNaN(length) || length > 2048) {
+				return NextResponse.json({ error: 'Request payload too large.' }, { status: 413 });
+			}
+		}
 		const rawBody = await request.text();
 		if (rawBody.length > 2048) {
 			return NextResponse.json({ error: 'Request payload too large.' }, { status: 413 });
