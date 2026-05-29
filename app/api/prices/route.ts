@@ -36,7 +36,6 @@ export async function POST(request: Request) {
 	let requestBody: unknown;
 
 	try {
-		// Security enhancement: Limit input length to prevent memory exhaustion / DoS
 		const rawBody = await request.text();
 		if (rawBody.length > 2048) {
 			return NextResponse.json({ error: 'Request payload too large.' }, { status: 413 });
