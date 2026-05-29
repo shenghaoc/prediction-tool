@@ -170,6 +170,7 @@ export function NumberField({
         required={required}
         aria-required={required}
         aria-label={ariaLabel}
+        aria-describedby={unit ? `${id}-unit` : undefined}
         value={value === "" || value === undefined ? "" : value}
         placeholder={placeholder}
         onChange={handleChange}
@@ -193,7 +194,7 @@ export function NumberField({
       )}
       {/* Accessible unit label for screen readers */}
       {unit && (
-        <span className="sr-only">{unit === "m²" ? "square meters" : unit}</span>
+        <span id={`${id}-unit`} className="sr-only">{unit === "m²" ? "square meters" : unit}</span>
       )}
 
       {/* Increment */}
