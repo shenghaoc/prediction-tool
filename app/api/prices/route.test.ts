@@ -127,6 +127,7 @@ describe('POST /api/prices payload length', () => {
 	test('does not reject payload of exactly 2048 characters', async () => {
 		const request = new Request('http://localhost/api/prices', {
 			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
 			body: 'a'.repeat(2048)
 		});
 		const response = await POST(request);
@@ -136,10 +137,22 @@ describe('POST /api/prices payload length', () => {
 	test('rejects payload of exactly 2049 characters', async () => {
 		const request = new Request('http://localhost/api/prices', {
 			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
 			body: 'a'.repeat(2049)
 		});
 		const response = await POST(request);
 
 		expect(response.status).toBe(413);
+	});
+
+	test('rejects requests without application/json content-type', async () => {
+		const request = new Request('http://localhost/api/prices', {
+			method: 'POST',
+			headers: { 'Content-Type': 'text/plain' },
+			body: JSON.stringify(validRequestBody)
+		});
+		const response = await POST(request);
+
+		expect(response.status).toBe(415);
 	});
 });
