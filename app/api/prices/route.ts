@@ -38,8 +38,8 @@ export async function POST(request: Request) {
 	try {
 		const contentLength = request.headers.get('content-length');
 		if (contentLength !== null) {
-			const length = parseInt(contentLength, 10);
-			if (Number.isNaN(length) || length > 2048) {
+			const length = Number(contentLength);
+			if (Number.isNaN(length) || length < 0 || length > 2048) {
 				return NextResponse.json({ error: 'Request payload too large.' }, { status: 413 });
 			}
 		}
