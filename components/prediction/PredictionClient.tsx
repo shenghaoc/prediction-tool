@@ -57,10 +57,9 @@ const emptyViewState = {
 function resolvePredictionView(
   actionState: PredictActionState,
   showResults: boolean,
-  isPending: boolean,
   t: TFunction,
 ): { output: number; trendData: TrendPoint[]; formError: string | null } {
-  if (!showResults || isPending || !actionState) {
+  if (!showResults || !actionState) {
     return emptyViewState;
   }
 
@@ -118,8 +117,8 @@ export default function PredictionClient() {
   );
 
   const { output, trendData, formError } = useMemo(
-    () => resolvePredictionView(actionState, showResults, isPending, t),
-    [actionState, showResults, isPending, t],
+    () => resolvePredictionView(actionState, showResults, t),
+    [actionState, showResults, t],
   );
 
   useEffect(() => {

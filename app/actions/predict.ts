@@ -8,11 +8,6 @@ import {
 	zodErrorToFieldErrors
 } from '../../lib/prediction-schema';
 
-export const PREDICTION_FORM_ERROR_KEYS = {
-	noPredictionData: 'error_no_prediction_data',
-	serviceUnavailable: 'error_fetch'
-} as const;
-
 export type PredictActionState =
 	| { ok: true; predictions: PredictionApiResponse['predictions'] }
 	| { ok: false; fieldErrors?: Record<string, string[]>; formError?: string }
@@ -36,10 +31,10 @@ export async function predictAction(
 		return { ok: true, predictions };
 	} catch (error: unknown) {
 		if (error instanceof PredictionNotFoundError) {
-			return { ok: false, formError: PREDICTION_FORM_ERROR_KEYS.noPredictionData };
+			return { ok: false, formError: 'error_no_prediction_data' };
 		}
 
 		console.error('[Predict Action Error]', error);
-		return { ok: false, formError: PREDICTION_FORM_ERROR_KEYS.serviceUnavailable };
+		return { ok: false, formError: 'error_fetch' };
 	}
 }
