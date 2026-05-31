@@ -71,6 +71,31 @@ function mockDbThatThrows(message: string) {
 	} as ReturnType<typeof getCloudflareContext>);
 }
 
+function mockDbWithValidResults() {
+	const mockAll = vi.fn().mockResolvedValue({
+		results: [
+			{
+				intercept_map: 1,
+				month_map: 1,
+				storey_range_map: 1,
+				floor_area_sqm_map: 1,
+				lease_commence_date_map: 1,
+				month_name: '2022-02',
+				month_multiplier: 1,
+				town_map: 1,
+				flat_model_map: 1,
+				storey_range_multiplier: 1
+			}
+		]
+	});
+	const mockBind = vi.fn().mockReturnValue({ all: mockAll });
+	const mockPrepare = vi.fn().mockReturnValue({ bind: mockBind });
+
+	vi.mocked(getCloudflareContext).mockReturnValue({
+		env: { DB: { prepare: mockPrepare } }
+	} as ReturnType<typeof getCloudflareContext>);
+}
+
 describe('POST /api/prices error responses', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -144,6 +169,12 @@ describe('POST /api/prices payload length', () => {
 
 		expect(response.status).toBe(413);
 	});
+});
+
+describe('POST /api/prices content-type validation', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
 
 	test('rejects requests without application/json content-type', async () => {
 		const request = new Request('http://localhost/api/prices', {
@@ -168,6 +199,8 @@ describe('POST /api/prices payload length', () => {
 	});
 
 	test('accepts application/json with parameters', async () => {
+		mockDbWithValidResults();
+
 		const request = new Request('http://localhost/api/prices', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json; charset=utf-8' },
@@ -175,6 +208,6 @@ describe('POST /api/prices payload length', () => {
 		});
 		const response = await POST(request);
 
-		expect(response.status).not.toBe(415);
+		expect(response.status).toBe(200);
 	});
 });
