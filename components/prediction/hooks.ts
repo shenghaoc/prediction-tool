@@ -1,23 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 
-import { Temporal } from "../../lib/temporal";
-import { STORAGE_KEYS, serializeLeaseCommenceDate } from "../../lib/prediction";
+import { STORAGE_KEYS } from "../../lib/prediction";
 import { initialFormValues } from "./constants";
 import { FORM_SCHEMA_VERSION, type FieldType, type PersistedForm } from "./types";
 
-// Theme toggle backed by next-themes. `isDark` is only meaningful after mount
-// (the server can't know the persisted theme), so it stays false until then to
-// keep the toggle button's icon hydration-safe.
 export function useThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   const toggle = useCallback(() => {
     setTheme(resolvedTheme === "dark" ? "light" : "dark");
@@ -26,7 +22,6 @@ export function useThemeToggle() {
   return { isDark: mounted && resolvedTheme === "dark", toggle };
 }
 
-// Imperative screen-reader announcer backed by an aria-live region.
 export function useAnnouncer() {
   const liveRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -36,8 +31,6 @@ export function useAnnouncer() {
       if (!liveRef.current) return;
       liveRef.current.setAttribute("aria-live", priority);
       liveRef.current.textContent = "";
-      // Use setTimeout instead of rAF so the announcement fires even in background tabs.
-      // The small delay (50ms) ensures screen readers detect the text change.
       clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => {
         if (liveRef.current) liveRef.current.textContent = message;
@@ -51,8 +44,6 @@ export function useAnnouncer() {
   return { liveRef, announce };
 }
 
-// Document-level keyboard shortcuts. The handlers are kept in refs so the
-// listener is attached once yet always invokes the latest closures.
 export function useKeyboardShortcuts({
   onSubmit,
   onReset,
@@ -90,16 +81,10 @@ export function useKeyboardShortcuts({
 function serializeForm(values: FieldType): string {
   return JSON.stringify({
     v: FORM_SCHEMA_VERSION,
-    data: {
-      ...values,
-      lease_commence_date: serializeLeaseCommenceDate(values.lease_commence_date),
-    },
+    data: values,
   } satisfies PersistedForm);
 }
 
-// Persists form values to localStorage: restores once on mount, debounces
-// writes to avoid blocking the main thread during rapid input, and flushes any
-// pending write on unmount so the latest value is never dropped.
 export function useFormPersistence({
   formValues,
   onRestore,
@@ -128,7 +113,6 @@ export function useFormPersistence({
     onRestoreErrorRef.current = onRestoreError;
   });
 
-  // Restore once on mount.
   useEffect(() => {
     if (isRestoredAndSyncedRef.current) return;
     try {
@@ -137,8 +121,9 @@ export function useFormPersistence({
         isRestoredAndSyncedRef.current = true;
         return;
       }
-      const parsed = JSON.parse(savedForm) as Partial<PersistedForm>;
-      // Discard payloads from an older/unknown schema silently — not an error.
+      const parsed = JSON.parse(savedForm) as Partial<PersistedForm> & {
+        data?: PersistedForm["data"] & { lease_commence_date?: string };
+      };
       if (parsed.v !== FORM_SCHEMA_VERSION || !parsed.data) {
         try {
           localStorage.removeItem(STORAGE_KEYS.form);
@@ -148,12 +133,10 @@ export function useFormPersistence({
         isRestoredAndSyncedRef.current = true;
         return;
       }
-      const { lease_commence_date: savedDate, ...rest } = parsed.data;
-      const leaseDate = savedDate ? Temporal.PlainDate.from(savedDate) : undefined;
+
       const restored: FieldType = {
         ...initialFormValues,
-        ...rest,
-        ...(leaseDate ? { lease_commence_date: leaseDate } : {}),
+        ...parsed.data,
       };
       restoredValuesRef.current = restored;
       onRestoreRef.current(restored);
@@ -168,7 +151,6 @@ export function useFormPersistence({
     }
   }, []);
 
-  // Debounce writes to prevent main thread blocking during rapid keystrokes.
   useEffect(() => {
     if (!isRestoredAndSyncedRef.current) return;
 
@@ -186,7 +168,6 @@ export function useFormPersistence({
     return () => clearTimeout(saveTimeoutRef.current);
   }, [formValues]);
 
-  // Flush a pending write on unmount to prevent data loss.
   useEffect(() => {
     return () => {
       if (!isRestoredAndSyncedRef.current) return;

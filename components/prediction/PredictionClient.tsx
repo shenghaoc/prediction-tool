@@ -1,15 +1,17 @@
 "use client";
 
-import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useActionState, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { Home, Layers, MapPin, Moon, Sparkles, Sun } from "lucide-react";
 import { toast } from "sonner";
 
+import { predictAction, type PredictActionState } from "../../app/actions/predict";
 import { useI18n } from "../../lib/i18n";
 import {
-  MIN_FLOOR_AREA_SQM,
-  clampFloorAreaSqm,
-  type PredictionRequestBody,
-} from "../../lib/prediction";
+  predictionFormSchema,
+  predictionFormValuesToFormData,
+} from "../../lib/prediction-schema";
 import PredictionForm from "./PredictionForm";
 import PredictionResults from "./PredictionResults";
 import { StatTile } from "./stat-tile";
@@ -26,11 +28,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { ApiResponse, FieldType, SummaryValues } from "./types";
+import type { FieldType, SummaryValues, TrendPoint } from "./types";
 import {
-  getErrorMessage,
-  getResponseErrorMessage,
-  isAbortError,
   normalizePrice,
   normalizeTrendData,
   trendDataHasValidPrices,
@@ -46,68 +45,98 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-const MAX_PREDICTION_CACHE_SIZE = 50;
-
-function getPredictionCacheKey(body: PredictionRequestBody): string {
-  return JSON.stringify(
-    Object.keys(body)
-      .sort()
-      .reduce<Record<string, unknown>>((acc, key) => {
-        acc[key] = body[key as keyof PredictionRequestBody];
-        return acc;
-      }, {}),
-  );
-}
-
 const panelCard =
   "relative overflow-hidden border-border/60 shadow-none transition-all duration-300";
+
+const emptyViewState = {
+  output: 0,
+  trendData: defaultTrendData,
+  formError: null as string | null,
+};
+
+function resolvePredictionView(
+  actionState: PredictActionState,
+  showResults: boolean,
+  isPending: boolean,
+  t: (key: string) => string,
+): { output: number; trendData: TrendPoint[]; formError: string | null } {
+  if (!showResults || isPending || !actionState) {
+    return emptyViewState;
+  }
+
+  if (actionState.ok) {
+    const normalizedData = normalizeTrendData({ predictions: actionState.predictions });
+    if (!trendDataHasValidPrices(normalizedData)) {
+      return { ...emptyViewState, formError: t("error_invalid_prediction") };
+    }
+
+    return {
+      output: normalizePrice(normalizedData[normalizedData.length - 1]?.value ?? 0),
+      trendData: normalizedData,
+      formError: null,
+    };
+  }
+
+  const formError = actionState.formError
+    ? actionState.formError === "Prediction service unavailable."
+      ? t("error_fetch")
+      : actionState.formError
+    : null;
+
+  return { ...emptyViewState, formError };
+}
 
 export default function PredictionClient() {
   const { t, lang, changeLang } = useI18n();
   const { isDark, toggle: toggleTheme } = useThemeToggle();
   const { liveRef, announce } = useAnnouncer();
-  const [output, setOutput] = useState(0);
-  const [trendData, setTrendData] = useState(defaultTrendData);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [formValues, setFormValues] = useState<FieldType>(initialFormValues);
-  // Derived from the form rather than stored: the summary tiles mirror the
-  // current selection. Memoized so PredictionResults (memo) only re-renders
-  // when one of these three fields actually changes.
+  const [actionState, dispatchAction, isPending] = useActionState(
+    predictAction,
+    null as PredictActionState,
+  );
+  const [showResults, setShowResults] = useState(false);
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const lastNotifiedActionRef = useRef<PredictActionState>(null);
+
+  const form = useForm<FieldType>({
+    resolver: zodResolver(predictionFormSchema) as Resolver<FieldType>,
+    defaultValues: initialFormValues,
+    mode: "onSubmit",
+  });
+
+  const watchedValues = useWatch({ control: form.control });
+  const formValues = useMemo(
+    () => ({ ...initialFormValues, ...watchedValues }) as FieldType,
+    [watchedValues],
+  );
+
   const summaryValues = useMemo<SummaryValues>(
     () => ({
       ml_model: formValues.ml_model,
       town: formValues.town,
-      lease_commence_date: formValues.lease_commence_date,
+      lease_commence_year: formValues.lease_commence_year,
     }),
-    [formValues.ml_model, formValues.town, formValues.lease_commence_date],
+    [formValues.ml_model, formValues.town, formValues.lease_commence_year],
   );
-  const resultsRef = useRef<HTMLDivElement>(null);
-  const requestControllerRef = useRef<AbortController | null>(null);
-  const predictionCacheRef = useRef<Map<string, ApiResponse>>(new Map());
 
-  // Enable theme color transitions only after the first paint, so the initial
-  // (pre-painted) theme doesn't animate.
+  const { output, trendData, formError } = useMemo(
+    () => resolvePredictionView(actionState, showResults, isPending, t),
+    [actionState, showResults, isPending, t],
+  );
+
   useEffect(() => {
     document.documentElement.classList.add("theme-ready");
   }, []);
 
   useFormPersistence({
     formValues,
-    onRestore: setFormValues,
+    onRestore: (restored) => form.reset(restored),
     onRestoreError: () => toast.error(t("error_form_restore_failed")),
   });
 
   useEffect(() => {
-    return () => {
-      requestControllerRef.current?.abort();
-    };
-  }, []);
-
-  useEffect(() => {
     if (output > 0) {
       resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      // Focus management: move focus to results area after prediction
       const id = setTimeout(() => {
         resultsRef.current?.focus({ preventScroll: false });
       }, 100);
@@ -115,122 +144,70 @@ export default function PredictionClient() {
     }
   }, [output]);
 
-  const handleFormChange = useCallback((allValues: Partial<FieldType>) => {
-    setError(null);
-    setFormValues((prev) => ({ ...prev, ...allValues }));
-  }, []);
+  useEffect(() => {
+    if (!actionState || isPending || actionState === lastNotifiedActionRef.current) {
+      return;
+    }
 
-  const handleReset = useCallback(() => {
-    requestControllerRef.current?.abort();
-    requestControllerRef.current = null;
-    setLoading(false);
-    setError(null);
-    setFormValues(initialFormValues);
-    setOutput(0);
-    setTrendData(defaultTrendData);
-  }, []);
+    lastNotifiedActionRef.current = actionState;
 
-  const handleFinish = useCallback(
-    async (values: FieldType) => {
-      const floorArea = Number.isFinite(values.floor_area_sqm)
-        ? clampFloorAreaSqm(values.floor_area_sqm)
-        : MIN_FLOOR_AREA_SQM;
-      const requestBody: PredictionRequestBody = {
-        mlModel: values.ml_model,
-        town: values.town,
-        storeyRange: values.storey_range,
-        flatModel: values.flat_model,
-        floorAreaSqm: floorArea,
-        leaseCommenceYear: values.lease_commence_date.year,
-      };
-
-      const applyServerData = (serverData: ApiResponse) => {
-        const normalizedData = normalizeTrendData(serverData);
-        if (!trendDataHasValidPrices(normalizedData)) {
-          throw new Error(t("error_invalid_prediction"));
-        }
-        setTrendData(normalizedData);
-        const predictedPrice = normalizePrice(normalizedData[normalizedData.length - 1]?.value ?? 0);
-        setOutput(predictedPrice);
-        toast.success(t("prediction_success"), { id: "prediction" });
-        announce(
-          t("sr_prediction_complete").replace(
-            "{price}",
-            `$${Math.round(predictedPrice).toLocaleString()}`,
-          ),
-          "assertive",
-        );
-      };
-
-      // ⚡ Bolt: Cache API responses to prevent redundant network requests
-      // when users toggle inputs back and forth or submit identical queries.
-      const cacheKey = getPredictionCacheKey(requestBody);
-      const cached = predictionCacheRef.current.get(cacheKey);
-      if (cached) {
-        predictionCacheRef.current.delete(cacheKey);
-        predictionCacheRef.current.set(cacheKey, cached);
-        try {
-          setError(null);
-          applyServerData(cached);
-        } catch (err: unknown) {
-          setOutput(0);
-          setTrendData(defaultTrendData);
-          const msg = getErrorMessage(err, t("error_fetch"));
-          setError(msg);
-          toast.error(msg);
-        }
+    if (actionState.ok) {
+      const normalizedData = normalizeTrendData({ predictions: actionState.predictions });
+      if (!trendDataHasValidPrices(normalizedData)) {
+        toast.error(t("error_invalid_prediction"));
         return;
       }
 
-      requestControllerRef.current?.abort();
-      const controller = new AbortController();
-      requestControllerRef.current = controller;
-      setLoading(true);
-      setError(null);
-      setOutput(0);
-      setTrendData(defaultTrendData);
+      const predictedPrice = normalizePrice(
+        normalizedData[normalizedData.length - 1]?.value ?? 0,
+      );
+      toast.success(t("prediction_success"), { id: "prediction" });
+      announce(
+        t("sr_prediction_complete").replace(
+          "{price}",
+          `$${Math.round(predictedPrice).toLocaleString()}`,
+        ),
+        "assertive",
+      );
+      return;
+    }
 
-      try {
-        const response = await fetch("/api/prices", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: cacheKey,
-          signal: controller.signal,
-        });
-        if (!response.ok) {
-          throw new Error(await getResponseErrorMessage(response, t("error_fetch")));
-        }
-        const serverData: ApiResponse = await response.json();
-
-        if (predictionCacheRef.current.size >= MAX_PREDICTION_CACHE_SIZE) {
-          const oldestKey = predictionCacheRef.current.keys().next().value;
-          if (oldestKey !== undefined) {
-            predictionCacheRef.current.delete(oldestKey);
-          }
-        }
-        predictionCacheRef.current.set(cacheKey, serverData);
-        applyServerData(serverData);
-      } catch (err: unknown) {
-        if (isAbortError(err)) return;
-        setOutput(0);
-        setTrendData(defaultTrendData);
-        const msg = getErrorMessage(err, t("error_fetch"));
-        setError(msg);
-        toast.error(msg);
-      } finally {
-        if (requestControllerRef.current === controller) {
-          requestControllerRef.current = null;
-          setLoading(false);
-        }
+    if (actionState.fieldErrors) {
+      for (const [field, messages] of Object.entries(actionState.fieldErrors)) {
+        const message = messages[0];
+        if (!message) continue;
+        form.setError(field as keyof FieldType, { message });
       }
+    }
+
+    if (actionState.formError) {
+      const message =
+        actionState.formError === "Prediction service unavailable."
+          ? t("error_fetch")
+          : actionState.formError;
+      toast.error(message);
+    }
+  }, [actionState, announce, form, isPending, t]);
+
+  const handleSubmit = useCallback(
+    (values: FieldType) => {
+      setShowResults(true);
+      startTransition(() => {
+        dispatchAction(predictionFormValuesToFormData(values));
+      });
     },
-    [t, announce],
+    [dispatchAction],
   );
 
-  // Keyboard shortcuts: Ctrl/Cmd+Enter to submit, Escape to reset
+  const handleReset = useCallback(() => {
+    setShowResults(false);
+    lastNotifiedActionRef.current = null;
+    form.reset(initialFormValues);
+  }, [form]);
+
   useKeyboardShortcuts({
     onSubmit: () => {
-      if (!loading) handleFinish(formValues);
+      if (!isPending) void form.handleSubmit(handleSubmit)();
     },
     onReset: () => {
       handleReset();
@@ -263,7 +240,6 @@ export default function PredictionClient() {
 
   return (
     <main className="min-h-screen px-6 pb-12 pt-5 max-sm:px-3 max-sm:pb-8">
-      {/* Skip navigation — visible on focus for keyboard users */}
       <a
         href="#input-ml_model"
         className="fixed -left-[9999px] top-auto z-[100] h-px w-px overflow-hidden focus:fixed focus:left-4 focus:top-4 focus:h-auto focus:w-auto focus:overflow-visible focus:rounded-lg focus:bg-primary focus:px-5 focus:py-2.5 focus:text-sm focus:font-bold focus:text-primary-foreground focus:no-underline focus:shadow-lg"
@@ -271,7 +247,6 @@ export default function PredictionClient() {
         Skip to form
       </a>
 
-      {/* Live region for screen reader announcements */}
       <div
         ref={liveRef}
         role="status"
@@ -325,10 +300,7 @@ export default function PredictionClient() {
 
         <div className="grid grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] items-start gap-5 max-[960px]:grid-cols-1">
           <div className="flex flex-col gap-5">
-            <Card
-              size="sm"
-              className={cn(panelCard, "py-6")}
-            >
+            <Card size="sm" className={cn(panelCard, "py-6")}>
               <CardHeader className="px-6 pb-0">
                 <CardTitle
                   asChild
@@ -368,21 +340,29 @@ export default function PredictionClient() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="px-6">
-                {error && !loading && (
-                  <div role="alert" className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-                    {error}
+                {formError && !isPending && (
+                  <div
+                    role="alert"
+                    className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+                  >
+                    {formError}
                   </div>
                 )}
                 <PredictionForm
-                  formValues={formValues}
-                  loading={loading}
-                  onFinish={handleFinish}
+                  form={form}
+                  onSubmit={handleSubmit}
                   onReset={handleReset}
-                  onValuesChange={handleFormChange}
+                  isPending={isPending}
                   t={t}
                 />
-                {loading && (
-                  <div className="progress-track mt-4" role="progressbar" aria-label={t("predicting")} aria-valuemin={0} aria-valuemax={100}>
+                {isPending && (
+                  <div
+                    className="progress-track mt-4"
+                    role="progressbar"
+                    aria-label={t("predicting")}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                  >
                     <div className="progress-bar" style={{ width: "60%" }} />
                   </div>
                 )}
@@ -397,7 +377,7 @@ export default function PredictionClient() {
               t={t}
               trendData={trendData}
               locale={lang}
-              loading={loading}
+              loading={isPending}
             />
           </div>
         </div>

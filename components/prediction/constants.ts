@@ -1,9 +1,10 @@
-import { Temporal } from '../../lib/temporal';
 import { FLAT_MODELS, ML_MODELS, STOREY_RANGES, TOWNS } from '../../lib/lists';
 import {
 	DEFAULT_LEASE_COMMENCE_DATE,
-	DEFAULT_PREDICTION_MONTH_END
+	DEFAULT_PREDICTION_MONTH_END,
+	MAX_LEASE_COMMENCE_YEAR
 } from '../../lib/prediction';
+import { Temporal } from '../../lib/temporal';
 import type { FieldType, TrendPoint } from './types';
 
 export const initialFormValues: FieldType = {
@@ -12,7 +13,7 @@ export const initialFormValues: FieldType = {
 	storey_range: STOREY_RANGES[0],
 	flat_model: FLAT_MODELS[0],
 	floor_area_sqm: 20,
-	lease_commence_date: Temporal.PlainDate.from(DEFAULT_LEASE_COMMENCE_DATE)
+	lease_commence_year: Temporal.PlainDate.from(DEFAULT_LEASE_COMMENCE_DATE).year
 };
 
 export const defaultTrendData: TrendPoint[] = [...Array(13).keys()]
@@ -23,3 +24,5 @@ export const defaultTrendData: TrendPoint[] = [...Array(13).keys()]
 			.toString(),
 		value: 0
 	}));
+
+export const DEFAULT_LEASE_YEAR = MAX_LEASE_COMMENCE_YEAR;

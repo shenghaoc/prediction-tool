@@ -1,14 +1,15 @@
 import { Temporal } from './temporal';
 import {
-	FLAT_MODELS,
-	ML_MODELS,
-	STOREY_RANGES,
-	TOWNS,
 	type FlatModel,
 	type MLModel,
 	type StoreyRange,
 	type Town
 } from './lists';
+import {
+	formValuesToNormalized,
+	parseApiRequestInput,
+	zodErrorToApiMessage
+} from './prediction-schema';
 
 export const STORAGE_KEYS = {
 	theme: 'prediction-tool:theme',
@@ -50,14 +51,6 @@ export type PredictionApiResponse = {
 	}>;
 };
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-	return typeof value === 'object' && value !== null;
-}
-
-function isOneOf<T extends string>(value: string, options: readonly T[]): value is T {
-	return options.includes(value as T);
-}
-
 export function clampFloorAreaSqm(value: number) {
 	return Math.max(MIN_FLOOR_AREA_SQM, Math.min(MAX_FLOOR_AREA_SQM, Math.round(value)));
 }
@@ -71,59 +64,11 @@ export function normalizePredictionRequest(
 ):
 	| { ok: true; value: NormalizedPredictionRequest }
 	| { ok: false; error: string } {
-	if (!isRecord(input)) {
-		return { ok: false, error: 'Invalid request body.' };
+	const parsed = parseApiRequestInput(input);
+
+	if (!parsed.success) {
+		return { ok: false, error: zodErrorToApiMessage(parsed.error) };
 	}
 
-	const mlModel = input.mlModel;
-	const town = input.town;
-	const storeyRange = input.storeyRange;
-	const flatModel = input.flatModel;
-	const floorAreaSqm = input.floorAreaSqm;
-	const leaseCommenceYear = input.leaseCommenceYear;
-
-	if (typeof mlModel !== 'string' || !isOneOf(mlModel, ML_MODELS)) {
-		return { ok: false, error: 'Invalid ML model.' };
-	}
-
-	if (typeof town !== 'string' || !isOneOf(town, TOWNS)) {
-		return { ok: false, error: 'Invalid town.' };
-	}
-
-	if (typeof storeyRange !== 'string' || !isOneOf(storeyRange, STOREY_RANGES)) {
-		return { ok: false, error: 'Invalid storey range.' };
-	}
-
-	if (typeof flatModel !== 'string' || !isOneOf(flatModel, FLAT_MODELS)) {
-		return { ok: false, error: 'Invalid flat model.' };
-	}
-
-	if (typeof floorAreaSqm !== 'number' || !Number.isFinite(floorAreaSqm)) {
-		return { ok: false, error: 'Invalid floor area.' };
-	}
-
-	if (
-		typeof leaseCommenceYear !== 'number' ||
-		!Number.isInteger(leaseCommenceYear) ||
-		leaseCommenceYear < MIN_LEASE_COMMENCE_YEAR ||
-		leaseCommenceYear > MAX_LEASE_COMMENCE_YEAR
-	) {
-		return {
-			ok: false,
-			error: `Lease commence year must be between ${MIN_LEASE_COMMENCE_YEAR} and ${MAX_LEASE_COMMENCE_YEAR}.`
-		};
-	}
-
-	return {
-		ok: true,
-		value: {
-				mlModel,
-				town,
-				storeyRange,
-				flatModel,
-				floorAreaSqm: clampFloorAreaSqm(floorAreaSqm),
-				leaseCommenceYear
-			}
-		};
+	return { ok: true, value: formValuesToNormalized(parsed.data) };
 }
-
