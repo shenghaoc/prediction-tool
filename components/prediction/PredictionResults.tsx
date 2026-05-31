@@ -92,7 +92,7 @@ export default memo(function PredictionResults({
     },
     {
       label: t("lease_commence_date"),
-      value: String(summaryValues.lease_commence_date.year),
+      value: String(summaryValues.lease_commence_year),
       icon: Home,
     },
   ];
