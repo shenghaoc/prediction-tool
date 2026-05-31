@@ -27,7 +27,8 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) {
-  const fillGradientId = useId();
+  const uniqueId = useId();
+  const fillGradientId = `chart-grad-${uniqueId.replace(/:/g, "")}`;
 
   const formatter = useMemo(
     () =>

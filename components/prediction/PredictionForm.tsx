@@ -196,7 +196,7 @@ export default function PredictionForm({
                   <FormControl>
                     <NumberField
                       id="input-floor_area"
-                      value={field.value}
+                      value={field.value || ""}
                       onChange={(value) => field.onChange(value === "" ? 0 : value)}
                       min={MIN_FLOOR_AREA_SQM}
                       max={MAX_FLOOR_AREA_SQM}
