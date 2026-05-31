@@ -7,7 +7,7 @@ import { Home, Layers, MapPin, Moon, Sparkles, Sun } from "lucide-react";
 import { toast } from "sonner";
 
 import { predictAction, type PredictActionState } from "../../app/actions/predict";
-import { useI18n } from "../../lib/i18n";
+import { useI18n, type TFunction } from "../../lib/i18n";
 import {
   predictionFormSchema,
   predictionFormValuesToFormData,
@@ -58,7 +58,7 @@ function resolvePredictionView(
   actionState: PredictActionState,
   showResults: boolean,
   isPending: boolean,
-  t: (key: string) => string,
+  t: TFunction,
 ): { output: number; trendData: TrendPoint[]; formError: string | null } {
   if (!showResults || isPending || !actionState) {
     return emptyViewState;
@@ -78,9 +78,7 @@ function resolvePredictionView(
   }
 
   const formError = actionState.formError
-    ? actionState.formError === "Prediction service unavailable."
-      ? t("error_fetch")
-      : actionState.formError
+    ? t(actionState.formError, actionState.formError)
     : null;
 
   return { ...emptyViewState, formError };
@@ -181,11 +179,7 @@ export default function PredictionClient() {
     }
 
     if (actionState.formError) {
-      const message =
-        actionState.formError === "Prediction service unavailable."
-          ? t("error_fetch")
-          : actionState.formError;
-      toast.error(message);
+      toast.error(t(actionState.formError, actionState.formError));
     }
   }, [actionState, announce, form, isPending, t]);
 

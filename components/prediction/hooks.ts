@@ -7,10 +7,12 @@ import { STORAGE_KEYS } from "../../lib/prediction";
 import { initialFormValues } from "./constants";
 import { FORM_SCHEMA_VERSION, type FieldType, type PersistedForm } from "./types";
 
+const emptySubscribe = () => () => {};
+
 export function useThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   const mounted = useSyncExternalStore(
-    () => () => {},
+    emptySubscribe,
     () => true,
     () => false,
   );

@@ -9,6 +9,7 @@
   "stat_types_hint": "用作预测输入的组屋房型。",
   "error_fetch": "获取预测失败，请重试。",
   "error_invalid_prediction": "服务器返回的价格无法显示。请尝试其他输入或模型。",
+  "error_no_prediction_data": "未找到符合所选条件的预测数据。",
   "error_form_restore_failed": "已保存的表单数据无效，已重置。",
   "validation.ml_model": "请选择机器学习模型。",
   "validation.town": "请选择组屋市镇。",

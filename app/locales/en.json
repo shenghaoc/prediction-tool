@@ -9,6 +9,7 @@
   "stat_types_hint": "HDB flat model types used as prediction inputs.",
   "error_fetch": "Failed to fetch prediction. Please try again.",
   "error_invalid_prediction": "The server returned prices we could not display. Try different inputs or a model.",
+  "error_no_prediction_data": "No prediction data found for the given parameters.",
   "error_form_restore_failed": "Saved form data was invalid and has been reset.",
   "validation.ml_model": "Please select an ML model.",
   "validation.town": "Please select a town.",
