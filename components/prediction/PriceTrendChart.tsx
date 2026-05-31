@@ -16,6 +16,8 @@ type PriceTrendChartProps = {
   locale: string;
 };
 
+const sliceMonth = (value: string) => value.slice(5);
+
 const chartConfig = {
   value: {
     label: "Price",
@@ -30,23 +32,20 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
   const uniqueId = useId();
   const fillGradientId = `chart-grad-${uniqueId.replace(/:/g, "")}`;
 
-  const formatter = useMemo(
-    () =>
-      new Intl.NumberFormat(locale === "zh" ? "zh-SG" : "en-SG", {
-        style: "currency",
-        currency: "SGD",
-        maximumFractionDigits: 0,
-      }),
-    [locale],
-  );
-
-  const formatCurrency = (value: number) => formatter.format(Math.round(value));
-
-  const formatAxis = (value: number) => {
-    if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-    if (value >= 1_000) return `${Math.round(value / 1_000)}k`;
-    return formatCurrency(value);
-  };
+  const { formatCurrency, formatAxis } = useMemo(() => {
+    const f = new Intl.NumberFormat(locale === "zh" ? "zh-SG" : "en-SG", {
+      style: "currency",
+      currency: "SGD",
+      maximumFractionDigits: 0,
+    });
+    const fmtCurrency = (value: number) => f.format(Math.round(value));
+    const fmtAxis = (value: number) => {
+      if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+      if (value >= 1_000) return `${Math.round(value / 1_000)}k`;
+      return fmtCurrency(value);
+    };
+    return { formatCurrency: fmtCurrency, formatAxis: fmtAxis };
+  }, [locale]);
 
   if (!data.length) return null;
 
@@ -70,7 +69,7 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
           tickLine={false}
           axisLine={false}
           tickMargin={8}
-          tickFormatter={(value: string) => value.slice(5)}
+          tickFormatter={sliceMonth}
         />
         <YAxis
           tickLine={false}
