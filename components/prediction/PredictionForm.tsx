@@ -133,6 +133,7 @@ export default function PredictionForm({
                 step={5}
                 placeholder={t("enter_floor_area")}
                 unit="m²"
+                unitLabel={t("square_metres")}
                 ariaLabel={t("floor_area")}
                 required
               />

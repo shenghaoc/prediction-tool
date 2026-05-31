@@ -13,6 +13,7 @@ type NumberFieldProps = {
   step?: number;
   placeholder?: string;
   unit?: string;
+  unitLabel?: string;
   ariaLabel: string;
   required?: boolean;
   className?: string;
@@ -27,6 +28,7 @@ export function NumberField({
   step = 1,
   placeholder,
   unit,
+  unitLabel,
   ariaLabel,
   required = false,
   className,
@@ -170,6 +172,7 @@ export function NumberField({
         required={required}
         aria-required={required}
         aria-label={ariaLabel}
+        aria-describedby={unit ? `${id}-unit` : undefined}
         value={value === "" || value === undefined ? "" : value}
         placeholder={placeholder}
         onChange={handleChange}
@@ -193,7 +196,7 @@ export function NumberField({
       )}
       {/* Accessible unit label for screen readers */}
       {unit && (
-        <span className="sr-only">{unit === "m²" ? "square meters" : unit}</span>
+        <span id={`${id}-unit`} className="sr-only">{unitLabel ?? unit}</span>
       )}
 
       {/* Increment */}
