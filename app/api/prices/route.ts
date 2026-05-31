@@ -34,7 +34,8 @@ function roundToTwo(value: number): number {
 
 export async function POST(request: Request) {
 	const contentType = request.headers.get('content-type') || '';
-	if (!contentType.includes('application/json')) {
+	const mimeType = contentType.split(';')[0].trim().toLowerCase();
+	if (mimeType !== 'application/json') {
 		return NextResponse.json({ error: 'Unsupported Media Type' }, { status: 415 });
 	}
 

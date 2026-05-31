@@ -155,4 +155,26 @@ describe('POST /api/prices payload length', () => {
 
 		expect(response.status).toBe(415);
 	});
+
+	test('rejects content-type that only embeds application/json in a parameter', async () => {
+		const request = new Request('http://localhost/api/prices', {
+			method: 'POST',
+			headers: { 'Content-Type': 'text/plain; charset=utf-8; boundary=application/json' },
+			body: JSON.stringify(validRequestBody)
+		});
+		const response = await POST(request);
+
+		expect(response.status).toBe(415);
+	});
+
+	test('accepts application/json with parameters', async () => {
+		const request = new Request('http://localhost/api/prices', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json; charset=utf-8' },
+			body: JSON.stringify(validRequestBody)
+		});
+		const response = await POST(request);
+
+		expect(response.status).not.toBe(415);
+	});
 });
