@@ -71,6 +71,31 @@ function mockDbThatThrows(message: string) {
 	} as ReturnType<typeof getCloudflareContext>);
 }
 
+function mockDbWithValidResults() {
+	const mockAll = vi.fn().mockResolvedValue({
+		results: [
+			{
+				intercept_map: 1,
+				month_map: 1,
+				storey_range_map: 1,
+				floor_area_sqm_map: 1,
+				lease_commence_date_map: 1,
+				month_name: '2022-02',
+				month_multiplier: 1,
+				town_map: 1,
+				flat_model_map: 1,
+				storey_range_multiplier: 1
+			}
+		]
+	});
+	const mockBind = vi.fn().mockReturnValue({ all: mockAll });
+	const mockPrepare = vi.fn().mockReturnValue({ bind: mockBind });
+
+	vi.mocked(getCloudflareContext).mockReturnValue({
+		env: { DB: { prepare: mockPrepare } }
+	} as ReturnType<typeof getCloudflareContext>);
+}
+
 describe('POST /api/prices error responses', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -127,6 +152,7 @@ describe('POST /api/prices payload length', () => {
 	test('does not reject payload of exactly 2048 characters', async () => {
 		const request = new Request('http://localhost/api/prices', {
 			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
 			body: 'a'.repeat(2048)
 		});
 		const response = await POST(request);
@@ -136,10 +162,52 @@ describe('POST /api/prices payload length', () => {
 	test('rejects payload of exactly 2049 characters', async () => {
 		const request = new Request('http://localhost/api/prices', {
 			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
 			body: 'a'.repeat(2049)
 		});
 		const response = await POST(request);
 
 		expect(response.status).toBe(413);
+	});
+});
+
+describe('POST /api/prices content-type validation', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	test('rejects requests without application/json content-type', async () => {
+		const request = new Request('http://localhost/api/prices', {
+			method: 'POST',
+			headers: { 'Content-Type': 'text/plain' },
+			body: JSON.stringify(validRequestBody)
+		});
+		const response = await POST(request);
+
+		expect(response.status).toBe(415);
+	});
+
+	test('rejects content-type that only embeds application/json in a parameter', async () => {
+		const request = new Request('http://localhost/api/prices', {
+			method: 'POST',
+			headers: { 'Content-Type': 'text/plain; charset=utf-8; boundary=application/json' },
+			body: JSON.stringify(validRequestBody)
+		});
+		const response = await POST(request);
+
+		expect(response.status).toBe(415);
+	});
+
+	test('accepts application/json with parameters', async () => {
+		mockDbWithValidResults();
+
+		const request = new Request('http://localhost/api/prices', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json; charset=utf-8' },
+			body: JSON.stringify(validRequestBody)
+		});
+		const response = await POST(request);
+
+		expect(response.status).toBe(200);
 	});
 });
