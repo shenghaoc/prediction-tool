@@ -1,5 +1,6 @@
 "use client";
 
+import { useId, useMemo } from "react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import {
@@ -26,13 +27,17 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) {
-  if (!data.length) return null;
+  const fillGradientId = useId();
 
-  const formatter = new Intl.NumberFormat(locale === "zh" ? "zh-SG" : "en-SG", {
-    style: "currency",
-    currency: "SGD",
-    maximumFractionDigits: 0,
-  });
+  const formatter = useMemo(
+    () =>
+      new Intl.NumberFormat(locale === "zh" ? "zh-SG" : "en-SG", {
+        style: "currency",
+        currency: "SGD",
+        maximumFractionDigits: 0,
+      }),
+    [locale],
+  );
 
   const formatCurrency = (value: number) => formatter.format(Math.round(value));
 
@@ -42,6 +47,8 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
     return formatCurrency(value);
   };
 
+  if (!data.length) return null;
+
   return (
     <ChartContainer config={chartConfig} className="min-h-[260px] w-full">
       <AreaChart
@@ -50,7 +57,7 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
         accessibilityLayer
       >
         <defs>
-          <linearGradient id="priceTrendFill" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id={fillGradientId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="var(--color-value)" stopOpacity={0.28} />
             <stop offset="60%" stopColor="var(--color-value)" stopOpacity={0.06} />
             <stop offset="100%" stopColor="var(--color-value)" stopOpacity={0} />
@@ -86,7 +93,7 @@ export default function PriceTrendChart({ data, locale }: PriceTrendChartProps) 
           dataKey="value"
           stroke="var(--color-value)"
           strokeWidth={2.5}
-          fill="url(#priceTrendFill)"
+          fill={`url(#${fillGradientId})`}
           dot={{ r: 3, fill: "var(--color-value)", strokeWidth: 0 }}
           activeDot={{
             r: 5,

@@ -97,7 +97,6 @@ export function useFormPersistence({
   onRestoreError: () => void;
 }) {
   const isRestoredAndSyncedRef = useRef(false);
-  const restoredValuesRef = useRef<FieldType | null>(null);
   const latestFormRef = useRef(formValues);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const onRestoreRef = useRef(onRestore);
@@ -105,9 +104,6 @@ export function useFormPersistence({
 
   useEffect(() => {
     latestFormRef.current = formValues;
-    if (restoredValuesRef.current && formValues === restoredValuesRef.current) {
-      isRestoredAndSyncedRef.current = true;
-    }
   }, [formValues]);
 
   useEffect(() => {
@@ -140,8 +136,8 @@ export function useFormPersistence({
         ...initialFormValues,
         ...parsed.data,
       };
-      restoredValuesRef.current = restored;
       onRestoreRef.current(restored);
+      isRestoredAndSyncedRef.current = true;
     } catch {
       try {
         localStorage.removeItem(STORAGE_KEYS.form);
