@@ -8,4 +8,4 @@
 
 ## 2024-05-29 - Number Field Screen Reader Unit Association
 **Learning:** For composite inputs with an `aria-label` and an adjacent visually hidden unit (e.g., a `.sr-only` span), screen readers will ignore the unit text because `aria-label` overrides the element's content, and the sibling unit isn't directly read out in the focus context.
-**Action:** When creating inputs with screen-reader-only unit text, always add an `id` to the unit element and reference it using `aria-describedby` on the input element. This guarantees screen readers announce the full context (e.g., "Floor area, 20, square meters").
+**Action:** When creating inputs with screen-reader-only unit text, always add an `id` to the unit element and reference it using `aria-describedby` on the input element. This guarantees screen readers announce the full context (e.g., "Floor area, 20, square metres"). Keep the screen-reader unit text localizable — pass a translated label into the reusable component (e.g., a `unitLabel` prop) rather than hardcoding an English string, so the announcement matches the active locale.
