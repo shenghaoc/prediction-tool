@@ -254,7 +254,7 @@ html {
 /* ── iOS auto-zoom prevention ─────────────────────────────────────────── */
 /* iOS Safari zooms in when a focused input has font-size < 16px.
    This override ensures inputs are at least 16px on touch screens. */
-@media (max-width: 640px) {
+@media (width < 640px) {
   input,
   select,
   textarea {

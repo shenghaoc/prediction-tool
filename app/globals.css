@@ -96,10 +96,14 @@
   color-scheme: dark;
 }
 
-/* Touch-target accessibility: raise interactive element height on mobile */
-@media (max-width: 640px) {
+/* Touch-target accessibility: raise interactive element heights on mobile.
+   Uses width < 640px (range syntax) to match Tailwind v4's max-sm: breakpoint exactly. */
+@media (width < 640px) {
   :root {
     --height-field: 44px;
+    --height-button: 44px;
+    --height-button-sm: 44px;
+    --height-icon-button: 44px;
   }
 }
 
