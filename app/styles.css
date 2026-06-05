@@ -251,6 +251,17 @@ html {
     0 12px 28px color-mix(in oklab, var(--foreground) 10%, transparent);
 }
 
+/* ── iOS auto-zoom prevention ─────────────────────────────────────────── */
+/* iOS Safari zooms in when a focused input has font-size < 16px.
+   This override ensures inputs are at least 16px on touch screens. */
+@media (width < 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
 /* ── No-spinner inputs ────────────────────────────────────────────────── */
 input[data-no-spinner="true"]::-webkit-outer-spin-button,
 input[data-no-spinner="true"]::-webkit-inner-spin-button {

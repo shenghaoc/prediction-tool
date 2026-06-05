@@ -1,5 +1,5 @@
 import './globals.css';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Source_Sans_3 } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import { cookies } from 'next/headers';
@@ -22,6 +22,11 @@ const sourceSans3 = Source_Sans_3({
 	variable: '--font-source-sans',
 	display: 'swap'
 });
+
+export const viewport: Viewport = {
+	width: 'device-width',
+	initialScale: 1,
+};
 
 export const metadata: Metadata = {
 	title: {
