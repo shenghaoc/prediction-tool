@@ -263,7 +263,7 @@ export default function PredictionClient() {
               type="button"
               variant="outline"
               size="sm"
-              className="normal-case tracking-normal max-sm:flex-1"
+              className="normal-case tracking-normal max-sm:flex-1 max-sm:h-11"
               onClick={() => {
                 startTransition(() => {
                   changeLang(lang === "en" ? "zh" : "en");
