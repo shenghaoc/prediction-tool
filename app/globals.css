@@ -96,6 +96,13 @@
   color-scheme: dark;
 }
 
+/* Touch-target accessibility: raise interactive element height on mobile */
+@media (max-width: 640px) {
+  :root {
+    --height-field: 44px;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

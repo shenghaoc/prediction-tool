@@ -243,14 +243,14 @@ function StatChip({
       <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
       <p
         className={cn(
-          "mt-1 flex items-center gap-1 text-sm font-semibold tabular-nums",
+          "mt-1 flex min-w-0 flex-wrap items-center gap-1 text-sm font-semibold tabular-nums",
           trend === "up" && "text-emerald-600 dark:text-emerald-400",
           trend === "down" && "text-amber-700 dark:text-amber-400",
           !trend && "text-foreground",
         )}
       >
         {TrendIcon && <TrendIcon className="size-3.5 shrink-0" aria-hidden />}
-        {value}
+        <span className="break-words">{value}</span>
       </p>
       {hint && (
         <p className="mt-0.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">

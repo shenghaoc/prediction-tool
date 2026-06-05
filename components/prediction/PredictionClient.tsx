@@ -258,7 +258,7 @@ export default function PredictionClient() {
             </Badge>
           </div>
 
-          <div className="flex items-center gap-2 max-sm:w-full max-sm:[&>*]:flex-1">
+          <div className="flex items-center gap-2 max-sm:w-full">
             <Button
               type="button"
               variant="outline"
@@ -278,6 +278,7 @@ export default function PredictionClient() {
                   type="button"
                   variant="outline"
                   size="icon-sm"
+                  className="max-sm:h-11 max-sm:w-11"
                   aria-label={isDark ? t("switch_to_light_mode") : t("switch_to_dark_mode")}
                   onClick={toggleTheme}
                 >
